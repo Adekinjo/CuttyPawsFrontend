@@ -1,0 +1,101 @@
+/* Container for the user list */
+.user-list-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Heading */
+  .user-list-container h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  /* Table styling */
+  .user-list-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .user-list-container th,
+  .user-list-container td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .user-list-container th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .user-list-container tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  /* Button styling */
+  .user-list-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .user-list-container button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Modal styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal h2 {
+    margin-top: 0;
+  }
+  
+  .modal button {
+    margin-top: 20px;
+  }
+  
+  /* Loading and error messages */
+  .loading,
+  .error {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .error {
+    color: #ff0000;
+  }
+  
+  .no-users {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #555;
+  }

@@ -1,0 +1,42 @@
+.cash-on-delivery-container {
+    text-align: center;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    margin: 2rem auto;
+    color: #333;
+  }
+  
+  .cash-on-delivery-container .icon {
+    color: #ff6f61;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cash-on-delivery-container h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .cash-on-delivery-container p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  
+  .cash-on-delivery-container .cta-button {
+    background: #ff6f61;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .cash-on-delivery-container .cta-button:hover {
+    background: #ff4a3d;
+  }

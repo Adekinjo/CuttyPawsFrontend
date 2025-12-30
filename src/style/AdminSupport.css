@@ -1,0 +1,68 @@
+/* AdminSupport.css */
+.inquiries-page {
+    padding: 20px;
+  }
+  
+  .page-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .inquiries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .inquiry-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .inquiry-subject {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .inquiry-message {
+    margin: 10px 0;
+    color: #555;
+  }
+  
+  .inquiry-details {
+    margin-top: 10px;
+  }
+  
+  .inquiry-details p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #777;
+  }
+  
+  .inquiry-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .inquiry-actions select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .inquiry-actions button {
+    padding: 5px 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .inquiry-actions button:hover {
+    background-color: #cc0000;
+  }

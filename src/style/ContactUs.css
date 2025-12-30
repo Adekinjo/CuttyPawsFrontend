@@ -1,0 +1,42 @@
+.contact-us-container {
+    text-align: center;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #00c6fb, #005bea);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    margin: 2rem auto;
+    color: white;
+  }
+  
+  .contact-us-container .icon {
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+  }
+  
+  .contact-us-container h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .contact-us-container p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  
+  .contact-us-container .cta-button {
+    background: white;
+    color: #005bea;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .contact-us-container .cta-button:hover {
+    background: #f0f0f0;
+  }

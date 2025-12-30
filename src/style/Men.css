@@ -1,0 +1,188 @@
+/* Refrigerator.css */
+.rf-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .rf-header {
+    font-size: 2rem;
+    color: #2d3748;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .rf-product-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .rf-product-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1rem;
+    transition: transform 0.2s;
+    position: relative;
+  }
+  
+  .rf-product-card:hover {
+    transform: translateY(-3px);
+  }
+  
+  .rf-image-container {
+    position: relative;
+    margin-bottom: 1rem;
+    width: 100%;
+    padding-top: 100%; /* Creates square aspect ratio */
+    background: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .rf-product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  
+  /* Add these new styles */
+  .rf-product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .rf-product-info {
+    flex: 1;
+    padding: 0 0.5rem;
+    margin-top: auto;
+  }
+  
+  .rf-product-name {
+    font-size: 1rem;
+    color: #4a5568;
+    height: 3rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rf-price-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+  
+  .rf-old-price {
+    color: #718096;
+    text-decoration: line-through;
+    font-size: 0.875rem;
+  }
+  
+  .rf-new-price {
+    color: #2d3748;
+    font-weight: bold;
+    font-size: 1.125rem;
+  }
+  
+  .rf-cart-controls {
+    margin-top: 1rem;
+  }
+  
+  .rf-cart-btn {
+    width: 100%;
+    background: #4299e1;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .rf-cart-btn:hover {
+    background: #3182ce;
+  }
+  
+  .rf-quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .rf-qty-btn {
+    background: #edf2f7;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  
+  .rf-qty-btn:hover {
+    background: #e2e8f0;
+  }
+  
+  .rf-quantity {
+    font-weight: bold;
+    min-width: 2rem;
+    text-align: center;
+  }
+  
+  .rf-rating {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 1rem;
+  }
+  
+  .rf-star {
+    color: #cbd5e0;
+    font-size: 1.25rem;
+  }
+  
+  .rf-filled-star {
+    color: #f6ad55;
+  }
+  
+  @media (min-width: 768px) {
+    .rf-product-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+    
+    .rf-product-image {
+      height: 250px;
+    }
+  }
+  
+  @media (min-width: 1200px) {
+    .rf-product-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    
+    .rf-header {
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+    }
+  }
+  
+  .rf-loading,
+  .rf-error {
+    text-align: center;
+    font-size: 1.25rem;
+    padding: 2rem;
+  }
+  
+  .rf-error {
+    color: #e53e3e;
+  }

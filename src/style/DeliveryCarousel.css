@@ -1,0 +1,41 @@
+.delivery-carousel {
+  padding: 0px;
+  background-color: transparent; /* Remove background color */
+  margin: 20px auto;
+  max-width: 1000px;
+}
+
+.carousel-item {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0px;
+  cursor: pointer; /* Indicate clickable items */
+  margin: 5px; /* Add margin between items */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
+}
+
+.carousel-item:hover {
+  transform: translateY(-5px); /* Lift item on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+}
+
+.text {
+  font-size: 14px;
+  font-weight: bold;
+  color: white; /* Darker text for better readability */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .carousel-item {
+    padding: 10px; /* Adjust padding for better spacing */
+  }
+
+  .text {
+    font-size: 12px; /* Adjust font size for smaller screens */
+  }
+}

@@ -1,0 +1,172 @@
+/* Container for the entire component */
+.last-search-container {
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Title for the component */
+.last-search-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  background-color: #2c3e50;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Container for the search list with horizontal scrolling */
+.search-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative; /* Required for gradient overlay */
+}
+
+/* Individual search item */
+.search-item {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Search details (term, type, date) */
+.search-details p {
+  margin: 8px 0;
+  color: #374151;
+  font-size: 16px;
+  display: none;
+}
+
+.search-details .label {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Container for horizontal scrolling products */
+.product-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 16px; /* Add some padding to avoid cutting off content */
+  position: relative; /* Required for gradient overlay */
+}
+
+/* Hide scrollbar for a cleaner look */
+.product-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Gradient overlay to indicate scrollable content */
+.product-scroll-container::before,
+.product-scroll-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px; /* Width of the gradient overlay */
+  pointer-events: none; /* Ensure clicks pass through */
+  z-index: 1;
+}
+
+/* Left gradient overlay */
+.product-scroll-container::before {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* Right gradient overlay */
+.product-scroll-container::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* Row of product cards */
+.product-row {
+  display: flex;
+  gap: 16px; /* Space between product cards */
+  padding: 16px 0;
+}
+
+/* Individual product card */
+.product-card {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  width: 180px; /* Reduced width */
+  flex-shrink: 0; /* Prevent cards from shrinking */
+  text-align: center;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Product image */
+.product-image {
+  width: 100%;
+  height: 120px; /* Reduced height */
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* Product name */
+.product-name {
+  font-size: 14px; /* Reduced font size */
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+  white-space: normal; /* Allow text to wrap */
+}
+
+/* Product description */
+.product-description {
+  font-size: 12px; /* Reduced font size */
+  color: #4b5563;
+  margin-bottom: 8px;
+  white-space: normal; /* Allow text to wrap */
+}
+
+/* Product price */
+.product-price {
+  font-size: 16px; /* Reduced font size */
+  font-weight: bold;
+  color: #059669;
+}
+
+/* No products message */
+.no-products {
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #4b5563;
+}
+
+/* Error state */
+.error {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #dc2626;
+}

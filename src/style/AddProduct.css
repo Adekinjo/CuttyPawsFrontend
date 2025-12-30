@@ -1,0 +1,166 @@
+/* .product-form{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin: auto;
+}
+.product-form input,
+.product-form select,
+.product-form textarea,
+.product-form button{
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.product-form button{
+  background-color: #f68b1e;
+  padding: 15px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 700;
+}
+.product-form button:hover{
+  background-color: #b17a44;
+}
+.product-form img{
+  max-width: 70px;
+  margin: 10px 0;
+} */
+
+
+
+
+
+
+
+
+/* General Container Styling */
+.add-product-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+}
+
+/* Title Styling */
+.add-product-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Form Styling */
+.add-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Form Group Styling */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Label Styling */
+.form-label {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Input and Select Styling */
+.form-input,
+textarea,
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #fff;
+  transition: border 0.3s ease;
+}
+
+.form-input:focus,
+textarea:focus,
+select:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+/* Button Styling */
+.submit-button {
+  padding: 10px 15px;
+  background-color: #2c3e50;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #45a049;
+}
+
+/* Message Styling */
+.message {
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.message.success {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.message.error {
+  background-color: #f2dede;
+  color: #a94442;
+}
+
+/* Image Preview Styling */
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.preview-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .add-product-container {
+    padding: 15px;
+  }
+
+  .add-product-title {
+    font-size: 1.5rem;
+  }
+
+  .submit-button {
+    font-size: 0.9rem;
+  }
+
+  .preview-image {
+    width: 80px;
+    height: 80px;
+  }
+}

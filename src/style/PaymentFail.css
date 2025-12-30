@@ -1,0 +1,69 @@
+/* PaymentFailed.css */
+.payment-failed-page {
+    text-align: center;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .payment-failed-page h1 {
+    color: #ff4d4f; /* Red color for the heading */
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .payment-failed-page p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 1.5rem;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .retry-button,
+  .home-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .retry-button {
+    background-color: #1890ff; /* Blue color for retry button */
+    color: white;
+  }
+  
+  .retry-button:hover {
+    background-color: #40a9ff; /* Lighter blue on hover */
+  }
+  
+  .home-button {
+    background-color: #f0f0f0; /* Light gray for home button */
+    color: #333;
+  }
+  
+  .home-button:hover {
+    background-color: #d9d9d9; /* Darker gray on hover */
+  }
+  
+  .error-details {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #777;
+  }
+  
+  .error-details a {
+    color: #1890ff;
+    text-decoration: none;
+  }
+  
+  .error-details a:hover {
+    text-decoration: underline;
+  }

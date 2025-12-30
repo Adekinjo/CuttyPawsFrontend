@@ -1,0 +1,83 @@
+/* Center the container */
+.seller-signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f6f8;
+}
+
+/* Card Styling */
+.signup-card {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+/* Form Title */
+.signup-card h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Form Styling */
+.seller-signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Form Group Styling */
+.signup-form-group {
+  text-align: left;
+}
+
+.signup-form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.signup-form-group input,
+.signup-form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.signup-form-group input:focus,
+.signup-form-group textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Submit Button Styling */
+.seller-signup-form button {
+  padding: 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.seller-signup-form button:hover {
+  background-color: #0056b3;
+}
+
+.seller-signup-form button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

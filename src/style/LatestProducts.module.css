@@ -1,0 +1,118 @@
+.latestProductsContainer {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.latestProductsHeader {
+  background-color: #ffffff;
+  padding: 10px;
+}
+
+.latestProductsList {
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  scrollbar-color: #888 transparent;
+}
+
+.latestProductsRow {
+  display: flex;
+  flex-wrap: nowrap;
+  margin: 0;
+}
+
+.productCol {
+  flex: 0 0 40%; /* 2.5 products per row on mobile */
+  max-width: 40%;
+}
+
+@media (min-width: 576px) {
+  .productCol {
+    flex: 0 0 25%; /* 4 products per row on tablets */
+    max-width: 25%;
+  }
+}
+
+@media (min-width: 768px) {
+  .productCol {
+    flex: 0 0 16.666%; /* 6 products per row on desktops */
+    max-width: 16.666%;
+  }
+}
+
+.productCard {
+  background-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  min-width: 150px; /* Ensure cards don't get too small */
+}
+
+.discountBadge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: red;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1; /* Ensure it appears above other elements */
+}
+
+.wishlistIcon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 8px;
+  z-index: 1;
+  cursor: pointer;
+  color: #ddd; /* Default color */
+}
+
+.wishlistIcon:hover {
+  color: orange; /* Change color on hover */
+}
+
+.productImageContainer {
+  background-color: #f8f9fa;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productDetails {
+  padding: 10px;
+}
+
+.productName {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addToCartButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.likesContainer {
+  display: flex;
+  align-items: center;
+}
+
+.likeButton {
+  padding: 0;
+}
+
+.likesCount {
+  margin-left: 5px;
+}

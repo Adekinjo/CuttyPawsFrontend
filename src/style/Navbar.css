@@ -1,0 +1,184 @@
+.navbar-cuttypaws {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f1f1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  border-radius: 0 0 18px 18px;
+}
+
+.cutty-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cutty-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.cutty-brand-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff7b54, #ffa559);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1rem;
+  box-shadow: 0 6px 14px rgba(255, 123, 84, 0.35);
+}
+
+.cutty-brand-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ff7b54;
+  transition: color 0.2s ease;
+}
+
+.cutty-brand:hover .cutty-brand-text {
+  color: #ff6b44;
+}
+
+.cutty-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.cutty-nav-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #6b7280;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cutty-nav-pill:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.cutty-nav-pill.active {
+  background-color: #ff7b54;
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(255, 123, 84, 0.3);
+}
+
+.cutty-nav-icon {
+  font-size: 0.95rem;
+}
+
+.cutty-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cutty-icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background-color: transparent;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.cutty-icon-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.cutty-link-btn.active {
+  background-color: #fff1ec;
+  color: #ff7b54;
+}
+
+.cutty-nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: #ff7b54;
+  color: #ffffff;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(255, 123, 84, 0.3);
+}
+
+.cutty-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #ff7b54;
+  border: 2px solid #ffffff;
+}
+
+.cutty-profile-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #ff7b54, #ffa559);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(255, 123, 84, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.cutty-profile-btn:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .cutty-nav-inner {
+    height: auto;
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+  }
+
+  .cutty-nav-center {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cutty-nav-label {
+    display: none !important;
+  }
+}

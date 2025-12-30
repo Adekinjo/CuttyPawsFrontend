@@ -1,0 +1,221 @@
+/* Search Results Page */
+.search-results-page1 {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+/* Loading and Error Messages */
+.loading,
+.error {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+/* Product List */
+.product-lists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Product Item */
+.product-item1 {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px; /* Reduced padding */
+  width: calc(33.33% - 20px); /* 3 items per row by default */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #fff;
+  position: relative; /* For positioning the share button */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Align content properly */
+  height: auto; /* Reduce height slightly */
+}
+
+.product-item1:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Product Image */
+.product-image4 {
+  max-width: 100%;
+  height: 120px; /* Fixed height for images */
+  object-fit: cover; /* Ensure images fit properly */
+  border-radius: 8px;
+}
+
+/* Product Details */
+.product-item1 h3 {
+  font-size: 14px; /* Smaller font size */
+  margin: 6px 0; /* Reduced margin */
+  color: #333;
+}
+
+.product-item1 p {
+  font-size: 12px; /* Smaller font size */
+  color: #666;
+  margin: 3px 0; /* Reduced margin */
+}
+
+/* Price Container */
+.price-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column; /* Stack prices vertically */
+  gap: 2px; /* Reduced gap between prices */
+  margin: 6px 0; /* Reduced margin */
+}
+
+/* Old Price Strikethrough */
+.old-pricess {
+  text-decoration: line-through;
+  color: red;
+  font-size: 12px; /* Smaller font size */
+}
+
+/* New Price */
+.price-container span {
+  font-size: 14px; /* Slightly larger font size for new price */
+  font-weight: bold;
+  color: #333;
+}
+
+/* Quantity Controls */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Reduced gap */
+  margin-top: 6px; /* Reduced margin */
+  justify-content: center; /* Center quantity controls */
+}
+
+.quantity-control button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 4px 8px; /* Reduced padding */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.quantity-control button:hover {
+  background-color: #0056b3;
+}
+
+/* Add to Cart Button */
+.add-to-cart-button {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 6px 12px; /* Reduced padding */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 6px; /* Reduced margin */
+  width: auto; /* Let the button adjust to its content */
+  text-align: center; /* Center text */
+  align-self: center; /* Center the button horizontally */
+}
+
+.add-to-cart-button:hover {
+  background-color: #218838;
+}
+
+/* Share Container */
+.share-container2 {
+  position: absolute; /* Position the share button absolutely */
+  top: 10px; /* Adjust top position */
+  right: 10px; /* Adjust right position */
+}
+
+.share-buttonp {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 6px 10px; /* Reduced padding */
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.share-buttonp:hover {
+  background-color: #0056b3;
+}
+
+.share-dropdownp {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  z-index: 10;
+}
+
+.share-dropdownp button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  color: #333;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.share-dropdownp button:hover {
+  background-color: #f1f1f1;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .product-item1 {
+    width: calc(50% - 20px); /* 2 items per row for tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  .product-item1 {
+    width: calc(50% - 20px); /* 2 items per row for smaller tablets */
+  }
+}
+
+@media (max-width: 480px) {
+  .product-item1 {
+    width: 100%; /* 1 item per row for mobile devices */
+  }
+
+  .product-item1 h3 {
+    font-size: 16px; /* Slightly smaller font size for mobile */
+  }
+
+  .product-item1 p {
+    font-size: 13px; /* Slightly smaller font size for mobile */
+  }
+
+  .add-to-cart-button {
+    padding: 8px 16px; /* Smaller padding for mobile */
+  }
+
+  .share-buttonp {
+    padding: 6px 10px; /* Smaller padding for mobile */
+  }
+}

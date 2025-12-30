@@ -1,0 +1,121 @@
+/* style/Login.css - Updated - Scoped to login page only */
+
+.login-page .container-fluid.bg-light {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  min-height: 100vh;
+}
+
+.login-page .card {
+  border: none;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.login-page .card-title {
+  color: #333;
+  font-weight: 700;
+}
+
+.login-page .form-control {
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  padding: 12px 15px;
+}
+
+.login-page .form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Only style buttons within login page */
+.login-page .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.login-page .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.login-page .btn-outline-primary {
+  border: 2px solid #667eea;
+  color: #667eea;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.login-page .btn-outline-primary:hover {
+  background-color: #667eea;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.login-page .btn-outline-secondary {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.login-page .btn-outline-secondary:hover {
+  transform: translateY(-1px);
+}
+
+.login-page .btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.login-page .btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.login-page .modal-content {
+  border-radius: 15px;
+  border: none;
+}
+
+.login-page .letter-spacing {
+  letter-spacing: 0.5em;
+}
+
+/* Ensure modal backdrop works */
+.login-page .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.login-page .modal.show {
+  display: block !important;
+}
+
+/* Specific styles for login form elements */
+.login-page .btn-link {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.login-page .btn-link:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+.login-page .form-check-input:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.login-page .alert {
+  border-radius: 10px;
+  border: none;
+}
+
+.login-page .badge {
+  border-radius: 8px;
+}

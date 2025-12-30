@@ -1,0 +1,87 @@
+/* Deal.css */
+.deal-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.deal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  border-color: #ff6b6b;
+}
+
+.countdown-timer {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.deal-card .card-img-top {
+  transition: transform 0.3s ease;
+}
+
+.deal-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .deal-card {
+    margin-bottom: 1rem;
+  }
+  
+  .countdown-timer .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.loading-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Custom badge styles */
+.badge.bg-danger {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e) !important;
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, #51cf66, #69db7c) !important;
+}
+
+/* Price styling */
+.text-primary {
+  color: #2b8a3e !important;
+  font-weight: 700;
+}
+
+.text-decoration-line-through {
+  color: #868e96 !important;
+}
+
+/* Button hover effects */
+.btn-warning {
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-color: #fcc419 !important;
+  border-color: #fcc419 !important;
+  transform: scale(1.02);
+}
+
+/* Wishlist button animation */
+.btn-light:hover {
+  background-color: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.1);
+}

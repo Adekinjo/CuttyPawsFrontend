@@ -1,0 +1,99 @@
+/* Home.css - Component-specific styles */
+.homeContainer {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+.homeContent {
+  min-height: calc(100vh - 200px); /* Adjust based on navbar/footer height */
+}
+
+.homeSpinner {
+  color: var(--accent-primary) !important;
+}
+
+.homeAlert {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+  border-color: #dc3545 !important;
+  color: var(--text-primary) !important;
+}
+
+.homeEmptyCard {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+.homeEmptyCard h5 {
+  color: var(--text-primary) !important;
+}
+
+.homeEmptyCard p {
+  color: var(--text-muted) !important;
+}
+
+.homeEmptyIcon {
+  font-size: 3rem;
+  color: var(--text-muted) !important;
+}
+
+.homeCreatePostBtn {
+  background-color: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--bg-primary) !important;
+  transition: all 0.3s ease;
+}
+
+.homeCreatePostBtn:hover {
+  background-color: #3bbbb3 !important;
+  border-color: #3bbbb3 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+.homePostItem {
+  transition: transform 0.3s ease;
+}
+
+.homePostItem:hover {
+  transform: translateY(-2px);
+}
+
+.homeFloatingBtn {
+  position: fixed !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  margin: 1.5rem !important;
+  width: 60px !important;
+  height: 60px !important;
+  font-size: 1.5rem !important;
+  background: var(--accent-primary) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  z-index: 999;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.homeFloatingBtn:hover {
+  background-color: #3bbbb3 !important;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(78, 205, 196, 0.4) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .homeContent {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .homeFloatingBtn {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.25rem !important;
+    margin: 1rem !important;
+  }
+}

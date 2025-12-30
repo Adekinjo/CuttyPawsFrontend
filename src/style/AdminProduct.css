@@ -1,0 +1,60 @@
+.admin-product{
+  align-items: center;
+  width: 50%;
+  margin: auto;
+  font-size: 16px;
+}
+
+.add-product{
+  border-radius: 5px;
+  margin: 5px 8px;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+  border: none;
+  background-color: #2c3e50;
+}
+.edit{
+  border-radius: 5px;
+  margin: 5px 8px;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+  border: none;
+  background-color: #2c3e50;
+}
+.delete{
+  border-radius: 5px;
+  margin: 5px 8px;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+  border: none;
+  background-color: tomato;
+}
+.admin-product button:hover{
+  background-color: #96693c;
+}
+.admin-product ul{
+  list-style-type: none;
+  padding: 0;
+}
+.admin-product li{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 1.5px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+.admin-product span{
+  flex: 1;
+  color: #444;
+}

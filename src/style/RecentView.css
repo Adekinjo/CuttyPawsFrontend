@@ -1,0 +1,60 @@
+.recently-viewed {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.recently-viewed-scroller {
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: hidden; /* Hide vertical scrollbar */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+  padding-bottom: 10px; /* Space for scrollbar */
+}
+
+.recently-viewed-scroller::-webkit-scrollbar {
+  height: 8px; /* Height of the scrollbar */
+}
+
+.recently-viewed-scroller::-webkit-scrollbar-thumb {
+  background-color: #888; /* Scrollbar thumb color */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.recently-viewed-scroller::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Scrollbar track color */
+}
+
+.recently-viewed-item {
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recently-viewed-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.image-container {
+  height: 150px; /* Fixed height for image container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-container img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain; /* Ensure images fit within the container */
+}
+
+/* Ensure the headline is always visible */
+h2 {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 1;
+  padding: 10px 0;
+}
