@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import UserProfileService from "../../service/UserProfileService";
+import UserProfileService, { handle401 } from "../../service/UserProfileService";
 import FollowService from "../../service/FollowService";
 import PostService from "../../service/PostService";
 import { 
@@ -46,7 +46,6 @@ const PublicProfilePage = () => {
       }
     }
   };
-
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
@@ -54,38 +53,37 @@ const PublicProfilePage = () => {
 
       // Fetch basic profile first
       const profileResponse = await UserProfileService.getUserProfile(userId);
-      
+
+      // ✅ if 401 → navigate to login (no popup, no thrown error)
+      if (handle401(profileResponse, navigate)) {
+        return; // finally will run and setLoading(false)
+      }
+
       if (profileResponse.status === 200) {
         setUserProfile(profileResponse.user);
-        
+
         // Then fetch stats and follow data - handle errors gracefully
         const [statsResponse, followStatsResponse] = await Promise.allSettled([
           UserProfileService.getUserStats(userId),
-          FollowService.getFollowStats(userId)
+          FollowService.getFollowStats(userId),
         ]);
 
         // Handle user stats
-        if (statsResponse.status === 'fulfilled' && statsResponse.value.status === 200) {
+        if (statsResponse.status === "fulfilled" && statsResponse.value.status === 200) {
           setUserStats(statsResponse.value.userStats);
         } else {
-          console.warn("Failed to load user stats, using defaults");
-          setUserStats({
-            postCount: 0,
-            totalLikes: 0,
-            totalComments: 0
-          });
+          setUserStats({ postCount: 0, totalLikes: 0, totalComments: 0 });
         }
 
         // Handle follow stats
-        if (followStatsResponse.status === 'fulfilled' && followStatsResponse.value.status === 200) {
+        if (followStatsResponse.status === "fulfilled" && followStatsResponse.value.status === 200) {
           setFollowStats(followStatsResponse.value.followStats);
         } else {
-          console.warn("Failed to load follow stats, using defaults");
           setFollowStats({
             followersCount: 0,
             followingCount: 0,
             isFollowing: false,
-            isFollowedBy: false
+            isFollowedBy: false,
           });
         }
 
@@ -101,6 +99,7 @@ const PublicProfilePage = () => {
       setLoading(false);
     }
   };
+
 
   const fetchUserPosts = async () => {
     try {
@@ -341,24 +340,7 @@ const PublicProfilePage = () => {
                     <div>
                       <h2 className="mb-1 fw-bold">{userProfile.name}</h2>
                       <p className="text-muted mb-1">@{userProfile.name.toLowerCase().replace(/\s+/g, '')}</p>
-                      <div className="d-flex flex-wrap gap-3 text-muted small">
-                        <span className="d-flex align-items-center">
-                          <FaEnvelope className="me-1" />
-                          {userProfile.email}
-                        </span>
-                        {userProfile.phoneNumber && (
-                          <span className="d-flex align-items-center">
-                            <FaPhone className="me-1" />
-                            {userProfile.phoneNumber}
-                          </span>
-                        )}
-                        {userProfile.address && (
-                          <span className="d-flex align-items-center">
-                            <FaMapMarkerAlt className="me-1" />
-                            {userProfile.address.city}, {userProfile.address.state}
-                          </span>
-                        )}
-                      </div>
+                    
                     </div>
                     
                     {/* Follow/Unfollow Button & Admin Actions */}
@@ -425,14 +407,14 @@ const PublicProfilePage = () => {
                   <h5 className="fw-bold mb-1">{userStats?.postCount || 0}</h5>
                   <small className="text-muted">Posts</small>
                 </Col>
-                <Col>
+                {/* <Col>
                   <h5 className="fw-bold mb-1">{userStats?.totalLikes || 0}</h5>
                   <small className="text-muted">Likes</small>
                 </Col>
                 <Col>
                   <h5 className="fw-bold mb-1">{userStats?.totalComments || 0}</h5>
                   <small className="text-muted">Comments</small>
-                </Col>
+                </Col> */}
                 <Col>
                   <div 
                     className="cursor-pointer"

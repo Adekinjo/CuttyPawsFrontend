@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaBookmark, FaHeart } from "react-icons/fa";
 import ApiService from "../../service/ApiService";
+import WishlistService from '../../service/WishlistService';
+import ProductService from '../../service/ProductService';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -29,7 +31,7 @@ const ProductList = ({ products, showFeaturedBadge }) => {
 
   const fetchWishlist = async () => {
     try {
-      const data = await ApiService.getWishlist();
+      const data = await WishlistService.getWishlist();
       setWishlist(data);
     } catch (error) {
       console.error("Failed to fetch wishlist:", error);
@@ -38,7 +40,7 @@ const ProductList = ({ products, showFeaturedBadge }) => {
 
   const fetchLikes = async () => {
     try {
-      const data = await ApiService.getAllLikes();
+      const data = await ProductService.getAllLikes();
       const likesMap = data.productList.reduce((acc, product) => ({
         ...acc,
         [product.id]: product.likes || 0
@@ -51,7 +53,7 @@ const ProductList = ({ products, showFeaturedBadge }) => {
 
   const handleLike = async (productId) => {
     try {
-      await ApiService.likeProduct(productId);
+      await ProductService.likeProduct(productId);
       setLikes(prev => ({ ...prev, [productId]: (prev[productId] || 0) + 1 }));
     } catch (error) {
       setAlertMessage("Failed to like the product");
@@ -80,11 +82,11 @@ const ProductList = ({ products, showFeaturedBadge }) => {
     try {
       const isInWishlist = wishlist.some(item => item.productId === productId);
       if (isInWishlist) {
-        await ApiService.removeFromWishlist(productId);
+        await WishlistService.removeFromWishlist(productId);
         setWishlist(wishlist.filter(item => item.productId !== productId));
       } else {
-        await ApiService.addToWishlist(productId);
-        setWishlist(await ApiService.getWishlist());
+        await WishlistService.addToWishlist(productId);
+        setWishlist(await WishlistService.getWishlist());
       }
     } catch (error) {
       setAlertMessage("Wishlist update failed");

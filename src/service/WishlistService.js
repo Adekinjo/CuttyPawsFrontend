@@ -12,7 +12,7 @@ export default class WishlistService extends ApiService {
   }
 
   static async getWishlist() {
-    if (!this.isAuthenticated()) {
+    if (!ApiService.isAuthenticated()) {
       return [];
     }
     const userId = this.getUserId();
@@ -38,6 +38,4 @@ export default class WishlistService extends ApiService {
     );
     return response.data;
   }
-
-
 }

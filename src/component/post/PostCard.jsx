@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Card,
   Image,
@@ -65,7 +65,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
-  const [totalComments, setTotalComments] = useState(post?.totalComments || 0);
+  const [totalComments, setTotalComments] = useState(post?.commentCount ?? 0);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -95,6 +95,16 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       if (post.totalReactions) {
         setTotalReactions(post.totalReactions);
       }
+    }
+  }, [post]);
+
+  useEffect(() => {
+    if (post) {
+      console.log("Post media debug:", {
+        postId: post.id,
+        media: post.media,
+        imageUrls: post.imageUrls
+      });
     }
   }, [post]);
 
@@ -278,15 +288,44 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     }
   };
 
+    // Keep comment count in sync when post changes (or when feed refreshes)
+  useEffect(() => {
+    if (!post) return;
+
+    // Prefer backend "commentCount"
+    if (post.commentCount !== undefined && post.commentCount !== null) {
+      setTotalComments(post.commentCount);
+      return;
+    }
+
+    // Backward compatibility if your API uses totalComments
+    if (post.totalComments !== undefined && post.totalComments !== null) {
+      setTotalComments(post.totalComments);
+    }
+  }, [post?.id, post?.commentCount, post?.totalComments]);
+
+
   // Comment Handlers
   const fetchComments = async () => {
     setCommentsLoading(true);
+    setError("");
     try {
       const res = await CommentService.getCommentsByPostId(post.id, 0, 50);
+      // if (res.status === 200) {
+      //   setComments(res.commentList || []);
+      //   setTotalComments(res.totalComments || 0);
+      //}
       if (res.status === 200) {
-        setComments(res.commentList || []);
-        setTotalComments(res.totalComments || 0);
+        const list = res.commentList || [];
+        setComments(list);
+
+        setTotalComments(
+          res.totalComments ??   // if API sends total count
+          post?.commentCount ??  // fallback to post count
+          list.length            // fallback to loaded list length
+        );
       }
+
     } catch {
       setError("Failed to load comments.");
     } finally {
@@ -410,6 +449,58 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     );
   };
 
+  const mediaItems = useMemo(() => {
+    if (Array.isArray(post?.media) && post.media.length > 0) {
+      return post.media
+        .map((item) => ({
+          url: item?.url || item?.mediaUrl,
+          type: item?.type || item?.mediaType,
+          thumbnailUrl: item?.thumbnailUrl || null
+        }))
+        .filter((item) => item.url);
+    }
+    if (Array.isArray(post?.imageUrls) && post.imageUrls.length > 0) {
+      return post.imageUrls
+        .filter(Boolean)
+        .map((url) => ({ url, type: "IMAGE", thumbnailUrl: null }));
+    }
+    return [];
+  }, [post]);
+
+  const renderMedia = (item, idx, isModal = false) => {
+    const isVideo = (item.type || "").toUpperCase() === "VIDEO";
+    if (isVideo) {
+      return (
+        <video
+          key={idx}
+          controls
+          className={isModal ? "modal-image" : "post-image"}
+          poster={item.thumbnailUrl || undefined}
+          style={!isModal ? { width: "100%" } : undefined}
+        >
+          <source src={item.url} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+    return (
+      <Image
+        key={idx}
+        src={item.url}
+        fluid
+        className={isModal ? "modal-image" : "post-image"}
+        onClick={
+          !isModal
+            ? () => {
+                setSelectedImage(idx);
+                setShowImageModal(true);
+              }
+            : undefined
+        }
+      />
+    );
+  };
+
   return (
     <Card className="post-card">
       {/* Header */}
@@ -453,19 +544,11 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       </Card.Header>
 
       {/* Images */}
-      {post.imageUrls?.length > 0 && (
+      {mediaItems.length > 0 && (
         <Carousel controls={false} indicators interval={null} className="post-images">
-          {post.imageUrls.map((img, idx) => (
+          {mediaItems.map((item, idx) => (
             <Carousel.Item key={idx}>
-              <Image
-                src={img}
-                fluid
-                className="post-image"
-                onClick={() => {
-                  setSelectedImage(idx);
-                  setShowImageModal(true);
-                }}
-              />
+              {renderMedia(item, idx)}
             </Carousel.Item>
           ))}
         </Carousel>
@@ -523,7 +606,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             </Button>
             {/* {post.shareCount > 0 && (
               <span className="action-count ms-2 small fw-medium">
-                {post.shareCount || 0}
+                {post.shareCount || 0}c
               </span>
             )} */}
           </div>
@@ -548,13 +631,21 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             </span>
           </div>
         )}
-
-        {/* Caption */}
+        {/* Caption (Username + Caption with Profile Link) */}
         {post.caption && (
-          <p className="post-caption mb-3">
-            {post.caption.length > 150 && !showMoreCaption
-              ? post.caption.substring(0, 150) + "..."
-              : post.caption}
+          <div className="post-caption mb-3">
+            <Link
+              to={`/customer-profile/${post.ownerId}`}
+              className="post-caption-username text-decoration-none"
+            >
+              {post.ownerName || "Unknown"}
+            </Link>
+
+            <span className="post-caption-text">
+              {post.caption.length > 150 && !showMoreCaption
+                ? post.caption.substring(0, 150) + "..."
+                : post.caption}
+            </span>
 
             {post.caption.length > 150 && (
               <Button
@@ -562,11 +653,12 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
                 className="ms-1 p-0 caption-toggle"
                 onClick={() => setShowMoreCaption(!showMoreCaption)}
               >
-                {showMoreCaption ? <FaChevronUp /> : <FaChevronDown />}
+                {showMoreCaption ? "less" : "more"}
               </Button>
             )}
-          </p>
+          </div>
         )}
+
 
         {/* Add Comment Form */}
         {currentUser ? (
@@ -620,15 +712,25 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             {!commentsLoading && comments.map((comment) => (
               <div key={comment.id} className="mb-3 comment-item">
                 <div className="d-flex">
-                  <Image
-                    src={comment.userProfileImage || "/default-avatar.png"}
-                    roundedCircle
-                    className="comment-avatar me-2"
-                  />
+                  <Link
+                    to={`/customer-profile/${comment.userId}`}
+                    className="text-decoration-none"
+                  >
+                    <Image
+                      src={comment.userProfileImage || "/default-avatar.png"}
+                      roundedCircle
+                      className="comment-avatar me-2"
+                    />
+                  </Link>
                   <div className="comment-content flex-grow-1">
                     <div className="d-flex align-items-start justify-content-between">
                       <div className="flex-grow-1">
-                        <strong className="comment-author">{comment.userName}</strong>
+                        <Link
+                          to={`/customer-profile/${comment.userId}`}
+                          className="text-decoration-none"
+                        >
+                          <strong className="comment-author">{comment.userName}</strong>
+                        </Link>
                         <p className="comment-text mb-1">{comment.content}</p>
                         
                         <div className="d-flex gap-3 comment-meta align-items-center">
@@ -689,15 +791,25 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
                   <div className="ms-5 mt-2 replies-container">
                     {comment.replies.map((reply) => (
                       <div key={reply.id} className="d-flex mb-2 reply-item">
-                        <Image
-                          src={reply.userProfileImage || "/default-avatar.png"}
-                          roundedCircle
-                          className="reply-avatar me-2"
-                        />
+                        <Link
+                          to={`/customer-profile/${reply.userId}`}
+                          className="text-decoration-none"
+                        >
+                          <Image
+                            src={reply.userProfileImage || "/default-avatar.png"}
+                            roundedCircle
+                            className="reply-avatar me-2"
+                          />
+                        </Link>
                         <div className="reply-content flex-grow-1">
                           <div className="d-flex align-items-start justify-content-between">
                             <div className="flex-grow-1">
-                              <strong>{reply.userName}</strong>
+                              <Link
+                                to={`/customer-profile/${reply.userId}`}
+                                className="text-decoration-none"
+                              >
+                                <strong>{reply.userName}</strong>
+                              </Link>
                               <p className="small mb-1">{reply.content}</p>
                               
                               <div className="d-flex gap-3 align-items-center">
@@ -723,11 +835,9 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       {/* Image Modal */}
       <Modal show={showImageModal} onHide={() => setShowImageModal(false)} centered className="image-modal">
         <Modal.Body className="p-0">
-          <Image
-            src={post.imageUrls?.[selectedImage]}
-            fluid
-            className="modal-image"
-          />
+          {mediaItems[selectedImage]
+            ? renderMedia(mediaItems[selectedImage], selectedImage, true)
+            : null}
         </Modal.Body>
       </Modal>
     </Card>

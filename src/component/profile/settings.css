@@ -1,0 +1,91 @@
+/* src/pages/profile/settings.css */
+:root{
+  --cp-orange:#FF7B54;
+  --cp-orange-2:#FFA559;
+  --cp-bg:#f6f7fb;
+  --cp-muted:#6b7280;
+  --cp-card:#fff;
+  --cp-border:#e5e7eb;
+}
+
+.cp-settings-page{
+  background: var(--cp-bg);
+  min-height: 100vh;
+}
+
+.cp-settings-hero{
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--cp-orange), var(--cp-orange-2));
+  color: white;
+}
+
+.cp-settings-hero .btn{
+  border-radius: 999px;
+  font-weight: 700;
+  background: rgba(255,255,255,.25);
+  border: 1px solid rgba(255,255,255,.35);
+  color: #fff;
+}
+
+.cp-settings-card{
+  border: 0;
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
+  overflow:hidden;
+}
+
+.cp-setting-row{
+  padding: 16px 18px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+}
+
+.cp-setting-row + .cp-setting-row{
+  border-top: 1px solid var(--cp-border);
+}
+
+.cp-setting-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.cp-setting-icon{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: #f3f4f6;
+}
+
+.cp-setting-title{
+  font-weight: 800;
+  margin:0;
+  color:#111827;
+  font-size: 15px;
+}
+.cp-setting-sub{
+  margin:0;
+  color: var(--cp-muted);
+  font-size: 13px;
+}
+
+.cp-logout-row{
+  border: 1px solid rgba(239,68,68,.25);
+  background: rgba(239,68,68,.06);
+}
+
+.cp-footer-links{
+  display:flex;
+  justify-content:center;
+  gap: 10px;
+  align-items:center;
+  color: var(--cp-muted);
+  font-size: 13px;
+}

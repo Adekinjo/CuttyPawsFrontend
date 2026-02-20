@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaBookmark, FaHeart } from "react-icons/fa";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/ProductService";
+import WishlistService from "../../service/WishlistService";
 import { Container, Row, Col, Card, Button, ButtonGroup, Spinner, Alert } from "react-bootstrap";
 import { Snackbar, Alert as MuiAlert, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -57,7 +58,7 @@ const SearchPricePage = () => {
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        const data = await ApiService.getWishlist();
+        const data = await WishlistService.getWishlist();
         setWishlist(data);
       } catch (error) {
         console.error("Failed to fetch wishlist:", error);
@@ -120,11 +121,11 @@ const SearchPricePage = () => {
     try {
       const isInWishlist = wishlist.some(item => item.productId === productId);
       if (isInWishlist) {
-        await ApiService.removeFromWishlist(productId);
+        await WishlistService.removeFromWishlist(productId);
         setWishlist(wishlist.filter(item => item.productId !== productId));
       } else {
-        await ApiService.addToWishlist(productId);
-        setWishlist(await ApiService.getWishlist());
+        await WishlistService.addToWishlist(productId);
+        setWishlist(await WishlistService.getWishlist());
       }
     } catch (error) {
       setAlertMessage("Wishlist update failed");

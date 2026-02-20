@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import ApiService from "../../service/ApiService";
+import ProductService from "../../service/ProductService";
 import ProductList from "../common/ProductList";
 import Pagination from "../common/Pagination";
 import RecentView from "../pages/RecentView";
@@ -19,7 +20,7 @@ const CategoryProduct = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await ApiService.getAllProductByCategoryId(categoryId);
+      const response = await ProductService.getAllProductByCategoryId(categoryId);
       const allProducts = response.productList || [];
 
       setTotalPages(Math.ceil(allProducts.length / itemsPerPage));

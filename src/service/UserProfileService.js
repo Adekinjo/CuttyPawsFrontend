@@ -1,4 +1,15 @@
 import ApiService from "./ApiService";
+import axios from "axios";
+
+export function handle401(res, navigate, redirectTo = "/login") {
+  if (res?.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate(redirectTo);
+    return true;
+  }
+  return false;
+}
 
 export default class UserProfileService extends ApiService {
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/CategoryService";
 import RecentlyViewed from "./RecentView";
 
 const SubCategoryListPage = () => {

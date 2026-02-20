@@ -7,7 +7,6 @@ import Footer from "./component/common/Footer.jsx";
 import LoadingSpinner from "./component/common/LoadingSpinner.jsx";
 import CompanyRegister from "./component/company/CompanyResgister.jsx";
 import SessionExpired from './component/pages/SessionExpired.jsx'; 
-import BackButton from "./component/common/BackButton.jsx";
 import ApiService from "./service/AuthService.js";
 import "react-toastify/dist/ReactToastify.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -15,21 +14,22 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
 const Home = lazy(() => import("./component/pages/Home.jsx"));
-const ProductPage = lazy(() => import("./component/common/ProductPage.jsx"));
+// const ProductPage = lazy(() => import("./component/common/ProductPage.jsx"));
 const ProductDetailsPage = lazy(() => import("./component/pages/ProductDetailsPage.jsx"));
 const CategoryListPage = lazy(() => import("./component/pages/CategoryListPage.jsx"));
 const CategoryProduct = lazy(() => import("./component/pages/CategoryProduct.jsx"));
 const CartPage = lazy(() => import("./component/pages/CartPage.jsx"));
 const RegisterPage = lazy(() => import("./component/pages/RegisterPage.jsx"));
 const LoginPage = lazy(() => import("./component/pages/LoginPage.jsx"));
-const ProfilePage = lazy(() => import("./component/pages/ProfilePage.jsx"));
+const ProfilePage = lazy(() => import("./component/profile/ProfilePage.jsx"));
+const SettingsPage = lazy(() => import("./component/profile/SettingsProfile.jsx"))
 const AddressPage = lazy(() => import("./component/pages/AddressPage.jsx"));
 const AdminPage = lazy(() => import("./component/admin/AdminPage.jsx"));
 const AdminCategory = lazy(() => import("./component/admin/AdminCategory.jsx"));
 const EditCategory = lazy(() => import("./component/admin/EditCategory.jsx"));
 const AddCategory = lazy(() => import("./component/admin/AddCategory.jsx"));
 const AdminProduct = lazy(() => import("./component/admin/AdminProduct.jsx"));
-const OrderDetails = lazy(() => import("./component/pages/OrderDetails.jsx"));
+const OrderDetails = lazy(() => import("./component/profile/OrderDetails.jsx"));
 const AddProduct = lazy(() => import("./component/admin/AddProduct.jsx"));
 const EditProduct = lazy(() => import("./component/admin/EditProduct.jsx"));
 const AdminOrder = lazy(() => import("./component/admin/AdminOrder.jsx"));
@@ -89,6 +89,9 @@ const FollowersPage = lazy(() => import("./component/post/FollowersPage.jsx"));
 const FollowingPage = lazy(() => import("./component/post/FollowingPage.jsx"));
 const AddPetPage = lazy(() => import("./component/pet/AddPetPage.jsx"));
 const EditPetPage = lazy(() => import("./component/pet/EditPetPage.jsx"));
+const OrderHistoryPage =lazy(() => import("./component/profile/OrderHistoryPage.jsx"))
+const UpdateProfile =lazy(() => import("./component/profile/UpdateProfile.jsx"))
+
 
 
 const ProtectedRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.ProtectedRoute })));
@@ -99,14 +102,12 @@ const CompanyRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ 
 function App() {
   const location = useLocation();
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
-  const [showBackButton, setShowBackButton] = useState(location.pathname !== "/");
 
   useEffect(() => {
     window.scrollTo(0, 0);
     ApiService.initializeApp();
     //ApiService.setupAxiosInterceptors();
     //ApiService.setupInactivityLogout();
-    setShowBackButton(location.pathname !== "/");
   }, [location.pathname]);
 
   
@@ -121,13 +122,12 @@ function App() {
   return (
     <CartProvider>
       <Navbar />
-      {showBackButton && <BackButton />}
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route exact path="/" element={<Home />} />
 
           <Route path="/product/:category/:subCategory/:productName/dp/:productId" element={<ProductDetailsPage />} />
-          <Route path="/accessories" element={<ProductPage />} />
+          {/* <Route path="/accessories" element={<ProductPage />} /> */}
           <Route path="/categories" element={<CategoryListPage />} />
           <Route path="/category/:categoryId" element={<CategoryProduct />} />
           <Route path="/cart-view" element={<CartPage />} />
@@ -159,6 +159,7 @@ function App() {
           {/* ==================== PROTECTED ROUTES ==================== */}
           <Route path="/customer-profile" element={<ProtectedRoute element={ProfilePage} />} />
           <Route path="/add-pet" element={<ProtectedRoute element={AddPetPage} />} />
+          <Route path="/settings" element={<ProtectedRoute element={SettingsPage} />} />
           <Route path="/edit-pet/:petId" element={<ProtectedRoute element={EditPetPage} />} />
           <Route path="/create-post" element={<ProtectedRoute element={CreatePostPage} />} />
           <Route path="/edit-post/:postId" element={<ProtectedRoute element={EditPostPage} />} />
@@ -167,6 +168,7 @@ function App() {
           <Route path="/profile/:userId/following" element={<ProtectedRoute element={FollowingPage} />} />
           <Route path="/customer-profile/:userId/followers" element={<ProtectedRoute element={FollowersPage} />} />
           <Route path="/customer-profile/:userId/following" element={<ProtectedRoute element={FollowingPage} />} />
+          <Route path="/order-history-page" element={<ProtectedRoute element={OrderHistoryPage}/>} />
 
 
           {/* CAROUSEL */}
@@ -187,6 +189,7 @@ function App() {
           <Route path="/payment-callback" element={<ProtectedRoute element={PaymentCallback} />} />
           <Route path="/payment-success" element={<ProtectedRoute element={PaymentSuccess} />} />
           <Route path="/payment-failed" element={<ProtectedRoute element={PaymentFail} />} />
+          <Route path="/update-user-profile" element={<ProtectedRoute element={UpdateProfile} />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminRoute element={AdminPage} />} />

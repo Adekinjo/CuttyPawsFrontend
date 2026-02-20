@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/CategoryService";
 import { useNavigate } from "react-router-dom";
 
 const AddCategory = () => {

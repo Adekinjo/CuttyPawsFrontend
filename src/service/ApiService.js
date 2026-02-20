@@ -1,56 +1,3 @@
-// import axios from "axios";
-// import { toast } from "react-toastify";
-// import { Navigate } from "react-router-dom";
-
-// export default class ApiService {
-//    //static BASE_URL = "https://kinjomarket-backend.onrender.com";
-
-//    static BASE_URL = "http://localhost:9393";
-
-
-//   static getHeader() {
-//     const token = localStorage.getItem("token");
-//     return {
-//       Authorization: `Bearer ${token}`,
-//       "Content-Type": "application/json",
-//     };
-//   }
-//   // In ApiService.js - Add this method
-// static getCurrentUser() {
-//     try {
-//         const token = localStorage.getItem("token");
-//         if (!token) return null;
-        
-//         // Decode JWT token to get user info
-//         const payload = JSON.parse(atob(token.split('.')[1]));
-//         return {
-//             id: payload.userId || payload.sub,
-//             email: payload.email,
-//             name: payload.name
-//             // Add other user fields as needed
-//         };
-//     } catch (error) {
-//         console.error("Error getting current user:", error);
-//         return null;
-//     }
-// }
-
-// static isAuthenticated() {
-//     const token = localStorage.getItem("token");
-//     if (!token) return false;
-    
-//     try {
-//         const payload = JSON.parse(atob(token.split('.')[1]));
-//         return payload.exp * 1000 > Date.now();
-//     } catch {
-//         return false;
-//     }
-//   }
-// }
-
-
-
-
 
 export default class ApiService {
   static BASE_URL = "http://localhost:9393";
@@ -64,8 +11,12 @@ export default class ApiService {
     // Only add Authorization header if token exists
     if (token && token.trim().length > 10) {
       headers.Authorization = `Bearer ${token}`;
+      console.log("Auth header set:", { tokenLength: token.length });
     } else {
-      console.warn("⚠️ No valid token found, request will be unauthenticated");
+      console.warn("No valid token found for auth header:", {
+        tokenPresent: Boolean(token),
+        tokenLength: token ? token.length : 0
+      });
     }
     
     return headers;
@@ -111,4 +62,34 @@ export default class ApiService {
       return null;
     }
   }
+
+  static getUserId() {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.userId || payload.sub || null;
+    } catch (error) {
+      console.error("Error getting user ID from token:", error);
+      return null;
+    }
+  }
+
+  static isAuthenticated() {
+    const token = localStorage.getItem("token");
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (!payload.exp) {
+        return true;
+      }
+      return payload.exp * 1000 > Date.now();
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      return false;
+    }
+  }
+
 }

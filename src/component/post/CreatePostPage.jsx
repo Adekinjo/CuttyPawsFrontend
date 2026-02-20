@@ -9,11 +9,11 @@ const CreatePostPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [imagePreviews, setImagePreviews] = useState([]);
+    const [mediaPreviews, setMediaPreviews] = useState([]);
 
     const [formData, setFormData] = useState({
         caption: "",
-        images: []
+        media: []
     });
 
     const handleInputChange = (e) => {
@@ -24,17 +24,17 @@ const CreatePostPage = () => {
         }));
     };
 
-    const handleImageUpload = (e) => {
+    const handleMediaUpload = (e) => {
         const files = Array.from(e.target.files);
         
         // Validate file types and size
         const validFiles = files.filter(file => {
-            if (!file.type.startsWith('image/')) {
-                setError("Please upload only image files (JPEG, PNG, GIF)");
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                setError("Please upload only image or video files");
                 return false;
             }
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                setError("Image size should be less than 5MB");
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                setError("File size should be less than 10MB");
                 return false;
             }
             return true;
@@ -42,28 +42,29 @@ const CreatePostPage = () => {
 
         if (validFiles.length === 0) return;
 
-        // Check total images limit
-        if (imagePreviews.length + validFiles.length > 10) {
-            setError("You can upload maximum 10 images per post");
+        // Check total media limit
+        if (mediaPreviews.length + validFiles.length > 10) {
+            setError("You can upload maximum 10 media files per post");
             return;
         }
 
         // Create preview URLs
         const newPreviews = validFiles.map(file => ({
             file,
-            preview: URL.createObjectURL(file)
+            preview: URL.createObjectURL(file),
+            type: file.type
         }));
 
-        setImagePreviews(prev => [...prev, ...newPreviews]);
+        setMediaPreviews(prev => [...prev, ...newPreviews]);
         setFormData(prev => ({
             ...prev,
-            images: [...prev.images, ...validFiles]
+            media: [...prev.media, ...validFiles]
         }));
         setError("");
     };
 
-    const removeImage = (index) => {
-        setImagePreviews(prev => {
+    const removeMedia = (index) => {
+        setMediaPreviews(prev => {
             const newPreviews = [...prev];
             URL.revokeObjectURL(newPreviews[index].preview);
             newPreviews.splice(index, 1);
@@ -72,7 +73,7 @@ const CreatePostPage = () => {
 
         setFormData(prev => ({
             ...prev,
-            images: prev.images.filter((_, i) => i !== index)
+            media: prev.media.filter((_, i) => i !== index)
         }));
     };
 
@@ -89,8 +90,8 @@ const CreatePostPage = () => {
             return;
         }
 
-        if (formData.images.length === 0) {
-            setError("At least one image is required");
+        if (formData.media.length === 0) {
+            setError("At least one media file (image/video) is required");
             setLoading(false);
             return;
         }
@@ -110,9 +111,9 @@ const CreatePostPage = () => {
                 // Reset form
                 setFormData({
                     caption: "",
-                    images: []
+                    media: []
                 });
-                setImagePreviews([]);
+                setMediaPreviews([]);
 
                 // Redirect after success
                 setTimeout(() => {
@@ -191,32 +192,44 @@ const CreatePostPage = () => {
                                 <Form.Group className="mb-4">
                                     <Form.Label className="fw-bold d-block mb-3">
                                         <FaCamera className="me-2" />
-                                        Photos ({imagePreviews.length}/10)
+                                        Media ({mediaPreviews.length}/10)
                                     </Form.Label>
                                     
                                     <div className="border rounded p-4">
-                                        {imagePreviews.length > 0 ? (
+                                        {mediaPreviews.length > 0 ? (
                                             <Row className="g-3">
-                                                {imagePreviews.map((preview, index) => (
+                                                {mediaPreviews.map((preview, index) => (
                                                     <Col xs={6} md={4} lg={3} key={index}>
                                                         <div className="position-relative">
-                                                            <Image
-                                                                src={preview.preview}
-                                                                alt={`Preview ${index + 1}`}
-                                                                fluid
-                                                                rounded
-                                                                style={{ 
-                                                                    height: "120px", 
-                                                                    width: "100%", 
-                                                                    objectFit: "cover" 
-                                                                }}
-                                                            />
+                                                            {preview.type?.startsWith("video/") ? (
+                                                                <video
+                                                                    src={preview.preview}
+                                                                    muted
+                                                                    style={{ 
+                                                                        height: "120px", 
+                                                                        width: "100%", 
+                                                                        objectFit: "cover" 
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <Image
+                                                                    src={preview.preview}
+                                                                    alt={`Preview ${index + 1}`}
+                                                                    fluid
+                                                                    rounded
+                                                                    style={{ 
+                                                                        height: "120px", 
+                                                                        width: "100%", 
+                                                                        objectFit: "cover" 
+                                                                    }}
+                                                                />
+                                                            )}
                                                             <Button
                                                                 variant="danger"
                                                                 size="sm"
                                                                 className="position-absolute top-0 end-0 m-1 rounded-circle"
                                                                 style={{ width: "28px", height: "28px" }}
-                                                                onClick={() => removeImage(index)}
+                                                                onClick={() => removeMedia(index)}
                                                                 disabled={loading}
                                                             >
                                                                 <FaTimes size={10} />
@@ -225,7 +238,7 @@ const CreatePostPage = () => {
                                                     </Col>
                                                 ))}
                                                 
-                                                {imagePreviews.length < 10 && (
+                                                {mediaPreviews.length < 10 && (
                                                     <Col xs={6} md={4} lg={3}>
                                                         <Form.Group>
                                                             <Form.Label 
@@ -240,15 +253,15 @@ const CreatePostPage = () => {
                                                             >
                                                                 <FaCamera className="text-muted mb-2" size={20} />
                                                                 <small className="text-muted text-center">
-                                                                    Add Photos
+                                                                    Add Media
                                                                 </small>
                                                             </Form.Label>
                                                             <Form.Control
                                                                 type="file"
                                                                 id="post-images"
                                                                 multiple
-                                                                accept="image/*"
-                                                                onChange={handleImageUpload}
+                                                                accept="image/*,video/*"
+                                                                onChange={handleMediaUpload}
                                                                 style={{ display: "none" }}
                                                                 disabled={loading}
                                                             />
@@ -268,18 +281,18 @@ const CreatePostPage = () => {
                                                     htmlFor="post-images"
                                                 >
                                                     <FaCamera className="text-muted mb-3" size={32} />
-                                                    <h5 className="text-muted">Upload Photos</h5>
+                                                    <h5 className="text-muted">Upload Media</h5>
                                                     <p className="text-muted mb-0 text-center">
                                                         Click to browse or drag and drop<br />
-                                                        <small>Maximum 10 photos, 5MB each</small>
+                                                        <small>Maximum 10 files, 10MB each</small>
                                                     </p>
                                                 </Form.Label>
                                                 <Form.Control
                                                     type="file"
                                                     id="post-images"
                                                     multiple
-                                                    accept="image/*"
-                                                    onChange={handleImageUpload}
+                                                    accept="image/*,video/*"
+                                                    onChange={handleMediaUpload}
                                                     style={{ display: "none" }}
                                                     disabled={loading}
                                                 />
@@ -300,7 +313,7 @@ const CreatePostPage = () => {
                                     <Button 
                                         variant="primary" 
                                         type="submit" 
-                                        disabled={loading || formData.images.length === 0 || !formData.caption.trim()}
+                                        disabled={loading || formData.media.length === 0 || !formData.caption.trim()}
                                         className="px-4"
                                     >
                                         {loading ? (

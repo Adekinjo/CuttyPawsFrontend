@@ -9,7 +9,7 @@ import {
   FaCalendarAlt, FaUser, FaMapMarkerAlt,
   FaEnvelope, FaPhone, FaTruck, FaHistory, FaHeadset
 } from "react-icons/fa";
-import ApiService from "../../service/ApiService";
+import OrderService from "../../service/OrderService";
 
 const statusConfig = {
   PENDING: { color: "#f6ad55", label: "Pending" },
@@ -33,7 +33,7 @@ const OrderDetails = () => {
     const fetchOrderDetails = async () => {
       setIsLoading(true);
       try {
-        const response = await ApiService.getOrderItemById(itemId);
+        const response = await OrderService.getOrderItemById(itemId);
 
         if (!response || !response.orderItemList || response.orderItemList.length === 0) {
           throw new Error("No data received from the API");

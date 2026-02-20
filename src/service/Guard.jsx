@@ -1,19 +1,55 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ApiService from "./AuthService";
 
 
 // ProtectedRoute - for general authentication checks
+// export const ProtectedRoute = ({ element: Component }) => {
+//   const location = useLocation();
+
+//   return ApiService.isAuthenticated() ? (
+//     <Component  />
+//   ) : (
+//     <Navigate to="/login" replace state={{ from: location }} />
+//   );
+// };
+
 export const ProtectedRoute = ({ element: Component }) => {
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [allowed, setAllowed] = useState(false);
 
-  return ApiService.isAuthenticated() ? (
-    <Component  />
-  ) : (
-    <Navigate to="/login" replace state={{ from: location }} />
-  );
+  useEffect(() => {
+    const checkAuth = async () => {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        setAllowed(false);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await ApiService.refreshTokenIfNeeded();
+        setAllowed(true);
+      } catch {
+        setAllowed(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) return null; // or spinner
+
+  return allowed
+    ? <Component />
+    : <Navigate to="/login" replace state={{ from: location }} />;
 };
+
 
 export const AdminRoute = ({ element: Component }) => {
   const navigate = useNavigate();

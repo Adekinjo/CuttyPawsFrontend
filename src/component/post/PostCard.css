@@ -117,7 +117,7 @@
 }
 
 /* Images */
-.post-images {
+/* .post-images {
   background-color: #000 !important;
   max-height: 520px;
   overflow: hidden;
@@ -130,7 +130,44 @@
   object-fit: contain;
   cursor: pointer;
   transition: transform 0.3s ease;
+} */
+
+
+/* ================= IMAGES (FIXED) ================= */
+
+.post-images {
+  background-color: transparent !important; /* remove black */
+  max-height: 520px;
+  overflow: hidden;
+  padding: 0 !important;
+  margin: 0 !important;
 }
+
+/* Kill Bootstrap spacing */
+.post-images .carousel,
+.post-images .carousel-inner,
+.post-images .carousel-item {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+/* Full-width image */
+.post-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 520px;
+  object-fit: contain; /* show full image */
+  cursor: pointer;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.post-card > .post-images {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 
 .post-image:hover {
   transform: scale(1.02);
@@ -143,11 +180,33 @@
 }
 
 /* Caption */
-.post-caption {
+/* .post-caption {
   color: var(--text-primary) !important;
   line-height: 1.6;
   margin-bottom: 1rem;
   word-break: break-word;
+} */
+ .post-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.post-caption-username {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.post-caption-username:hover {
+  text-decoration: underline;
+}
+
+.post-caption-text {
+  font-weight: 400;
+  color: var(--text-primary);
 }
 
 .caption-toggle {

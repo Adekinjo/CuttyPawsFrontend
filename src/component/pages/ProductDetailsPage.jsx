@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/ProductService";
 import {
   FaShareAlt,
   FaFacebook,
@@ -27,8 +27,8 @@ import {
 import "../../style/ProductdetailPage.css";
 import { addToRecentlyViewed } from "../../service/LocalStorage";
 import RecentView from "../pages/RecentView";
-import BackToTop from "./BackToTop";
-
+import WishlistService from "../../service/WishlistService";
+import ReviewService from "../../service/ReviewService"
 const ProductDetailsPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ const ProductDetailsPage = () => {
         setProduct(productRes.product);
         addToRecentlyViewed(productRes.product);
 
-        const wishRes = await ApiService.getWishlist();
+        const wishRes = await WishlistService.getWishlist();
         setWishlist(wishRes);
 
         await ApiService.trackProductView(productId);
@@ -71,7 +71,7 @@ const ProductDetailsPage = () => {
           )
         );
 
-        const reviewsData = await ApiService.getReviewsByProductId(productId);
+        const reviewsData = await ReviewService.getReviewsByProductId(productId);
         setReviews(reviewsData);
         setReviewLoading(false);
 
@@ -132,10 +132,10 @@ const ProductDetailsPage = () => {
       // Debug: Log the review data being sent
       console.log("Submitting review:", reviewData);
       
-      const response = await ApiService.addReview(reviewData);
+      const response = await ReviewService.addReview(reviewData);
       console.log("Review submission response:", response);
       
-      const updatedReviews = await ApiService.getReviewsByProductId(productId);
+      const updatedReviews = await ReviewService.getReviewsByProductId(productId);
       setReviews(updatedReviews);
       setRating(0);
       setComment("");
@@ -197,10 +197,10 @@ const ProductDetailsPage = () => {
     }
     try {
       if (wishlist.some((item) => item.productId === productId)) {
-        await ApiService.removeFromWishlist(productId);
+        await WishlistService.removeFromWishlist(productId);
         setWishlist(wishlist.filter((item) => item.productId !== productId));
       } else {
-        await ApiService.addToWishlist(productId);
+        await WishlistService.addToWishlist(productId);
         setWishlist([...wishlist, { productId }]);
       }
     } catch (error) {
@@ -625,7 +625,6 @@ const ProductDetailsPage = () => {
         )}
       </section>
       <RecentView />
-      <BackToTop />
     </Container>
   );
 };
