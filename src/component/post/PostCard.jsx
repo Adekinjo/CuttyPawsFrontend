@@ -11,18 +11,15 @@ import {
   Spinner
 } from "react-bootstrap";
 import {
-  FaComment,
-  FaShare,
   FaEllipsisH,
   FaTrash,
   FaEdit,
   FaPaperPlane,
   FaSignInAlt,
-  FaChevronDown,
-  FaChevronUp,
   FaHeart,
   FaRegHeart
 } from "react-icons/fa";
+import { PawPrint, MessageCircle, Share2, Bookmark, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommentService from "../../service/CommentsService";
 import PostLikeService from "../../service/LikesService";
@@ -72,6 +69,8 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const [replyText, setReplyText] = useState("");
   const [error, setError] = useState("");
   const [showMoreCaption, setShowMoreCaption] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
 
   // Comment Reactions State
   const [commentReactionsLoading, setCommentReactionsLoading] = useState({});
@@ -302,7 +301,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     if (post.totalComments !== undefined && post.totalComments !== null) {
       setTotalComments(post.totalComments);
     }
-  }, [post?.id, post?.commentCount, post?.totalComments]);
+  }, [post]);
 
 
   // Comment Handlers
@@ -395,6 +394,48 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     }
   };
 
+  const formatCount = (value) => {
+    const numericValue = Number(value) || 0;
+    return new Intl.NumberFormat().format(numericValue);
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/post/${post.id}`;
+    const sharePayload = {
+      title: `${post.ownerName || "CuttyPaws"}'s post`,
+      text: post.caption || "Check out this pet post on CuttyPaws",
+      url: shareUrl
+    };
+
+    setError("");
+    setShareMessage("");
+
+    if (navigator.share) {
+      try {
+        await navigator.share(sharePayload);
+        setShareMessage("Post shared");
+        return;
+      } catch (shareError) {
+        if (shareError?.name !== "AbortError") {
+          setError("Could not share right now. Link copied instead.");
+        } else {
+          return;
+        }
+      }
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        window.prompt("Copy this post link:", shareUrl);
+      }
+      setShareMessage("Link copied");
+    } catch {
+      setError("Failed to share post.");
+    }
+  };
+
   const removeComment = async (commentId) => {
     if (!window.confirm("Delete comment?")) return;
     try {
@@ -409,7 +450,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   // Reaction Display Helpers for Post
   const getReactionIcon = (reactionType) => {
     const emojis = {
-      LIKE: '👍',
+      LIKE: '🐾',
       LOVE: '❤️',
       HAHA: '😄',
       WOW: '😲',
@@ -470,6 +511,24 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const renderMedia = (item, idx, isModal = false) => {
     const isVideo = (item.type || "").toUpperCase() === "VIDEO";
     if (isVideo) {
+      if (!isModal) {
+        return (
+          <div key={idx} className="post-video-wrapper">
+            <video
+              controls
+              className="post-image"
+              poster={item.thumbnailUrl || undefined}
+              style={{ width: "100%" }}
+            >
+              <source src={item.url} />
+              Your browser does not support the video tag.
+            </video>
+            <span className="post-video-badge">
+              <Play size={14} fill="currentColor" />
+            </span>
+          </div>
+        );
+      }
       return (
         <video
           key={idx}
@@ -531,7 +590,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
             {showOptions && (
               <div className="post-options-menu">
-                <Button variant="link" onClick={() => navigate(`/edit-post/${post.id}`)}>
+                <Button variant="link" onClick={() => (onEdit ? onEdit(post.id) : navigate(`/edit-post/${post.id}`))}>
                   <FaEdit className="me-1" /> Edit
                 </Button>
                 <Button variant="link" className="text-danger" onClick={() => onDelete(post.id)}>
@@ -556,79 +615,70 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
       {/* Body */}
       <Card.Body className="post-body">
-        {/* Action Buttons with Counts */}
-        <div className="post-actions-container d-flex justify-content-around align-items-center mb-3 py-2">
-          {/* Reactions Button with Count */}
-          <div className="action-item d-flex align-items-center">
-            <div className="action-icon-wrapper">
+        <div className="post-actions-row">
+          <div className="post-actions-left">
+            <div className="action-item">
               <ReactionsPicker
                 onReactionSelect={handleReaction}
                 onRemoveReaction={handleRemoveReaction}
                 currentReaction={userReaction}
-                size={24}
+                size={22}
                 className="reaction-picker-trigger"
               />
             </div>
-            {totalReactions > 0 && (
-              <span className="action-count ms-2 small fw-medium">
-                {totalReactions}
-              </span>
-            )}
-          </div>
 
-          {/* Comments Button with Count */}
-          <div className="action-item d-flex align-items-center">
-            <Button 
-              variant="link" 
-              className="action-btn p-2 d-flex align-items-center text-decoration-none"
+            <Button
+              variant="link"
+              className="action-btn text-decoration-none"
               onClick={toggleComments}
+              aria-label="Open comments"
             >
-              <div className="action-icon-wrapper">
-                <FaComment size={22} className="action-icon" />
-              </div>
+              <MessageCircle size={24} className="action-icon" />
             </Button>
-            {totalComments > 0 && (
-              <span className="action-count ms-2 small fw-medium">
-                {totalComments} comment{totalComments > 1 ? 's' : ''}
-              </span>
-            )}
+
+            <Button
+              variant="link"
+              className="action-btn text-decoration-none"
+              onClick={handleShare}
+              aria-label="Share post"
+            >
+              <Share2 size={24} className="action-icon" />
+            </Button>
           </div>
 
-          {/* Share Button (Placeholder) */}
-          <div className="action-item d-flex align-items-center">
-            <Button 
-              variant="link" 
-              className="action-btn p-2 d-flex align-items-center text-decoration-none"
-            >
-              <div className="action-icon-wrapper">
-                <FaShare size={22} className="action-icon" />
-              </div>
-            </Button>
-            {/* {post.shareCount > 0 && (
-              <span className="action-count ms-2 small fw-medium">
-                {post.shareCount || 0}c
-              </span>
-            )} */}
-          </div>
+          <Button
+            variant="link"
+            className={`action-btn bookmark-btn text-decoration-none ${isBookmarked ? "active" : ""}`}
+            onClick={() => setIsBookmarked((prev) => !prev)}
+            aria-label={isBookmarked ? "Remove bookmark" : "Save post"}
+          >
+            <Bookmark size={24} className="action-icon" fill={isBookmarked ? "currentColor" : "none"} />
+          </Button>
         </div>
+
+        <div className="post-stats-row">
+          <span className="post-stat">{formatCount(totalReactions)} likes</span>
+          <button type="button" className="post-stat post-stat-button" onClick={toggleComments}>
+            {formatCount(totalComments)} comments
+          </button>
+        </div>
+
+        {shareMessage && <div className="share-feedback">{shareMessage}</div>}
 
         {/* Reaction Summary */}
         {totalReactions > 0 && (
           <div className="d-flex align-items-center gap-2 mb-2">
             <div className="d-flex gap-1">
               {Object.entries(reactionsCount)
-                .filter(([_, count]) => count > 0)
-                .sort(([_, a], [__, b]) => b - a)
+                .filter((entry) => entry[1] > 0)
+                .sort((a, b) => b[1] - a[1])
                 .slice(0, 3)
                 .map(([type]) => (
-                  <span key={type} style={{ fontSize: '0.9rem' }}>
-                    {getReactionIcon(type)}
+                  <span key={type} style={{ fontSize: "0.9rem" }}>
+                    {type === "LIKE" ? <PawPrint size={14} strokeWidth={2.3} /> : getReactionIcon(type)}
                   </span>
                 ))}
             </div>
-            <span className="text-muted small">
-              {totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}
-            </span>
           </div>
         )}
         {/* Caption (Username + Caption with Profile Link) */}

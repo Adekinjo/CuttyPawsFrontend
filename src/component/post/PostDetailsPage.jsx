@@ -70,7 +70,7 @@ const PostDetailPage = () => {
         try {
             await PostService.deletePost(deletedPostId);
             navigate(-1);
-        } catch (err) {
+        } catch {
             setError("Failed to delete post");
         }
     };
@@ -81,9 +81,9 @@ const PostDetailPage = () => {
 
     if (loading) {
         return (
-            <div className="bg-dark min-vh-100 d-flex justify-content-center align-items-center">
-                <div className="text-center text-white">
-                    <Spinner animation="border" variant="light" size="lg" />
+            <div className="post-detail-page min-vh-100 d-flex justify-content-center align-items-center">
+                <div className="text-center">
+                    <Spinner animation="border" variant="warning" size="lg" />
                     <p className="mt-3 mb-0">Loading post...</p>
                 </div>
             </div>
@@ -92,19 +92,19 @@ const PostDetailPage = () => {
 
     if (error) {
         return (
-            <div className="bg-dark min-vh-100 d-flex justify-content-center align-items-center">
-                <div className="text-center text-white">
+            <div className="post-detail-page min-vh-100 d-flex justify-content-center align-items-center">
+                <div className="text-center">
                     <div className="mb-4">
                         <FaHeart className="text-muted" size={48} />
                     </div>
                     <h4 className="mb-3">Post Not Available</h4>
                     <p className="text-muted mb-4">{error}</p>
                     <div className="d-flex gap-3 justify-content-center">
-                        <Button variant="outline-light" onClick={() => navigate(-1)}>
+                        <Button variant="outline-secondary" onClick={() => navigate(-1)}>
                             <FaArrowLeft className="me-2" />
                             Go Back
                         </Button>
-                        <Button variant="primary" onClick={() => window.location.reload()}>
+                        <Button className="post-detail-primary" onClick={() => window.location.reload()}>
                             Try Again
                         </Button>
                     </div>
@@ -115,19 +115,19 @@ const PostDetailPage = () => {
 
     if (!post) {
         return (
-            <div className="bg-dark min-vh-100 d-flex justify-content-center align-items-center">
-                <div className="text-center text-white">
+            <div className="post-detail-page min-vh-100 d-flex justify-content-center align-items-center">
+                <div className="text-center">
                     <div className="mb-4">
                         <FaHeart className="text-muted" size={48} />
                     </div>
                     <h4 className="mb-3">Post Not Found</h4>
                     <p className="text-muted mb-4">The post you're looking for doesn't exist or has been removed.</p>
                     <div className="d-flex gap-3 justify-content-center">
-                        <Button variant="outline-light" onClick={() => navigate(-1)}>
+                        <Button variant="outline-secondary" onClick={() => navigate(-1)}>
                             <FaArrowLeft className="me-2" />
                             Go Back
                         </Button>
-                        <Button variant="primary" onClick={() => navigate('/')}>
+                        <Button className="post-detail-primary" onClick={() => navigate('/')}>
                             Go Home
                         </Button>
                     </div>
@@ -137,11 +137,11 @@ const PostDetailPage = () => {
     }
 
     return (
-        <div className="bg-dark min-vh-100">
+        <div className="post-detail-page min-vh-100">
             <Container className="py-4">
                 <div className="d-flex align-items-center mb-4">
                     <Button 
-                        variant="outline-light" 
+                        variant="outline-secondary" 
                         className="border-0 rounded-circle d-flex align-items-center justify-content-center"
                         style={{ width: '40px', height: '40px' }}
                         onClick={() => navigate(-1)}
@@ -149,7 +149,7 @@ const PostDetailPage = () => {
                         <FaArrowLeft />
                     </Button>
                     <div className="ms-3">
-                        <h5 className="text-white mb-0">Post</h5>
+                        <h5 className="mb-0">Post</h5>
                         <small className="text-muted">
                             {post.ownerName || "Unknown User"}
                         </small>
@@ -168,8 +168,11 @@ const PostDetailPage = () => {
             </Container>
 
             <style>{`
-                .bg-dark {
-                    background-color: #000000 !important;
+                .post-detail-page {
+                    background:
+                      radial-gradient(1200px 700px at 0% -8%, #ffe7d6 0%, transparent 50%),
+                      radial-gradient(900px 550px at 100% 0%, #dff4ff 0%, transparent 52%),
+                      linear-gradient(165deg, #f6f1ec 0%, #fffaf4 45%, #fffefe 100%);
                 }
                 
                 .post-detail-container {
@@ -177,9 +180,19 @@ const PostDetailPage = () => {
                     margin: 0 auto;
                 }
 
+                .post-detail-primary {
+                    background: linear-gradient(135deg, #ff8b5e 0%, #ff6d3f 100%);
+                    border: none !important;
+                    color: #ffffff !important;
+                }
+
+                .post-detail-primary:hover {
+                    filter: brightness(0.97);
+                }
+
                 .highlight-comment {
-                    background-color: #262626 !important;
-                    border-left: 3px solid #0095f6;
+                    background-color: rgba(255, 139, 94, 0.14) !important;
+                    border-left: 3px solid #ff7b54;
                     transition: all 0.3s ease;
                 }
             `}</style>

@@ -31,23 +31,29 @@
 }
 
 .reaction-icon {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.2rem;
   line-height: 1;
   transition: transform 0.2s ease;
+}
+
+.reaction-icon svg {
+  display: block;
 }
 
 .reaction-trigger:hover .reaction-icon {
   transform: scale(1.1);
 }
 
-/* Reactions Picker Popup - POSITIONED BELOW */
+/* Reactions Picker Popup - OPEN ABOVE TRIGGER */
 .reactions-picker-popup {
   position: absolute;
-  top: 100%; /* Position below the trigger */
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 10px; /* Space between trigger and picker */
+  bottom: calc(100% + 8px);
+  left: 0;
+  transform: none;
+  margin-top: 0;
   z-index: 1060;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -62,18 +68,17 @@
   justify-content: center;
 }
 
-/* Arrow pointing UP to the trigger */
+/* Arrow pointing DOWN to the trigger */
 .picker-arrow {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 100%;
+  left: 20px;
   width: 0;
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 8px solid var(--bg-card);
-  filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
+  border-top: 8px solid var(--bg-card);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
 
 .reactions-list {
@@ -101,6 +106,10 @@
   position: relative;
   line-height: 1;
   flex-shrink: 0;
+}
+
+.reaction-emoji svg {
+  display: block;
 }
 
 .reaction-emoji:hover {
@@ -144,11 +153,11 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
 }
 
@@ -174,7 +183,7 @@
   .reactions-picker-popup {
     min-width: 200px;
     padding: 6px 10px;
-    margin-top: 8px;
+    left: 0;
   }
   
   .reaction-emoji {
@@ -202,7 +211,8 @@
 /* For very small screens */
 @media (max-width: 480px) {
   .reactions-picker-popup {
-    min-width: 180px;
+    min-width: 170px;
+    max-width: calc(100vw - 44px);
     padding: 4px 8px;
   }
   
@@ -222,13 +232,8 @@ body {
   overflow-x: visible !important;
 }
 
-/* If picker is still getting cut off, adjust container */
-.post-card {
-  position: relative;
-  overflow: visible !important;
-}
-
-.post-actions-container {
+/* Keep picker above nearby controls without breaking card clipping */
+.post-actions-row {
   position: relative;
   z-index: 10;
 }

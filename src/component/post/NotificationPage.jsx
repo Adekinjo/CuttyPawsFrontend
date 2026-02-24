@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { Container, Row, Col, Card, Badge, Button, Spinner, Alert, Dropdown } from "react-bootstrap";
-import { FaBell, FaCheck, FaCheckDouble, FaFilter, FaExclamationTriangle, FaWifi } from "react-icons/fa";
+import { Container, Row, Col, Card, Badge, Button, Spinner, Alert } from "react-bootstrap";
+import { FaBell, FaCheck, FaCheckDouble, FaExclamationTriangle, FaWifi } from "react-icons/fa";
+import { MessageCircle, UserPlus, PawPrint, Reply, Heart, Bookmark, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NotificationService from "../../service/NotificationService";
 import ApiService from "../../service/AuthService";
+import "./NotificationPage.css";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -19,7 +21,6 @@ const NotificationPage = () => {
   const [connectionChecked, setConnectionChecked] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch notifications
   const fetchNotifications = useCallback(async (pageNum = 0, append = false) => {
     try {
       if (pageNum === 0) {
@@ -30,12 +31,12 @@ const NotificationPage = () => {
       }
 
       const response = await NotificationService.getMyNotifications(pageNum, 20);
-      
+
       if (response && response.status === 200) {
         const newNotifications = response.notificationList || [];
-        
+
         if (append) {
-          setNotifications(prev => [...prev, ...newNotifications]);
+          setNotifications((prev) => [...prev, ...newNotifications]);
         } else {
           setNotifications(newNotifications);
         }
@@ -47,8 +48,8 @@ const NotificationPage = () => {
       }
     } catch (err) {
       const errorMessage = err.message || "Failed to load notifications";
-      
-      if (err.message && err.message.includes('JDBC') && err.message.includes('SQL')) {
+
+      if (err.message && err.message.includes("JDBC") && err.message.includes("SQL")) {
         setError("Server error: Please try again later");
       } else {
         setError(errorMessage);
@@ -59,109 +60,95 @@ const NotificationPage = () => {
     }
   }, []);
 
-  // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {
     try {
       const response = await NotificationService.getUnreadCount();
       if (response && response.status === 200) {
         const count = response.totalComments || 0;
         setUnreadCount(count);
-        //console.log(`📊 Unread count: ${count}`);
       }
-    } catch (err) {
-      //console.error("Error fetching unread count:", err);
+    } catch {
+      // no-op
     }
   }, []);
 
-  // Load more notifications
   const loadMore = () => {
     if (hasMore && !loadingMore) {
       fetchNotifications(page + 1, true);
     }
   };
 
-  // Mark as read
   const handleMarkAsRead = async (notificationId, event = null) => {
     if (event) {
       event.stopPropagation();
     }
-    
+
     try {
       await NotificationService.markRead(notificationId);
-      
-      setNotifications(prev =>
-        prev.map(notif =>
-          notif.id === notificationId ? { ...notif, read: true } : notif
-        )
+
+      setNotifications((prev) =>
+        prev.map((notif) => (notif.id === notificationId ? { ...notif, read: true } : notif))
       );
-      
-      setUnreadCount(prev => Math.max(0, prev - 1));
+
+      setUnreadCount((prev) => Math.max(0, prev - 1));
       setSuccess("Notification marked as read");
-      
+
       setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
+    } catch {
       setError("Failed to mark notification as read");
     }
   };
 
-  // Mark all as read
   const handleMarkAllAsRead = async () => {
     try {
       await NotificationService.markAllRead();
-      
-      setNotifications(prev =>
-        prev.map(notif => ({ ...notif, read: true }))
-      );
-      
+
+      setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
+
       setUnreadCount(0);
       setSuccess("All notifications marked as read");
-      
+
       setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
+    } catch {
       setError("Failed to mark all notifications as read");
     }
   };
-  // In your NotificationPage.jsx - Update the handleNotificationClick function
-const handleNotificationClick = async (notification) => {
-    // Mark as read if unread
+
+  const handleNotificationClick = async (notification) => {
     if (!notification.read) {
-        await handleMarkAsRead(notification.id);
+      await handleMarkAsRead(notification.id);
     }
 
-    // Navigate based on notification type
     switch (notification.type) {
-        case "NEW_POST":
-        case "POST_LIKE":
-        case "COMMENT":
-            if (notification.postId) {
-                navigate(`/post/${notification.postId}`);
-            } else {
-                setError("Post information not available");
-            }
-            break;
-        case "REPLY":
-            if (notification.postId && notification.commentId) {
-                navigate(`/post/${notification.postId}?comment=${notification.commentId}`);
-            } else {
-                setError("Post or comment information not available");
-            }
-            break;
-        case "FOLLOW": // Add this case
-            if (notification.senderId) {
-                navigate(`/customer-profile/${notification.senderId}`);
-            } else {
-                setError("User information not available");
-            }
-            break;
-        default:
-            //console.log("Unknown notification type:", notification.type);
-            break;
+      case "NEW_POST":
+      case "POST_LIKE":
+      case "COMMENT":
+        if (notification.postId) {
+          navigate(`/post/${notification.postId}`);
+        } else {
+          setError("Post information not available");
+        }
+        break;
+      case "REPLY":
+        if (notification.postId && notification.commentId) {
+          navigate(`/post/${notification.postId}?comment=${notification.commentId}`);
+        } else {
+          setError("Post or comment information not available");
+        }
+        break;
+      case "FOLLOW":
+        if (notification.senderId) {
+          navigate(`/customer-profile/${notification.senderId}`);
+        } else {
+          setError("User information not available");
+        }
+        break;
+      default:
+        break;
     }
   };
 
-
-  // Filter notifications
-  const filteredNotifications = notifications.filter(notification => {
+  const filteredNotifications = notifications.filter((notification) => {
     switch (filter) {
       case "unread":
         return !notification.read;
@@ -172,10 +159,12 @@ const handleNotificationClick = async (notification) => {
     }
   });
 
-  // Format date
+  const unreadNotificationsCount = notifications.filter((notification) => !notification.read).length;
+  const readNotificationsCount = notifications.length - unreadNotificationsCount;
+
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown time";
-    
+
     try {
       const date = new Date(dateString);
       const now = new Date();
@@ -189,58 +178,169 @@ const handleNotificationClick = async (notification) => {
       if (diffInHours < 24) return `${diffInHours}h ago`;
       if (diffInDays < 7) return `${diffInDays}d ago`;
       return date.toLocaleDateString();
-    } catch (error) {
+    } catch {
       return "Unknown time";
     }
   };
 
-  // Get notification icon based on type
-  const getNotificationIcon = (type) => {
+  const getSenderName = (notification) =>
+    notification.senderName || notification.userName || "Someone";
+
+  const extractCommentText = (notification) => {
+    if (notification.commentContent) return notification.commentContent;
+    if (notification.commentText) return notification.commentText;
+    if (notification.content) return notification.content;
+    if (!notification.message) return "";
+
+    const quoted = notification.message.match(/["']([^"']+)["']/);
+    if (quoted?.[1]) return quoted[1];
+
+    return notification.message;
+  };
+
+  const extractReactionType = (notification) => {
+    const source = (
+      notification.reactionType ||
+      notification.reaction ||
+      notification.typeDetail ||
+      notification.message ||
+      ""
+    )
+      .toString()
+      .toUpperCase();
+
+    if (source.includes("LOVE")) return "LOVE";
+    if (source.includes("HAHA")) return "HAHA";
+    if (source.includes("WOW")) return "WOW";
+    if (source.includes("SAD")) return "SAD";
+    if (source.includes("ANGRY")) return "ANGRY";
+    return "LIKE";
+  };
+
+  const getReactionBadge = (reactionType) => {
+    const type = reactionType?.toUpperCase() || "LIKE";
     switch (type) {
-      case "NEW_POST":
-        return "📝";
-      case "POST_LIKE":
-        return "❤️";
-      case "COMMENT":
-        return "💬";
-      case "REPLY":
-        return "↩️";
-      case "FOLLOW": 
-          return "👥";
+      case "LOVE":
+        return { label: "Loved", emoji: "❤️" };
+      case "HAHA":
+        return { label: "Found it funny", emoji: "😂" };
+      case "WOW":
+        return { label: "Reacted wow", emoji: "😮" };
+      case "SAD":
+        return { label: "Reacted sad", emoji: "😢" };
+      case "ANGRY":
+        return { label: "Reacted angry", emoji: "😠" };
       default:
-        return "🔔";
+        return { label: "Liked", emoji: "🐾" };
     }
   };
 
-  // Handle new WebSocket notifications
+  const getPostPreviewImage = (notification) =>
+    notification.postImage ||
+    notification.postImageUrl ||
+    notification.mediaUrl ||
+    notification.imageUrl ||
+    notification.thumbnailUrl ||
+    "";
+
+  const getNotificationPresentation = (notification) => {
+    const type = notification.type;
+    const sender = getSenderName(notification);
+    const time = formatDate(notification.createdAt);
+
+    if (type === "COMMENT" || type === "REPLY") {
+      const commentText = extractCommentText(notification);
+      return {
+        icon: type === "REPLY" ? <Reply size={15} /> : <MessageCircle size={15} />,
+        iconClass: "notif-badge-comment",
+        title: (
+          <>
+            <strong>{sender}</strong> {type === "REPLY" ? "replied to your comment" : "commented on your post"}
+          </>
+        ),
+        detail: commentText,
+        time,
+        previewImage: getPostPreviewImage(notification),
+      };
+    }
+
+    if (type === "FOLLOW") {
+      return {
+        icon: <UserPlus size={15} />,
+        iconClass: "notif-badge-follow",
+        title: (
+          <>
+            <strong>{sender}</strong> started following you
+          </>
+        ),
+        detail: "",
+        time,
+        previewImage: "",
+      };
+    }
+
+    if (type === "POST_LIKE") {
+      const reaction = getReactionBadge(extractReactionType(notification));
+      return {
+        icon: reaction.emoji === "❤️" ? <Heart size={15} /> : <PawPrint size={15} />,
+        iconClass: "notif-badge-reaction",
+        title: (
+          <>
+            <strong>{sender}</strong> {reaction.label.toLowerCase()} your post
+          </>
+        ),
+        detail: `Reaction: ${reaction.emoji} ${reaction.label}`,
+        time,
+        previewImage: getPostPreviewImage(notification),
+      };
+    }
+
+    if (type === "NEW_POST") {
+      return {
+        icon: <Bookmark size={15} />,
+        iconClass: "notif-badge-post",
+        title: (
+          <>
+            <strong>{sender}</strong> created a new post
+          </>
+        ),
+        detail: notification.message || "",
+        time,
+        previewImage: getPostPreviewImage(notification),
+      };
+    }
+
+    return {
+      icon: <Bell size={15} />,
+      iconClass: "notif-badge-default",
+      title: notification.message || "New notification",
+      detail: "",
+      time,
+      previewImage: getPostPreviewImage(notification),
+    };
+  };
+
   const handleNewNotification = useCallback((newNotification) => {
-    //console.log("📨 Processing new WebSocket notification:", newNotification);
-    
-    // Add new notification to the top
-    setNotifications(prev => [newNotification, ...prev]);
-    setUnreadCount(prev => prev + 1);
-    
-    // Show desktop notification if supported
+    setNotifications((prev) => [newNotification, ...prev]);
+    setUnreadCount((prev) => prev + 1);
+
     if ("Notification" in window && Notification.permission === "granted") {
       try {
         new Notification("New Notification", {
           body: newNotification.message,
-          icon: newNotification.senderProfileImage || "/default-avatar.png"
+          icon: newNotification.senderProfileImage || "/default-avatar.png",
         });
-      } catch (notifError) {
-        //console.warn("Desktop notification failed:", notifError);
+      } catch {
+        // no-op
       }
     }
   }, []);
 
-  // Handle connection status changes
   const handleConnectionChange = useCallback((connected) => {
-    //console.log(`🌐 WebSocket connection status: ${connected ? 'Connected' : 'Disconnected'}`);
     setIsConnected(connected);
     setConnectionChecked(true);
   }, []);
 
-  // Initialize WebSocket connection
   useEffect(() => {
     if (!ApiService.isAuthenticated()) {
       setLoading(false);
@@ -252,14 +352,9 @@ const handleNotificationClick = async (notification) => {
 
     const setupWebSocket = () => {
       try {
-        
-        // Subscribe to connection status changes
         unsubscribeConnection = NotificationService.onConnectionChange(handleConnectionChange);
-        
-        // Connect to WebSocket
         NotificationService.connect(handleNewNotification);
-        
-      } catch (err) {
+      } catch {
         if (isSubscribed) {
           setIsConnected(false);
           setConnectionChecked(true);
@@ -267,32 +362,28 @@ const handleNotificationClick = async (notification) => {
       }
     };
 
-    // Delay WebSocket connection to ensure REST calls complete first
     const websocketTimeout = setTimeout(setupWebSocket, 500);
 
     return () => {
       isSubscribed = false;
       clearTimeout(websocketTimeout);
-      
+
       if (unsubscribeConnection) {
         unsubscribeConnection();
       }
-      
-      // Use setTimeout to ensure cleanup happens after component unmounts
+
       setTimeout(() => {
         NotificationService.disconnect();
       }, 100);
     };
   }, [handleNewNotification, handleConnectionChange]);
 
-  // Request notification permission
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(console.error);
     }
   }, []);
 
-  // Initial data fetch
   useEffect(() => {
     if (ApiService.isAuthenticated()) {
       fetchNotifications(0);
@@ -315,21 +406,16 @@ const handleNotificationClick = async (notification) => {
   }
 
   return (
-    <Container className="py-4">
+    <Container className="py-4 notifications-page-wrap">
       <Row className="justify-content-center">
-        <Col lg={8} xl={6}>
-          {/* Header */}
+        <Col lg={9} xl={8}>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
-              <h2 className="fw-bold mb-1">Notifications</h2>
-              <p className="text-muted mb-0">
-                {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
+              <h2 className="fw-bold mb-1 notification-title">Notifications</h2>
+              <p className="text-muted mb-0 notification-subtitle">
+                {unreadCount > 0 ? `${unreadCount} unread notifications` : "All caught up!"}
                 {connectionChecked && (
-                  <Badge 
-                    bg={isConnected ? "success" : "warning"} 
-                    className="ms-2" 
-                    text={isConnected ? "white" : "dark"}
-                  >
+                  <Badge bg={isConnected ? "success" : "warning"} className="ms-2" text={isConnected ? "white" : "dark"}>
                     {isConnected ? (
                       <>
                         <FaWifi className="me-1" />
@@ -345,32 +431,39 @@ const handleNotificationClick = async (notification) => {
                 )}
               </p>
             </div>
-            
-            <div className="d-flex gap-2">
-              {/* Filter Dropdown */}
-              <Dropdown>
-                <Dropdown.Toggle variant="outline-secondary" size="sm">
-                  <FaFilter className="me-2" />
-                  {filter === "all" ? "All" : filter === "unread" ? "Unread" : "Read"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => setFilter("all")}>All</Dropdown.Item>
-                  <Dropdown.Item onClick={() => setFilter("unread")}>Unread</Dropdown.Item>
-                  <Dropdown.Item onClick={() => setFilter("read")}>Read</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
 
-              {/* Mark All as Read */}
-              {unreadCount > 0 && (
-                <Button variant="outline-primary" size="sm" onClick={handleMarkAllAsRead}>
-                  <FaCheckDouble className="me-2" />
-                  Mark all read
-                </Button>
-              )}
-            </div>
+            {unreadCount > 0 && (
+              <Button variant="outline-primary" size="sm" onClick={handleMarkAllAsRead} className="mark-all-btn">
+                <FaCheckDouble className="me-2" />
+                Mark all read
+              </Button>
+            )}
           </div>
 
-          {/* Alerts */}
+          <div className="notification-filter-bar mb-4">
+            <button
+              type="button"
+              className={`notification-filter-pill ${filter === "all" ? "active" : ""}`}
+              onClick={() => setFilter("all")}
+            >
+              All ({notifications.length})
+            </button>
+            <button
+              type="button"
+              className={`notification-filter-pill ${filter === "unread" ? "active" : ""}`}
+              onClick={() => setFilter("unread")}
+            >
+              Unread ({unreadNotificationsCount})
+            </button>
+            <button
+              type="button"
+              className={`notification-filter-pill ${filter === "read" ? "active" : ""}`}
+              onClick={() => setFilter("read")}
+            >
+              Read ({readNotificationsCount})
+            </button>
+          </div>
+
           {success && (
             <Alert variant="success" dismissible onClose={() => setSuccess("")} className="mb-4">
               {success}
@@ -382,7 +475,6 @@ const handleNotificationClick = async (notification) => {
             </Alert>
           )}
 
-          {/* Connection Status */}
           {connectionChecked && !isConnected && (
             <Alert variant="warning" className="mb-4">
               <FaExclamationTriangle className="me-2" />
@@ -390,79 +482,75 @@ const handleNotificationClick = async (notification) => {
             </Alert>
           )}
 
-          {/* Notifications List */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm notification-list-card">
             <Card.Body className="p-0">
               {filteredNotifications.length === 0 ? (
                 <div className="text-center py-5">
                   <FaBell className="text-muted mb-3" size={48} />
                   <h5 className="text-muted">No notifications</h5>
                   <p className="text-muted">
-                    {filter === "all" 
-                      ? "You're all caught up!" 
-                      : `No ${filter} notifications`}
+                    {filter === "all" ? "You're all caught up!" : `No ${filter} notifications`}
                   </p>
                 </div>
               ) : (
                 <div className="list-group list-group-flush">
-                  {filteredNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`list-group-item list-group-item-action border-0 p-3 ${
-                        !notification.read ? 'bg-light' : ''
-                      }`}
-                      onClick={() => handleNotificationClick(notification)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div className="d-flex align-items-start gap-3">
-                        {/* Notification Icon */}
-                        <div className="flex-shrink-0 mt-1">
-                          <span style={{ fontSize: '1.2rem' }}>
-                            {getNotificationIcon(notification.type)}
-                          </span>
-                        </div>
+                  {filteredNotifications.map((notification) => {
+                    const presentation = getNotificationPresentation(notification);
+                    const senderName = getSenderName(notification);
 
-                        {/* Notification Content */}
-                        <div className="flex-grow-1">
-                          <div className="d-flex justify-content-between align-items-start mb-1">
-                            <p className="mb-1 fw-medium">{notification.message || "New notification"}</p>
-                            {!notification.read && (
-                              <Badge bg="primary" className="flex-shrink-0">
-                                New
-                              </Badge>
-                            )}
+                    return (
+                      <div
+                        key={notification.id}
+                        className={`list-group-item list-group-item-action border-0 p-0 notification-item-row ${
+                          !notification.read ? "unread" : ""
+                        }`}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="notification-item-card">
+                          <div className="notification-avatar-wrap">
+                            <img
+                              src={notification.senderProfileImage || "/default-avatar.png"}
+                              alt={senderName}
+                              className="notification-avatar"
+                              onError={(e) => {
+                                e.target.src = "/default-avatar.png";
+                              }}
+                            />
+                            <div className={`notification-type-badge ${presentation.iconClass}`}>{presentation.icon}</div>
                           </div>
 
-                          {/* Sender Info */}
-                          {notification.senderName && (
-                            <div className="d-flex align-items-center gap-2 mb-2">
-                              {notification.senderProfileImage && (
-                                <img
-                                  src={notification.senderProfileImage}
-                                  alt={notification.senderName}
-                                  className="rounded-circle"
-                                  style={{ width: '20px', height: '20px', objectFit: 'cover' }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                  }}
-                                />
-                              )}
-                              <small className="text-muted">{notification.senderName}</small>
+                          <div className="notification-content">
+                            <p className="notification-main-text">{presentation.title}</p>
+                            {presentation.detail && <p className="notification-detail-text">"{presentation.detail}"</p>}
+                            <div className="notification-meta-row">
+                              <small className="notification-time">{presentation.time}</small>
+                              {!notification.read && <span className="notification-unread-dot" />}
                             </div>
-                          )}
+                          </div>
 
-                          {/* Timestamp and Actions */}
-                          <div className="d-flex justify-content-between align-items-center">
-                            <small className="text-muted">
-                              {formatDate(notification.createdAt)}
-                            </small>
-                            
+                          <div className="notification-right">
+                            {presentation.previewImage ? (
+                              <img
+                                src={presentation.previewImage}
+                                alt="Post preview"
+                                className="notification-preview-image"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <div className="notification-preview-fallback">
+                                <FaBell />
+                              </div>
+                            )}
+
                             {!notification.read && (
                               <Button
                                 variant="outline-success"
                                 size="sm"
-                                className="ms-2"
+                                className="notification-read-btn"
                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
+                                title="Mark as read"
                               >
                                 <FaCheck size={12} />
                               </Button>
@@ -470,21 +558,16 @@ const handleNotificationClick = async (notification) => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </Card.Body>
           </Card>
 
-          {/* Load More Button */}
           {hasMore && filteredNotifications.length > 0 && (
             <div className="text-center mt-4">
-              <Button
-                variant="outline-primary"
-                onClick={loadMore}
-                disabled={loadingMore}
-              >
+              <Button variant="outline-primary" onClick={loadMore} disabled={loadingMore}>
                 {loadingMore ? (
                   <>
                     <Spinner animation="border" size="sm" className="me-2" />
@@ -497,7 +580,6 @@ const handleNotificationClick = async (notification) => {
             </div>
           )}
 
-          {/* Empty state for no more notifications */}
           {!hasMore && filteredNotifications.length > 0 && (
             <div className="text-center mt-4">
               <p className="text-muted">No more notifications to load</p>

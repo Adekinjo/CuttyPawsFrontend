@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "react-bootstrap";
+import { PawPrint } from "lucide-react";
 import "./ReactionPicker.css";
 
 const ReactionsPicker = ({ 
@@ -15,7 +16,7 @@ const ReactionsPicker = ({
   const timeoutRef = useRef(null);
 
   const reactions = [
-    { type: 'LIKE', label: 'Like', emoji: '👍', color: '#1877F2' },
+    { type: 'LIKE', label: 'Like', emoji: '🐾', icon: PawPrint, color: '#f97316' },
     { type: 'LOVE', label: 'Love', emoji: '❤️', color: '#F02849' },
     { type: 'HAHA', label: 'Haha', emoji: '😄', color: '#F7B928' },
     { type: 'WOW', label: 'Wow', emoji: '😲', color: '#F7B928' },
@@ -100,7 +101,7 @@ const ReactionsPicker = ({
 
   const getCurrentReactionEmoji = () => {
     const current = reactions.find(r => r.type === currentReaction);
-    return current ? current.emoji : '👍';
+    return current ? current.emoji : '🐾';
   };
 
   const currentReactionData = reactions.find(r => r.type === currentReaction);
@@ -122,7 +123,11 @@ const ReactionsPicker = ({
         }}
       >
         <span className="reaction-icon">
-          {getCurrentReactionEmoji()}
+          {currentReactionData?.icon ? (
+            <currentReactionData.icon size={size - 1} strokeWidth={2.3} />
+          ) : (
+            getCurrentReactionEmoji()
+          )}
         </span>
       </Button>
 
@@ -150,7 +155,7 @@ const ReactionsPicker = ({
                     '--reaction-color': reaction.color
                   }}
                 >
-                  {reaction.emoji}
+                  {reaction.icon ? <reaction.icon size={20} strokeWidth={2.3} /> : reaction.emoji}
                   <span className="reaction-tooltip">{reaction.label}</span>
                 </button>
               );

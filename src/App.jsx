@@ -54,14 +54,14 @@ const SupportReviewsPage = lazy(() => import("./component/support/SupportReview.
 const PaymentSuccess = lazy(() => import("./component/pages/PaymentSuccess.jsx"));
 const PaymentCallback = lazy(() => import("./component/pages/PaymentCallback.jsx"));
 const PaymentFail = lazy(() => import("./component/pages/PaymentFail.jsx"));
-const FemaleFashion = lazy(() => import("./component/carousel/FemaleFashion.jsx"));
-const Electronics = lazy(() => import("./component/carousel/Electronics.jsx"));
-const HomeAppliances = lazy(() => import("./component/carousel/HomeAppliances.jsx"));
-const ChildrenWears = lazy(() => import("./component/carousel/ChildrenWears.jsx"));
-const PaymentOnDelivery = lazy(() => import("./component/About/PaymentOnDelivery.jsx"));
-const FreeDelivery = lazy(() => import("./component/About/FreeDelivery.jsx"));
-const FreeGetRok = lazy(() => import("./component/About/FreeGetRok.jsx"));
-const Loyalty = lazy(() => import("./component/About/Loyalty.jsx"));
+// const FemaleFashion = lazy(() => import("./component/carousel/FemaleFashion.jsx"));
+// const Electronics = lazy(() => import("./component/carousel/Electronics.jsx"));
+// const HomeAppliances = lazy(() => import("./component/carousel/HomeAppliances.jsx"));
+// const ChildrenWears = lazy(() => import("./component/carousel/ChildrenWears.jsx"));
+// const PaymentOnDelivery = lazy(() => import("./component/About/PaymentOnDelivery.jsx"));
+// const FreeDelivery = lazy(() => import("./component/About/FreeDelivery.jsx"));
+// const FreeGetRok = lazy(() => import("./component/About/FreeGetRok.jsx"));
+// const Loyalty = lazy(() => import("./component/About/Loyalty.jsx"));
 const AboutUs = lazy(() => import("./component/pages/AboutUs.jsx"));
 const AdminDeal = lazy(() => import("./component/admin/AdminDeals.jsx"));
 const Deal = lazy(() => import("./component/pages/Deal.jsx"));
@@ -172,14 +172,14 @@ function App() {
 
 
           {/* CAROUSEL */}
-          <Route path="/female-fashion" element={<FemaleFashion />} />
+          {/* <Route path="/female-fashion" element={<FemaleFashion />} />
           <Route path="/electronics" element={<Electronics />} />
           <Route path="/home-appliances" element={<HomeAppliances />} />
           <Route path="/children-clothes" element={<ChildrenWears />} />
           <Route path="/free-delivery" element={<FreeDelivery />} />
           <Route path="/payment-on-delivery" element={<PaymentOnDelivery />} />
           <Route path="/free-get-rok" element={<FreeGetRok />} />
-          <Route path="/loyalty" element={<Loyalty />} />
+          <Route path="/loyalty" element={<Loyalty />} /> */}
 
           {/* Protected Routes */}
           <Route path="/customer-profile" element={<ProtectedRoute element={ProfilePage} />} />
