@@ -60,21 +60,21 @@
 
 .homeFloatingBtn {
   position: fixed !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  margin: 1.5rem !important;
+  bottom: max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem)) !important;
+  right: max(1rem, calc(env(safe-area-inset-right, 0px) + 0.75rem)) !important;
   width: 60px !important;
   height: 60px !important;
   font-size: 1.5rem !important;
   background: var(--accent-primary) !important;
   border: none !important;
+  color: #ffffff !important;
   border-radius: 50% !important;
-  z-index: 999;
+  z-index: 1200 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.32), 0 0 0 3px rgba(255, 255, 255, 0.9) !important;
 }
 
 .homeFloatingBtn:hover {
@@ -94,6 +94,7 @@
     width: 50px !important;
     height: 50px !important;
     font-size: 1.25rem !important;
-    margin: 1rem !important;
+    bottom: max(0.9rem, calc(env(safe-area-inset-bottom, 0px) + 0.6rem)) !important;
+    right: max(0.9rem, calc(env(safe-area-inset-right, 0px) + 0.6rem)) !important;
   }
 }
