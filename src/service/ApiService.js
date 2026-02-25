@@ -1,13 +1,7 @@
 
 export default class ApiService {
-<<<<<<< HEAD
   //static BASE_URL = "http://localhost:9393";
   static BASE_URL = "https://cuttypawsbackend.onrender.com";
-
-=======
-  //static BASE_URL = "http://localhost:9393"; new
-  static BASE_URL = "https://cuttypawsbackend.onrender.com";
->>>>>>> d491331 (changes)
 
   static getHeader() {
     const token = localStorage.getItem("token");
