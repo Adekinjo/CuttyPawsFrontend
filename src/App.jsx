@@ -94,22 +94,24 @@ const CompanyRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ 
 function App() {
   const location = useLocation();
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    ApiService.initializeApp();
-    //ApiService.setupAxiosInterceptors();
-    //ApiService.setupInactivityLogout();
-  }, [location.pathname]);
-
+    (async () => {
+      await ApiService.initializeApp();
+      setAuthReady(true);
+    })();
+  }, []);
   
   const showSessionExpired = () => {
     setShowSessionExpiredModal(true);
   };
 
   useEffect(() => {
-    //ApiService.initInterceptor(showSessionExpired);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  if (!authReady) return <LoadingSpinner />;
 
   return (
     <CartProvider>

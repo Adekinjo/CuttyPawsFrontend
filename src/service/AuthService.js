@@ -182,17 +182,30 @@ export default class AuthService extends ApiService {
   /** AUTHENTICATION & TOKEN MANAGEMENT */
 
   // ✅ Check if token is expired
-  static isTokenExpired() {
-    const token = localStorage.getItem('token');
-    if (!token) return true;
+  // static isTokenExpired() {
+  //   const token = localStorage.getItem('token');
+  //   if (!token) return true;
     
+  //   try {
+  //     // Decode JWT to check expiration
+  //     const payload = JSON.parse(atob(token.split('.')[1]));
+  //     const expiry = payload.exp * 1000; // Convert to milliseconds
+  //     return Date.now() >= expiry;
+  //   } catch (error) {
+  //     console.error("Error checking token expiration:", error);
+  //     return true;
+  //   }
+  // }
+
+  static isTokenExpired(bufferSeconds = 60) {
+    const token = localStorage.getItem("token");
+    if (!token) return true;
+
     try {
-      // Decode JWT to check expiration
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiry = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() >= expiry;
-    } catch (error) {
-      console.error("Error checking token expiration:", error);
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const expiryMs = payload.exp * 1000;
+      return Date.now() >= (expiryMs - bufferSeconds * 1000);
+    } catch (e) {
       return true;
     }
   }
@@ -221,7 +234,12 @@ export default class AuthService extends ApiService {
   }
 
   // ✅ Enhanced setupAxiosInterceptors with automatic refresh
+  static interceptorsInitialized = false;
   static setupAxiosInterceptors() {
+
+    if (this.interceptorsInitialized) return;
+    this.interceptorsInitialized = true;
+
     let isRefreshing = false;
     let failedQueue = [];
 
@@ -430,22 +448,35 @@ export default class AuthService extends ApiService {
   }
 
   // ✅ Initialize app - call this in your main App.jsx
-  static initializeApp() {
-    // Setup axios interceptors for automatic token refresh
+  // static initializeApp() {
+  //   // Setup axios interceptors for automatic token refresh
+  //   this.setupAxiosInterceptors();
+    
+  //   // Setup inactivity logout
+  //   this.setupInactivityLogout();
+    
+  //   // Check token on app startup
+  //   const token = localStorage.getItem('token');
+  //   const refreshToken = localStorage.getItem('refreshToken');
+    
+  //   if (token && refreshToken) {
+  //     console.log("🔍 Checking token status on app startup...");
+  //     this.refreshTokenIfNeeded().catch(error => {
+  //       console.log("Token refresh failed on startup:", error);
+  //     });
+  //   }
+  // }
+
+  static async initializeApp() {
     this.setupAxiosInterceptors();
-    
-    // Setup inactivity logout
     this.setupInactivityLogout();
-    
-    // Check token on app startup
-    const token = localStorage.getItem('token');
-    const refreshToken = localStorage.getItem('refreshToken');
-    
+
+    const token = localStorage.getItem("token");
+    const refreshToken = localStorage.getItem("refreshToken");
+
     if (token && refreshToken) {
       console.log("🔍 Checking token status on app startup...");
-      this.refreshTokenIfNeeded().catch(error => {
-        console.log("Token refresh failed on startup:", error);
-      });
+      await this.refreshTokenIfNeeded();
     }
   }
 
