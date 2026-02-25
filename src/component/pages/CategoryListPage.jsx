@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../service/CategoryService";
 import RecentlyViewed from "./RecentView";
+import Categories from "../common/Categories";
 
 const CategoryListPage = () => {
   const [categories, setCategories] = useState([]);
@@ -75,6 +76,7 @@ const CategoryListPage = () => {
 
   return (
     <div className="container py-4">
+      <div><Categories/></div>
       {/* Header Section */}
       <div className="text-center mb-5">
         <h1 className="display-5 fw-bold text-dark mb-3">Shop by Category</h1>
