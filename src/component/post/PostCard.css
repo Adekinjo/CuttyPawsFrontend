@@ -21,6 +21,14 @@
   border-radius: 50%;
 }
 
+.avatar-paw-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff7b54, #ffa559);
+  color: #ffffff;
+}
+
 .post-owner-name {
   color: #1f2937 !important;
   font-size: clamp(1.35rem, 1.2rem + 0.6vw, 1.7rem);

@@ -26,6 +26,7 @@ import {
   FaImages,
   FaPlay
 } from "react-icons/fa";
+import { PawPrint } from "lucide-react";
 
 import { formatJoined, formatLocation, toHandle } from "./uiHelper";
 
@@ -426,10 +427,16 @@ export default function ProfilePage() {
         <div className="cp-avatar-wrap">
           <div className="d-flex align-items-end gap-3">
             <div className="cp-avatar" onClick={() => setShowProfilePicModal(true)}>
-              <img
-                src={userInfo?.profileImageUrl || "https://via.placeholder.com/240"}
-                alt="Avatar"
-              />
+              {userInfo?.profileImageUrl ? (
+                <img
+                  src={userInfo.profileImageUrl}
+                  alt="Avatar"
+                />
+              ) : (
+                <div className="cp-avatar-default" aria-label="Default profile picture">
+                  <PawPrint size={36} strokeWidth={2.2} />
+                </div>
+              )}
               <div className="cp-avatar-camera">
                 <FaCamera size={14} />
               </div>
@@ -631,12 +638,18 @@ export default function ProfilePage() {
               </div>
               <div className="modal-body p-4">
                 <div className="text-center mb-3">
-                  <img
-                    src={profilePicturePreview || userInfo?.profileImageUrl || "https://via.placeholder.com/240"}
-                    alt="preview"
-                    className="img-fluid rounded-4"
-                    style={{ maxHeight: 260, objectFit: "cover" }}
-                  />
+                  {profilePicturePreview || userInfo?.profileImageUrl ? (
+                    <img
+                      src={profilePicturePreview || userInfo?.profileImageUrl}
+                      alt="preview"
+                      className="img-fluid rounded-4"
+                      style={{ maxHeight: 260, objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div className="cp-profile-preview-fallback rounded-4 mx-auto">
+                      <PawPrint size={44} strokeWidth={2.2} />
+                    </div>
+                  )}
                 </div>
 
                 <label className="form-label fw-bold">Choose image</label>

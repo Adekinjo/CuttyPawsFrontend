@@ -11,6 +11,7 @@ import {
   FaHeart, FaComment, FaUsers, FaBan, FaArrowLeft,
   FaUserPlus, FaUserCheck, FaUserMinus, FaList
 } from "react-icons/fa";
+import { PawPrint } from "lucide-react";
 import PostCard from "../post/PostCard";
 
 const PublicProfilePage = () => {
@@ -326,7 +327,7 @@ const PublicProfilePage = () => {
                           }}
                         />
                       ) : null}
-                      {!userProfile.profileImageUrl && <FaUser />}
+                      {!userProfile.profileImageUrl && <PawPrint size={30} strokeWidth={2.2} />}
                     </div>
                     {userProfile.isBlocked && (
                       <Badge bg="danger" className="position-absolute top-0 start-0">
@@ -606,12 +607,27 @@ const PublicProfilePage = () => {
                   <div key={follow.id} className="list-group-item border-0 px-0">
                     <Row className="align-items-center">
                       <Col xs="auto">
-                        <Image
-                          src={user.profileImageUrl || "/default-avatar.png"}
-                          alt={user.name}
-                          roundedCircle
-                          style={{ width: "40px", height: "40px", objectFit: "cover" }}
-                        />
+                        {user.profileImageUrl ? (
+                          <Image
+                            src={user.profileImageUrl}
+                            alt={user.name}
+                            roundedCircle
+                            style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div
+                            className="rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              backgroundColor: "#ff7b54",
+                              color: "#fff"
+                            }}
+                            aria-label="Default profile picture"
+                          >
+                            <PawPrint size={18} strokeWidth={2.2} />
+                          </div>
+                        )}
                       </Col>
                       <Col>
                         <Link 

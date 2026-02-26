@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Container, Button, Spinner, Alert } from "react-bootstrap";
+import { Container, Button, Spinner, Alert, Image } from "react-bootstrap";
 import { FaArrowLeft, FaHeart } from "react-icons/fa";
+import { PawPrint } from "lucide-react";
 import PostCard from "../post/PostCard";
 import PostService from "../../service/PostService";
 import ApiService from "../../service/AuthService";
@@ -149,10 +150,35 @@ const PostDetailPage = () => {
                         <FaArrowLeft />
                     </Button>
                     <div className="ms-3">
-                        <h5 className="mb-0">Post</h5>
-                        <small className="text-muted">
-                            {post.ownerName || "Unknown User"}
-                        </small>
+                        <div className="d-flex align-items-center gap-2">
+                            {post.ownerProfileImage ? (
+                              <Image
+                                src={post.ownerProfileImage}
+                                alt={post.ownerName || "Post owner"}
+                                roundedCircle
+                                style={{ width: "34px", height: "34px", objectFit: "cover" }}
+                              />
+                            ) : (
+                              <div
+                                className="d-inline-flex align-items-center justify-content-center rounded-circle"
+                                style={{
+                                  width: "34px",
+                                  height: "34px",
+                                  background: "linear-gradient(135deg, #ff7b54, #ffa559)",
+                                  color: "#fff"
+                                }}
+                                aria-label="Default profile picture"
+                              >
+                                <PawPrint size={16} strokeWidth={2.2} />
+                              </div>
+                            )}
+                            <div>
+                              <h5 className="mb-0">Post</h5>
+                              <small className="text-muted">
+                                  {post.ownerName || "Unknown User"}
+                              </small>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

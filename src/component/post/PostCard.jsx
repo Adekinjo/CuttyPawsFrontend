@@ -568,16 +568,31 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     );
   };
 
+  const renderAvatar = (imageUrl, alt, className, iconSize = 16) => {
+    if (imageUrl) {
+      return (
+        <Image
+          src={imageUrl}
+          roundedCircle
+          className={className}
+          alt={alt}
+        />
+      );
+    }
+
+    return (
+      <div className={`${className} avatar-paw-fallback`} aria-label="Default profile picture">
+        <PawPrint size={iconSize} strokeWidth={2.2} />
+      </div>
+    );
+  };
+
   return (
     <Card className="post-card">
       {/* Header */}
       <Card.Header className="post-header d-flex justify-content-between align-items-center">
         <Link to={`/customer-profile/${post.ownerId}`} className="d-flex text-decoration-none align-items-center">
-          <Image
-            src={post.ownerProfileImage || "/default-avatar.png"}
-            roundedCircle
-            className="post-avatar me-3"
-          />
+          {renderAvatar(post.ownerProfileImage, "Avatar", "post-avatar me-3", 22)}
           <div>
             <strong className="post-owner-name">{post.ownerName}</strong>
             <div className="post-time text-muted small">
@@ -785,11 +800,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
                     to={`/customer-profile/${comment.userId}`}
                     className="text-decoration-none"
                   >
-                    <Image
-                      src={comment.userProfileImage || "/default-avatar.png"}
-                      roundedCircle
-                      className="comment-avatar me-2"
-                    />
+                    {renderAvatar(comment.userProfileImage, comment.userName || "Comment user", "comment-avatar me-2", 14)}
                   </Link>
                   <div className="comment-content flex-grow-1">
                     <div className="d-flex align-items-start justify-content-between">
@@ -864,11 +875,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
                           to={`/customer-profile/${reply.userId}`}
                           className="text-decoration-none"
                         >
-                          <Image
-                            src={reply.userProfileImage || "/default-avatar.png"}
-                            roundedCircle
-                            className="reply-avatar me-2"
-                          />
+                          {renderAvatar(reply.userProfileImage, reply.userName || "Reply user", "reply-avatar me-2", 12)}
                         </Link>
                         <div className="reply-content flex-grow-1">
                           <div className="d-flex align-items-start justify-content-between">

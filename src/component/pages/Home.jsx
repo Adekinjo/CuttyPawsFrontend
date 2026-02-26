@@ -21,8 +21,7 @@ const Home = () => {
     if (process.env.NODE_ENV === "production") {
       const { protocol, hostname } = window.location;
       if (protocol !== "https:" || !hostname.startsWith("www.")) {
-        const newUrl = `https://www.cuttypaws.com${location.pathname}`;
-        window.location.replace(newUrl);
+      const newUrl = `https://www.cuttypaws.com${location.pathname}${location.search}${location.hash}`;        window.location.replace(newUrl);
       }
     }
   }, [location.pathname]);
