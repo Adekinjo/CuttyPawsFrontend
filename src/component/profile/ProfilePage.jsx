@@ -23,7 +23,8 @@ import {
   FaBookmark,
   FaHeart,
   FaComment,
-  FaImages
+  FaImages,
+  FaPlay
 } from "react-icons/fa";
 
 import { formatJoined, formatLocation, toHandle } from "./uiHelper";
@@ -134,6 +135,15 @@ export default function ProfilePage() {
         ? list.map((p) => ({
             id: p.id,
             image: p.imageUrls?.[0] || null,
+            media: Array.isArray(p.media)
+              ? p.media
+                  .map((m) => ({
+                    type: (m?.type || m?.mediaType || "").toUpperCase(),
+                    url: m?.url || m?.mediaUrl || null,
+                    thumbnailUrl: m?.thumbnailUrl || null
+                  }))
+                  .filter((m) => m.url)
+              : [],
             likes: p.likeCount || 0,
             comments: p.totalComments || 0
           }))
@@ -491,14 +501,55 @@ export default function ProfilePage() {
             ) : (
               <div className="cp-grid">
                 {posts.map((p) => (
-                  <div key={p.id} className="cp-grid-card">
-                    {p.image ? (
-                      <img src={p.image} alt="post" />
-                    ) : (
-                      <div className="w-100 h-100 d-flex align-items-center justify-content-center">
-                        <FaImages className="text-muted" size={22} />
-                      </div>
-                    )}
+                  <div
+                    key={p.id}
+                    className="cp-grid-card"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Open post details"
+                    onClick={() => navigate(`/post/${p.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        navigate(`/post/${p.id}`);
+                      }
+                    }}
+                  >
+                    {(() => {
+                      const firstMedia = p.media?.[0];
+                      const isVideo = firstMedia?.type === "VIDEO";
+                      const videoUrl = isVideo ? firstMedia?.url : null;
+                      const videoPoster = isVideo ? firstMedia?.thumbnailUrl : null;
+                      const imageUrl = !isVideo ? (firstMedia?.url || p.image) : p.image;
+
+                      if (isVideo && videoUrl) {
+                        return (
+                          <>
+                            <video
+                              src={videoUrl}
+                              poster={videoPoster || undefined}
+                              className="cp-grid-video"
+                              muted
+                              playsInline
+                              preload="metadata"
+                            />
+                            <div className="cp-grid-video-badge">
+                              <FaPlay size={12} />
+                            </div>
+                          </>
+                        );
+                      }
+
+                      if (imageUrl) {
+                        return <img src={imageUrl} alt="post" />;
+                      }
+
+                      return (
+                        <div className="cp-grid-fallback w-100 h-100 d-flex align-items-center justify-content-center">
+                          <FaImages className="text-muted" size={22} />
+                        </div>
+                      );
+                    })()}
                     <div className="cp-grid-overlay">
                       <div className="cp-grid-metric">
                         <FaHeart /> {p.likes}

@@ -98,8 +98,8 @@
 /* Badge */
 .cutty-nav-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -2px;
+  right: -2px;
   background: var(--cutty-orange);
   color: #fff;
   font-size: .7rem;

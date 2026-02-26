@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import ApiService from '../../service/ApiService';
+import ApiService from '../../service/AuthService';
 import '../../style/AdminAllUsers.css';
 
 const UserList = () => {
@@ -48,43 +48,45 @@ const UserList = () => {
   return (
     <div className="user-list-container">
       <h1>User List</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-            <th>Role</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(users) && users.length > 0 ? (
-            users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.phoneNumber}</td>
-                <td>{user.role}</td>
-                <td>
-                  <button onClick={() => handleViewDetails(user)}>View Details</button>
-                </td>
-              </tr>
-            ))
-          ) : (
+      <div className="user-table-wrap">
+        <table className="user-table">
+          <thead>
             <tr>
-              <td colSpan="6" className="no-users">No users found.</td>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>Role</th>
+              <th>Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {Array.isArray(users) && users.length > 0 ? (
+              users.map((user) => (
+                <tr key={user.id}>
+                  <td data-label="ID">{user.id}</td>
+                  <td data-label="Name">{user.name}</td>
+                  <td data-label="Email">{user.email}</td>
+                  <td data-label="Phone Number">{user.phoneNumber}</td>
+                  <td data-label="Role">{user.role}</td>
+                  <td data-label="Actions">
+                    <button onClick={() => handleViewDetails(user)}>View Details</button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="no-users">No users found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Modal for displaying full user details */}
       {selectedUser && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal user-details-modal">
             <h2>User Details</h2>
             <p><strong>ID:</strong> {selectedUser.id}</p>
             <p><strong>Name:</strong> {selectedUser.name}</p>

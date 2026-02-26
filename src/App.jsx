@@ -3,7 +3,6 @@ import { ToastContainer } from "react-toastify";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./component/context/CartContext.jsx";
 import Navbar from "./component/common/Navbar.jsx";
-import Footer from "./component/common/Footer.jsx";
 import LoadingSpinner from "./component/common/LoadingSpinner.jsx";
 import CompanyRegister from "./component/company/CompanyResgister.jsx";
 import SessionExpired from './component/pages/SessionExpired.jsx'; 
@@ -221,7 +220,6 @@ function App() {
           } />
         </Routes>
       </Suspense>
-      <Footer />
       <ToastContainer />
       <SessionExpired
         show={showSessionExpiredModal}

@@ -99,11 +99,6 @@ const ReactionsPicker = ({
     }
   };
 
-  const getCurrentReactionEmoji = () => {
-    const current = reactions.find(r => r.type === currentReaction);
-    return current ? current.emoji : '🐾';
-  };
-
   const currentReactionData = reactions.find(r => r.type === currentReaction);
 
   return (
@@ -125,8 +120,10 @@ const ReactionsPicker = ({
         <span className="reaction-icon">
           {currentReactionData?.icon ? (
             <currentReactionData.icon size={size - 1} strokeWidth={2.3} />
+          ) : !currentReactionData ? (
+            <PawPrint size={size - 1} strokeWidth={2.3} />
           ) : (
-            getCurrentReactionEmoji()
+            currentReactionData.emoji
           )}
         </span>
       </Button>

@@ -65,7 +65,7 @@
   width: 60px !important;
   height: 60px !important;
   font-size: 1.5rem !important;
-  background: var(--accent-primary) !important;
+  background: #ff6a00 !important;
   border: none !important;
   color: #ffffff !important;
   border-radius: 50% !important;
@@ -74,13 +74,19 @@
   align-items: center !important;
   justify-content: center !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.32), 0 0 0 3px rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.95) !important;
 }
 
 .homeFloatingBtn:hover {
-  background-color: #3bbbb3 !important;
+  background-color: #e85f00 !important;
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(78, 205, 196, 0.4) !important;
+  box-shadow: 0 12px 28px rgba(232, 95, 0, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.95) !important;
+}
+
+.homeFloatingBtn:focus,
+.homeFloatingBtn:focus-visible {
+  background-color: #e85f00 !important;
+  box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.28), 0 10px 26px rgba(17, 24, 39, 0.4) !important;
 }
 
 /* Responsive adjustments */

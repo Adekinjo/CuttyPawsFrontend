@@ -431,19 +431,83 @@ h2{
 
 .cp-grid{
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: clamp(6px, 2vw, 10px);
+  margin-top: 14px;
 }
 
 .cp-grid-card{
   aspect-ratio: 1 / 1;
   border-radius: clamp(10px, 3vw, 16px);
+  overflow: hidden;
+  position: relative;
+  background: #ededee;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
 }
 
 .cp-grid-card img{
   width:100%;
   height:100%;
   object-fit: cover;
+  display: block;
+}
+
+.cp-grid-video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+.cp-grid-video-badge{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.75);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-grid-fallback{
+  background: #e9eaec;
+}
+
+.cp-grid-overlay{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 10px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cp-grid-card:hover .cp-grid-overlay,
+.cp-grid-card:focus-visible .cp-grid-overlay{
+  opacity: 1;
+}
+
+.cp-grid-card:focus-visible{
+  outline: 2px solid #ff7b54;
+  outline-offset: 1px;
+}
+
+.cp-grid-metric{
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 /* ================= MOBILE REFINEMENTS ================= */
@@ -466,7 +530,7 @@ h2{
   }
 
   .cp-grid{
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -475,7 +539,7 @@ h2{
 @media (max-width: 480px) {
 
   .cp-grid{
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .cp-edit-cover{

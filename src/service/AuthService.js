@@ -7,7 +7,8 @@ export default class AuthService extends ApiService {
 
   static async getAllUsers() {
     try {
-      const response = await axios.get(`${this.BASE_URL}/users/get-all`, {
+      // Some backend versions expose this as /user/get-all-info.
+      const response = await axios.get(`${this.BASE_URL}/user/get-all-info`, {
         headers: this.getHeader(),
       });
       
@@ -25,6 +26,24 @@ export default class AuthService extends ApiService {
         return [];
       }
     } catch (error) {
+      // Backward compatibility for older backend route naming.
+      if (error?.response?.status === 404) {
+        try {
+          const fallbackResponse = await axios.get(`${this.BASE_URL}/users/get-all`, {
+            headers: this.getHeader(),
+          });
+          const fallbackData = fallbackResponse.data;
+
+          if (fallbackData?.userList) return fallbackData.userList;
+          if (fallbackData?.data) return fallbackData.data;
+          if (Array.isArray(fallbackData)) return fallbackData;
+          return [];
+        } catch (fallbackError) {
+          console.error("Error fetching users (fallback route):", fallbackError);
+          throw fallbackError;
+        }
+      }
+
       console.error("Error fetching users:", error);
       throw error;
     }

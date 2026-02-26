@@ -310,10 +310,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     setError("");
     try {
       const res = await CommentService.getCommentsByPostId(post.id, 0, 50);
-      // if (res.status === 200) {
-      //   setComments(res.commentList || []);
-      //   setTotalComments(res.totalComments || 0);
-      //}
+     
       if (res.status === 200) {
         const list = res.commentList || [];
         setComments(list);
@@ -449,15 +446,15 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
   // Reaction Display Helpers for Post
   const getReactionIcon = (reactionType) => {
-    const emojis = {
-      LIKE: '🐾',
-      LOVE: '❤️',
-      HAHA: '😄',
-      WOW: '😲',
-      SAD: '😢',
-      ANGRY: '😠'
+    const icons = {
+      LIKE: <PawPrint size={14} strokeWidth={2.3} />,
+      LOVE: "❤️",
+      HAHA: "😄",
+      WOW: "😲",
+      SAD: "😢",
+      ANGRY: "😠",
     };
-    return emojis[reactionType] || emojis.LIKE;
+    return icons[reactionType] || icons.LIKE;
   };
 
   // Simple comment like button component
@@ -491,21 +488,32 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   };
 
   const mediaItems = useMemo(() => {
-    if (Array.isArray(post?.media) && post.media.length > 0) {
-      return post.media
-        .map((item) => ({
-          url: item?.url || item?.mediaUrl,
-          type: item?.type || item?.mediaType,
-          thumbnailUrl: item?.thumbnailUrl || null
-        }))
-        .filter((item) => item.url);
-    }
-    if (Array.isArray(post?.imageUrls) && post.imageUrls.length > 0) {
-      return post.imageUrls
-        .filter(Boolean)
-        .map((url) => ({ url, type: "IMAGE", thumbnailUrl: null }));
-    }
-    return [];
+    const normalizedFromMedia = Array.isArray(post?.media)
+      ? post.media
+          .map((item) => ({
+            url: item?.url || item?.mediaUrl,
+            type: (item?.type || item?.mediaType || "IMAGE").toUpperCase(),
+            thumbnailUrl: item?.thumbnailUrl || null,
+          }))
+          .filter((item) => item.url)
+      : [];
+
+    const normalizedFromImageUrls = Array.isArray(post?.imageUrls)
+      ? post.imageUrls
+          .filter(Boolean)
+          .map((url) => ({ url, type: "IMAGE", thumbnailUrl: null }))
+      : [];
+
+    // Merge and de-duplicate so one real file does not create fake "multiple media"
+    const unique = new Map();
+    [...normalizedFromMedia, ...normalizedFromImageUrls].forEach((item) => {
+      const key = `${item.type}|${item.url}`;
+      if (!unique.has(key)) {
+        unique.set(key, item);
+      }
+    });
+
+    return Array.from(unique.values());
   }, [post]);
 
   const renderMedia = (item, idx, isModal = false) => {
@@ -603,8 +611,19 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       </Card.Header>
 
       {/* Images */}
-      {mediaItems.length > 0 && (
-        <Carousel controls={false} indicators interval={null} className="post-images">
+      {mediaItems.length === 1 && (
+        <div className="post-images">
+          {renderMedia(mediaItems[0], 0)}
+        </div>
+      )}
+
+      {mediaItems.length > 1 && (
+        <Carousel
+          controls={false}
+          indicators={true}
+          interval={null}
+          className="post-images"
+        >
           {mediaItems.map((item, idx) => (
             <Carousel.Item key={idx}>
               {renderMedia(item, idx)}

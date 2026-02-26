@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-        import ApiService from '../../service/ApiService';
+        import ApiService from '../../service/SecurityService';
 
         const SecurityMonitoring = () => {
         const [stats, setStats] = useState({

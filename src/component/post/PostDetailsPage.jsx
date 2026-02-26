@@ -138,7 +138,7 @@ const PostDetailPage = () => {
 
     return (
         <div className="post-detail-page min-vh-100">
-            <Container className="py-4">
+            <Container fluid className="py-4 px-0 px-md-3">
                 <div className="d-flex align-items-center mb-4">
                     <Button 
                         variant="outline-secondary" 
@@ -178,6 +178,15 @@ const PostDetailPage = () => {
                 .post-detail-container {
                     max-width: 600px;
                     margin: 0 auto;
+                    width: 100%;
+                    padding: 0 0.25rem;
+                }
+
+                @media (max-width: 768px) {
+                  .post-detail-container {
+                    max-width: 100%;
+                    padding: 0;
+                  }
                 }
 
                 .post-detail-primary {
