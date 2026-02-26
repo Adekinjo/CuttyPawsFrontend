@@ -81,10 +81,13 @@ const Home = () => {
     <div className={styles.homeContainer}>
       <Helmet>
         <title>CuttyPaws - Social Pet Community</title>
+
         <meta
           name="description"
-          content="CuttyPaws is a social pet community where pet lovers connect and share adorable pet moments."
+          content="CuttyPaws (also written as Cutty Paws) is a social pet community where pet lovers connect, share pet moments, and shop pet products online."
         />
+
+        <meta name="keywords" content="CuttyPaws, Cutty Paws, cuttypaws, pet social network, pet community, pet shop" />
       </Helmet>
 
       <Container className={`${styles.homeContent} pt-4 pb-5`}>
