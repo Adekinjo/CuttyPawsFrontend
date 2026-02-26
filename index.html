@@ -1,54 +1,27 @@
-
-
-
-
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
 
-    <!-- ✅ Favicons (must be in /public) -->
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- ✅ Google verification (CuttyPaws) -->
-    <!-- Replace CONTENT_HERE with the verification code for CuttyPaws -->
-    <meta name="google-site-verification" content="CONTENT_HERE" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- ✅ SEO basics -->
-    <title>CuttyPaws - Pet Social Community</title>
-    <meta
-      name="description"
-      content="CuttyPaws (also written as Cutty Paws) is a social pet community where pet lovers connect and share adorable pet moments."
-    />
+    <!-- default SEO (Helmet can override) -->
+    <title>CuttyPaws</title>
+    <meta name="description" content="CuttyPaws - Social pet community." />
+    <link rel="canonical" href="https://www.cuttypaws.com/" />
 
-    <!-- ✅ Open Graph (social previews) -->
+    <!-- Open Graph default -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="CuttyPaws" />
-    <meta property="og:title" content="CuttyPaws - Pet Social Community" />
-    <meta
-      property="og:description"
-      content="CuttyPaws is a social pet community where pet lovers connect and share adorable pet moments."
-    />
+    <meta property="og:title" content="CuttyPaws" />
+    <meta property="og:description" content="CuttyPaws - Social pet community." />
     <meta property="og:url" content="https://www.cuttypaws.com/" />
     <meta property="og:image" content="https://www.cuttypaws.com/og-image.png" />
 
-    <!-- ✅ Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CuttyPaws - Pet Social Community" />
-    <meta
-      name="twitter:description"
-      content="CuttyPaws is a social pet community where pet lovers connect and share adorable pet moments."
-    />
-    <meta name="twitter:image" content="https://www.cuttypaws.com/og-image.png" />
-
-    <!-- ✅ Canonical -->
-    <link rel="canonical" href="https://www.cuttypaws.com/" />
-
-    <!-- ✅ Organization Schema (helps brand recognition + name variations) -->
+    <!-- Organization schema -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -60,7 +33,6 @@
       }
     </script>
 
-    <!-- Bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"

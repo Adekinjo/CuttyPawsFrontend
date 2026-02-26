@@ -80,7 +80,7 @@ const Home = () => {
   return (
     <div className={styles.homeContainer}>
       <Helmet>
-        <title>CuttyPaws - Social Pet Community</title>
+        <title>CuttyPaws | Social Pet Community & Pet Shop</title>
 
         <meta
           name="description"
