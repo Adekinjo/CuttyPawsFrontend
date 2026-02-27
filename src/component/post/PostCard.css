@@ -137,9 +137,16 @@
   background: #000000;
 }
 
+.post-video-preview {
+  width: 100%;
+  height: 72svh;
+  max-height: 78svh;
+  object-fit: cover;
+}
+
 .post-video-badge {
   position: absolute;
-  right: 14px;
+  right: 56px;
   bottom: 14px;
   width: 28px;
   height: 28px;
@@ -150,6 +157,26 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+}
+
+.post-video-volume-btn {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.post-video-volume-btn:hover {
+  background: rgba(0, 0, 0, 0.84);
 }
 
 .post-body {

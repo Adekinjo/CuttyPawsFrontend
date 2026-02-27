@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Card,
   Image,
@@ -19,7 +19,7 @@ import {
   FaHeart,
   FaRegHeart
 } from "react-icons/fa";
-import { PawPrint, MessageCircle, Share2, Bookmark, Play } from "lucide-react";
+import { PawPrint, MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommentService from "../../service/CommentsService";
 import PostLikeService from "../../service/LikesService";
@@ -46,6 +46,7 @@ const formatDate = (dateString) => {
 
 const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const navigate = useNavigate();
+  const videoPreviewRefs = useRef(new Map());
 
   // State
   const [showOptions, setShowOptions] = useState(false);
@@ -71,6 +72,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const [showMoreCaption, setShowMoreCaption] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
+  const [feedVideosMuted, setFeedVideosMuted] = useState(true);
 
   // Comment Reactions State
   const [commentReactionsLoading, setCommentReactionsLoading] = useState({});
@@ -516,9 +518,75 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     return Array.from(unique.values());
   }, [post]);
 
+  const registerFeedVideo = useCallback((mediaKey) => {
+    return (node) => {
+      if (node) {
+        videoPreviewRefs.current.set(mediaKey, node);
+      } else {
+        videoPreviewRefs.current.delete(mediaKey);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    videoPreviewRefs.current.forEach((video) => {
+      video.muted = feedVideosMuted;
+    });
+  }, [feedVideosMuted]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          const mediaKey = video.dataset.mediaKey;
+
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+            window.dispatchEvent(
+              new CustomEvent("cuttypaws-feed-video-active", {
+                detail: { mediaKey },
+              })
+            );
+
+            const playPromise = video.play();
+            if (playPromise?.catch) {
+              playPromise.catch(() => {});
+            }
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: [0.25, 0.7] }
+    );
+
+    const handleActiveVideo = (event) => {
+      const activeMediaKey = event.detail?.mediaKey;
+      videoPreviewRefs.current.forEach((video, mediaKey) => {
+        if (mediaKey !== activeMediaKey) {
+          video.pause();
+        }
+      });
+    };
+
+    window.addEventListener("cuttypaws-feed-video-active", handleActiveVideo);
+
+    videoPreviewRefs.current.forEach((video) => {
+      video.pause();
+      observer.observe(video);
+    });
+
+    return () => {
+      window.removeEventListener("cuttypaws-feed-video-active", handleActiveVideo);
+      observer.disconnect();
+    };
+  }, [mediaItems]);
+
   const renderMedia = (item, idx, isModal = false) => {
     const isVideo = (item.type || "").toUpperCase() === "VIDEO";
     if (isVideo) {
+      const mediaKey = item.url || `${post?.id || "post"}-${idx}`;
+      const isMuted = feedVideosMuted;
       const handleVideoPreviewReady = (event) => {
         const video = event.currentTarget;
         if (isModal) return;
@@ -538,14 +606,14 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         return (
           <div key={idx} className="post-video-wrapper">
             <video
-              autoPlay
-              muted
+              muted={isMuted}
               loop
               playsInline
               preload="auto"
-              className="post-image"
+              className="post-image post-video-preview"
               poster={item.thumbnailUrl || undefined}
-              style={{ width: "100%" }}
+              ref={registerFeedVideo(mediaKey)}
+              data-media-key={mediaKey}
               onClick={() => {
                 setSelectedImage(idx);
                 setShowImageModal(true);
@@ -559,6 +627,17 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             <span className="post-video-badge">
               <Play size={14} fill="currentColor" />
             </span>
+            <button
+              type="button"
+              className="post-video-volume-btn"
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
+              onClick={(event) => {
+                event.stopPropagation();
+                setFeedVideosMuted((prev) => !prev);
+              }}
+            >
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
           </div>
         );
       }
