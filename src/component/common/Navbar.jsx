@@ -20,7 +20,7 @@ import ProductService from "../../service/ProductService";
 import NotificationService from "../../service/NotificationService";
 import { debounce } from 'lodash';
 import "../../style/Navbar.css";
-import logo from "../../images/loggo.png";
+import logo from "../../images/Logo.png";
 
 const Navbar = () => {
   const navigate = useNavigate();
