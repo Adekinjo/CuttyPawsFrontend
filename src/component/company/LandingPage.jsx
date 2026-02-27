@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import logo from "../../images/loggo.png";
+import logo from "../../images/Logo.png";
 import { 
   FaRocket, FaChartLine, FaBoxOpen, FaMoneyCheckAlt, FaShieldAlt,
   FaTachometerAlt, FaHandshake, FaMobileAlt, FaUsers, FaShoppingBag,
