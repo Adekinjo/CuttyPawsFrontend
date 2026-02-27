@@ -88,6 +88,17 @@ const Home = () => {
         />
 
         <meta name="keywords" content="CuttyPaws, Cutty Paws, cuttypaws, pet social network, pet community, pet shop" />
+        <meta name="robots" content="index,follow" />
+        <link rel="canonical" href="https://www.cuttypaws.com/" />
+        <meta property="og:title" content="CuttyPaws | Social Pet Community & Pet Shop" />
+        <meta property="og:description" content="CuttyPaws is a social pet community where pet lovers connect, share pet moments, and shop pet products online." />
+        <meta property="og:url" content="https://www.cuttypaws.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://www.cuttypaws.com/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CuttyPaws | Social Pet Community & Pet Shop" />
+        <meta name="twitter:description" content="CuttyPaws is a social pet community where pet lovers connect, share pet moments, and shop pet products online." />
+        <meta name="twitter:image" content="https://www.cuttypaws.com/og-image.png" />
       </Helmet>
 
       <Container className={`${styles.homeContent} pt-4 pb-5`}>
@@ -161,5 +172,4 @@ const Home = () => {
 };
 
 export default Home;
-
 
