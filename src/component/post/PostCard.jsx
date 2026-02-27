@@ -519,14 +519,39 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const renderMedia = (item, idx, isModal = false) => {
     const isVideo = (item.type || "").toUpperCase() === "VIDEO";
     if (isVideo) {
+      const handleVideoPreviewReady = (event) => {
+        const video = event.currentTarget;
+        if (isModal) return;
+
+        // iOS Safari often shows a black frame unless playback/seek is nudged.
+        if (video.readyState >= 2 && !video.dataset.previewReady) {
+          video.dataset.previewReady = "true";
+          try {
+            video.currentTime = 0.1;
+          } catch {
+            // Ignore seek failures on browsers that restrict it.
+          }
+        }
+      };
+
       if (!isModal) {
         return (
           <div key={idx} className="post-video-wrapper">
             <video
-              controls
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
               className="post-image"
               poster={item.thumbnailUrl || undefined}
               style={{ width: "100%" }}
+              onClick={() => {
+                setSelectedImage(idx);
+                setShowImageModal(true);
+              }}
+              onLoadedData={handleVideoPreviewReady}
+              onLoadedMetadata={handleVideoPreviewReady}
             >
               <source src={item.url} />
               Your browser does not support the video tag.
@@ -541,6 +566,8 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         <video
           key={idx}
           controls
+          playsInline
+          preload="metadata"
           className={isModal ? "modal-image" : "post-image"}
           poster={item.thumbnailUrl || undefined}
           style={!isModal ? { width: "100%" } : undefined}
