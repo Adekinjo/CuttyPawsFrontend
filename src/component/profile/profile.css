@@ -530,6 +530,50 @@ h2{
   color: #ffffff;
 }
 
+/* ================= PUBLIC PROFILE ================= */
+
+.public-profile-header-card {
+  border-radius: 24px;
+}
+
+.public-profile-avatar {
+  width: 80px;
+  height: 80px;
+  font-size: 2rem;
+  overflow: hidden;
+}
+
+.public-profile-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-profile-name {
+  font-size: clamp(1.75rem, 1.5rem + 0.7vw, 2.1rem);
+  line-height: 1.05;
+}
+
+.public-profile-handle {
+  font-size: 1rem;
+}
+
+.public-profile-action-group {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.public-profile-action-btn {
+  min-height: 38px;
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+}
+
+.public-profile-post-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 /* ================= MOBILE REFINEMENTS ================= */
 
 @media (max-width: 768px) {
@@ -552,6 +596,44 @@ h2{
   .cp-grid{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .public-profile-header-body {
+    padding: 1rem !important;
+  }
+
+  .public-profile-header-row {
+    align-items: flex-start !important;
+  }
+
+  .public-profile-main-row {
+    gap: 0.9rem;
+  }
+
+  .public-profile-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .public-profile-name {
+    font-size: 1.35rem;
+  }
+
+  .public-profile-handle {
+    font-size: 0.9rem;
+  }
+
+  .public-profile-action-group {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem !important;
+    margin-top: 0.25rem;
+  }
+
+  .public-profile-action-btn {
+    min-height: 34px;
+    font-size: 0.84rem;
+    padding: 0.38rem 0.7rem;
+  }
 }
 
 /* ================= SMALL PHONES ================= */
@@ -564,5 +646,29 @@ h2{
 
   .cp-edit-cover{
     padding: 4px 10px;
+  }
+
+  .public-profile-name {
+    font-size: 1.15rem;
+  }
+
+  .public-profile-handle {
+    font-size: 0.82rem;
+  }
+
+  .public-profile-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .public-profile-action-btn {
+    min-height: 32px;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  .public-profile-post-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 }

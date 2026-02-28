@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import "./profile.css";
 import UserProfileService, { handle401 } from "../../service/UserProfileService";
 import FollowService from "../../service/FollowService";
 import PostService from "../../service/PostService";
@@ -9,10 +10,9 @@ import {
 import { 
   FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaImages, 
   FaHeart, FaComment, FaUsers, FaBan, FaArrowLeft,
-  FaUserPlus, FaUserCheck, FaUserMinus, FaList
+  FaUserPlus, FaUserCheck, FaUserMinus, FaList, FaPlay
 } from "react-icons/fa";
 import { PawPrint } from "lucide-react";
-import PostCard from "../post/PostCard";
 
 const PublicProfilePage = () => {
   const { userId } = useParams();
@@ -28,9 +28,9 @@ const PublicProfilePage = () => {
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [showFollowModal, setShowFollowModal] = useState(false);
-  const [followModalType, setFollowModalType] = useState("followers"); // "followers" or "following"
-  const [followList, setFollowList] = useState([]);
-  const [followListLoading, setFollowListLoading] = useState(false);
+  const [followModalType] = useState("followers"); // "followers" or "following"
+  const [followList] = useState([]);
+  const [followListLoading] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -215,6 +215,22 @@ const PublicProfilePage = () => {
     return currentUser && currentUser.role === "ROLE_ADMIN";
   };
 
+  const getPostPreview = (post) => {
+    const firstMedia = Array.isArray(post.media) ? post.media[0] : null;
+    const normalizedType = (firstMedia?.type || firstMedia?.mediaType || "").toUpperCase();
+    const isVideo = normalizedType === "VIDEO";
+    const mediaUrl = firstMedia?.url || firstMedia?.mediaUrl || null;
+
+    return {
+      isVideo,
+      imageUrl: isVideo ? null : (mediaUrl || post.image || post.imageUrls?.[0] || null),
+      videoUrl: isVideo ? mediaUrl : null,
+      thumbnailUrl: firstMedia?.thumbnailUrl || null,
+      likes: post.totalReactions ?? post.likeCount ?? post.likes ?? 0,
+      comments: post.commentCount ?? post.comments ?? 0,
+    };
+  };
+
   const handleBlockUser = async () => {
     if (!window.confirm("Are you sure you want to block this user?")) return;
 
@@ -289,45 +305,35 @@ const PublicProfilePage = () => {
   }
 
   return (
-    <Container fluid className="py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+    <Container fluid className="py-4 cp-page public-profile-page">
       <Row className="justify-content-center">
         <Col lg={10} xl={8}>
           {/* Back Button */}
-          <Button variant="outline-secondary" onClick={handleBack} className="mb-3">
+          <Button variant="outline-secondary" onClick={handleBack} className="mb-3 public-profile-back-btn">
             <FaArrowLeft className="me-2" />
             Back
           </Button>
 
           {/* Header Section */}
-          <Card className="shadow-sm border-0 mb-4">
-            <Card.Body className="p-4">
-              <Row className="align-items-center">
+          <Card className="shadow-sm border-0 mb-4 public-profile-header-card">
+            <Card.Body className="p-4 public-profile-header-body">
+              <Row className="align-items-center public-profile-header-row">
                 <Col xs="auto">
                   <div className="position-relative">
                     <div 
-                      className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white"
-                      style={{ 
-                        width: "80px", 
-                        height: "80px", 
-                        fontSize: "2rem",
-                        overflow: "hidden"
-                      }}
+                      className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white public-profile-avatar"
                     >
                       {userProfile.profileImageUrl ? (
                         <Image 
                           src={userProfile.profileImageUrl} 
                           alt="Profile"
-                          style={{ 
-                            width: "100%", 
-                            height: "100%", 
-                            objectFit: "cover" 
-                          }}
+                          className="public-profile-avatar-image"
                           onError={(e) => {
                             e.target.style.display = 'none';
                           }}
                         />
                       ) : null}
-                      {!userProfile.profileImageUrl && <PawPrint size={30} strokeWidth={2.2} />}
+                      {!userProfile.profileImageUrl && <PawPrint size={26} strokeWidth={2.2} />}
                     </div>
                     {userProfile.isBlocked && (
                       <Badge bg="danger" className="position-absolute top-0 start-0">
@@ -337,20 +343,21 @@ const PublicProfilePage = () => {
                   </div>
                 </Col>
                 <Col>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h2 className="mb-1 fw-bold">{userProfile.name}</h2>
-                      <p className="text-muted mb-1">@{userProfile.name.toLowerCase().replace(/\s+/g, '')}</p>
+                  <div className="d-flex justify-content-between align-items-start public-profile-main-row">
+                    <div className="public-profile-identity">
+                      <h2 className="mb-1 fw-bold public-profile-name">{userProfile.name}</h2>
+                      <p className="text-muted mb-1 public-profile-handle">@{userProfile.name.toLowerCase().replace(/\s+/g, '')}</p>
                     
                     </div>
                     
                     {/* Follow/Unfollow Button & Admin Actions */}
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 public-profile-action-group">
                       {!isCurrentUserProfile() && currentUser && (
                         followStats?.isFollowing ? (
                           <Button 
                             variant="outline-secondary" 
                             size="sm"
+                            className="public-profile-action-btn"
                             onClick={handleUnfollow}
                             disabled={followLoading}
                           >
@@ -367,6 +374,7 @@ const PublicProfilePage = () => {
                           <Button 
                             variant="primary" 
                             size="sm"
+                            className="public-profile-action-btn"
                             onClick={handleFollow}
                             disabled={followLoading}
                           >
@@ -385,11 +393,11 @@ const PublicProfilePage = () => {
                       {isAdmin() && !isCurrentUserProfile() && (
                         <div>
                           {userProfile.isBlocked ? (
-                            <Button variant="success" size="sm" onClick={handleUnblockUser}>
+                            <Button variant="success" size="sm" className="public-profile-action-btn" onClick={handleUnblockUser}>
                               Unblock User
                             </Button>
                           ) : (
-                            <Button variant="danger" size="sm" onClick={handleBlockUser}>
+                            <Button variant="danger" size="sm" className="public-profile-action-btn" onClick={handleBlockUser}>
                               <FaBan className="me-1" />
                               Block User
                             </Button>
@@ -504,15 +512,58 @@ const PublicProfilePage = () => {
                       <p className="text-muted">This user hasn't shared any posts yet.</p>
                     </div>
                   ) : (
-                    <div className="posts-feed">
-                      {userPosts.map((post) => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          currentUser={currentUser}
-                          isOwner={false} // Not the owner in public view
-                        />
-                      ))}
+                    <div className="cp-grid public-profile-post-grid">
+                      {userPosts.map((post) => {
+                        const preview = getPostPreview(post);
+
+                        return (
+                          <div
+                            key={post.id}
+                            className="cp-grid-card"
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Open post details"
+                            onClick={() => navigate(`/post/${post.id}`)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                navigate(`/post/${post.id}`);
+                              }
+                            }}
+                          >
+                            {preview.videoUrl ? (
+                              <>
+                                <video
+                                  src={preview.videoUrl}
+                                  poster={preview.thumbnailUrl || undefined}
+                                  className="cp-grid-video"
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                />
+                                <div className="cp-grid-video-badge">
+                                  <FaPlay size={12} />
+                                </div>
+                              </>
+                            ) : preview.imageUrl ? (
+                              <img src={preview.imageUrl} alt="post" />
+                            ) : (
+                              <div className="cp-grid-fallback w-100 h-100 d-flex align-items-center justify-content-center">
+                                <FaImages className="text-muted" size={22} />
+                              </div>
+                            )}
+
+                            <div className="cp-grid-overlay">
+                              <div className="cp-grid-metric">
+                                <FaHeart /> {preview.likes}
+                              </div>
+                              <div className="cp-grid-metric">
+                                <FaComment /> {preview.comments}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </Card.Body>

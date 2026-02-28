@@ -17,9 +17,11 @@ import {
   FaPaperPlane,
   FaSignInAlt,
   FaHeart,
-  FaRegHeart
+  FaRegHeart,
+  FaPause,
+  FaPlay
 } from "react-icons/fa";
-import { PawPrint, MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX } from "lucide-react";
+import { PawPrint, MessageCircle, Share2, Bookmark, Volume2, VolumeX, RotateCcw, RotateCw } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommentService from "../../service/CommentsService";
 import PostLikeService from "../../service/LikesService";
@@ -47,11 +49,15 @@ const formatDate = (dateString) => {
 const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const navigate = useNavigate();
   const videoPreviewRefs = useRef(new Map());
+  const interactiveVideoRefs = useRef(new Map());
+  const controlsHideTimeoutRef = useRef(null);
 
   // State
   const [showOptions, setShowOptions] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [activeVideoControls, setActiveVideoControls] = useState(null);
+  const [playingStates, setPlayingStates] = useState({});
 
   // Post Reactions State
   const [userReaction, setUserReaction] = useState(null);
@@ -528,6 +534,96 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     };
   }, []);
 
+  const clearControlsHideTimeout = useCallback(() => {
+    if (controlsHideTimeoutRef.current) {
+      clearTimeout(controlsHideTimeoutRef.current);
+      controlsHideTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleControlsHide = useCallback(() => {
+    clearControlsHideTimeout();
+    controlsHideTimeoutRef.current = setTimeout(() => {
+      setActiveVideoControls(null);
+    }, 5000);
+  }, [clearControlsHideTimeout]);
+
+  const registerInteractiveVideo = useCallback((videoKey) => {
+    return (node) => {
+      if (node) {
+        interactiveVideoRefs.current.set(videoKey, node);
+      } else {
+        interactiveVideoRefs.current.delete(videoKey);
+      }
+    };
+  }, []);
+
+  const setVideoPlayingState = useCallback((videoKey, isPlaying) => {
+    setPlayingStates((prev) => {
+      if (prev[videoKey] === isPlaying) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [videoKey]: isPlaying,
+      };
+    });
+  }, []);
+
+  const showVideoControls = useCallback((videoKey) => {
+    setActiveVideoControls(videoKey);
+    scheduleControlsHide();
+  }, [scheduleControlsHide]);
+
+  const hideVideoControls = useCallback(() => {
+    clearControlsHideTimeout();
+    setActiveVideoControls(null);
+  }, [clearControlsHideTimeout]);
+
+  const seekVideoBy = useCallback((videoKey, seconds) => {
+    const video = interactiveVideoRefs.current.get(videoKey);
+    if (!video) return;
+
+    const duration = Number.isFinite(video.duration) ? video.duration : null;
+    const nextTime = Math.max(
+      0,
+      duration === null ? video.currentTime + seconds : Math.min(video.currentTime + seconds, duration)
+    );
+
+    video.currentTime = nextTime;
+    showVideoControls(videoKey);
+  }, [showVideoControls]);
+
+  const toggleVideoPlayback = useCallback((videoKey) => {
+    const video = interactiveVideoRefs.current.get(videoKey);
+    if (!video) return;
+
+    if (video.paused) {
+      const playPromise = video.play();
+      if (playPromise?.then) {
+        playPromise
+          .then(() => {
+            setVideoPlayingState(videoKey, true);
+            showVideoControls(videoKey);
+          })
+          .catch(() => {});
+        return;
+      }
+      setVideoPlayingState(videoKey, true);
+    } else {
+      video.pause();
+      setVideoPlayingState(videoKey, false);
+    }
+
+    showVideoControls(videoKey);
+  }, [setVideoPlayingState, showVideoControls]);
+
+  useEffect(() => {
+    return () => {
+      clearControlsHideTimeout();
+    };
+  }, [clearControlsHideTimeout]);
+
   useEffect(() => {
     videoPreviewRefs.current.forEach((video) => {
       video.muted = feedVideosMuted;
@@ -552,8 +648,10 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             if (playPromise?.catch) {
               playPromise.catch(() => {});
             }
+            setVideoPlayingState(mediaKey, true);
           } else {
             video.pause();
+            setVideoPlayingState(mediaKey, false);
           }
         });
       },
@@ -565,6 +663,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       videoPreviewRefs.current.forEach((video, mediaKey) => {
         if (mediaKey !== activeMediaKey) {
           video.pause();
+          setVideoPlayingState(mediaKey, false);
         }
       });
     };
@@ -573,6 +672,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
     videoPreviewRefs.current.forEach((video) => {
       video.pause();
+      setVideoPlayingState(video.dataset.mediaKey, false);
       observer.observe(video);
     });
 
@@ -580,53 +680,104 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       window.removeEventListener("cuttypaws-feed-video-active", handleActiveVideo);
       observer.disconnect();
     };
-  }, [mediaItems]);
+  }, [mediaItems, setVideoPlayingState]);
 
-  const renderMedia = (item, idx, isModal = false) => {
-    const isVideo = (item.type || "").toUpperCase() === "VIDEO";
-    if (isVideo) {
-      const mediaKey = item.url || `${post?.id || "post"}-${idx}`;
-      const isMuted = feedVideosMuted;
-      const handleVideoPreviewReady = (event) => {
-        const video = event.currentTarget;
-        if (isModal) return;
+  useEffect(() => {
+    if (!showImageModal) {
+      hideVideoControls();
+    }
+  }, [showImageModal, hideVideoControls]);
 
-        // iOS Safari often shows a black frame unless playback/seek is nudged.
-        if (video.readyState >= 2 && !video.dataset.previewReady) {
-          video.dataset.previewReady = "true";
-          try {
-            video.currentTime = 0.1;
-          } catch {
-            // Ignore seek failures on browsers that restrict it.
-          }
+  const renderInteractiveVideo = (item, idx, isModal = false) => {
+    const videoKey = `${post?.id || "post"}-${isModal ? "modal" : "feed"}-${idx}`;
+    const mediaKey = videoKey;
+    const isMuted = !isModal ? feedVideosMuted : false;
+    const controlsVisible = activeVideoControls === videoKey;
+
+    const handleVideoPreviewReady = (event) => {
+      const video = event.currentTarget;
+      if (isModal) return;
+
+      // iOS Safari often shows a black frame unless playback/seek is nudged.
+      if (video.readyState >= 2 && !video.dataset.previewReady) {
+        video.dataset.previewReady = "true";
+        try {
+          video.currentTime = 0.1;
+        } catch {
+          // Ignore seek failures on browsers that restrict it.
         }
-      };
+      }
+    };
 
-      if (!isModal) {
-        return (
-          <div key={idx} className="post-video-wrapper">
-            <video
-              muted={isMuted}
-              loop
-              playsInline
-              preload="auto"
-              className="post-image post-video-preview"
-              poster={item.thumbnailUrl || undefined}
-              ref={registerFeedVideo(mediaKey)}
-              data-media-key={mediaKey}
-              onClick={() => {
-                setSelectedImage(idx);
-                setShowImageModal(true);
-              }}
-              onLoadedData={handleVideoPreviewReady}
-              onLoadedMetadata={handleVideoPreviewReady}
-            >
-              <source src={item.url} />
-              Your browser does not support the video tag.
-            </video>
-            <span className="post-video-badge">
-              <Play size={14} fill="currentColor" />
-            </span>
+    return (
+      <div
+        key={idx}
+        className={`post-video-wrapper ${controlsVisible ? "controls-visible" : ""} ${isModal ? "post-video-wrapper-modal" : ""}`}
+        onClick={() => {
+          if (controlsVisible) {
+            hideVideoControls();
+            return;
+          }
+          showVideoControls(videoKey);
+        }}
+      >
+        <video
+          muted={isMuted}
+          loop={!isModal}
+          playsInline
+          preload={isModal ? "metadata" : "auto"}
+          className={isModal ? "modal-image post-interactive-video" : "post-image post-video-preview post-interactive-video"}
+          poster={item.thumbnailUrl || undefined}
+          ref={(node) => {
+            registerInteractiveVideo(videoKey)(node);
+            if (!isModal) {
+              registerFeedVideo(mediaKey)(node);
+            }
+          }}
+          data-media-key={!isModal ? mediaKey : undefined}
+          onLoadedData={handleVideoPreviewReady}
+          onLoadedMetadata={handleVideoPreviewReady}
+          onPlay={() => setVideoPlayingState(videoKey, true)}
+          onPause={() => setVideoPlayingState(videoKey, false)}
+        >
+          <source src={item.url} />
+          Your browser does not support the video tag.
+        </video>
+
+        <div
+          className={`post-video-center-controls ${controlsVisible ? "visible" : ""}`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="post-video-center-btn"
+            aria-label="Go back 10 seconds"
+            onClick={() => seekVideoBy(videoKey, -10)}
+          >
+            <RotateCcw size={18} />
+            <span>10</span>
+          </button>
+          <button
+            type="button"
+            className="post-video-center-btn post-video-center-btn-main"
+            aria-label={playingStates[videoKey] ? "Pause video" : "Play video"}
+            onClick={() => toggleVideoPlayback(videoKey)}
+          >
+            {playingStates[videoKey] ? <FaPause size={18} /> : <FaPlay size={18} />}
+          </button>
+          <button
+            type="button"
+            className="post-video-center-btn"
+            aria-label="Go forward 10 seconds"
+            onClick={() => seekVideoBy(videoKey, 10)}
+          >
+            <RotateCw size={18} />
+            <span>10</span>
+          </button>
+        </div>
+
+        {!isModal && (
+          <>
             <button
               type="button"
               className="post-video-volume-btn"
@@ -638,23 +789,16 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             >
               {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
-          </div>
-        );
-      }
-      return (
-        <video
-          key={idx}
-          controls
-          playsInline
-          preload="metadata"
-          className={isModal ? "modal-image" : "post-image"}
-          poster={item.thumbnailUrl || undefined}
-          style={!isModal ? { width: "100%" } : undefined}
-        >
-          <source src={item.url} />
-          Your browser does not support the video tag.
-        </video>
-      );
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const renderMedia = (item, idx, isModal = false) => {
+    const isVideo = (item.type || "").toUpperCase() === "VIDEO";
+    if (isVideo) {
+      return renderInteractiveVideo(item, idx, isModal);
     }
     return (
       <Image

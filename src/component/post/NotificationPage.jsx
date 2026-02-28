@@ -7,6 +7,28 @@ import NotificationService from "../../service/NotificationService";
 import ApiService from "../../service/AuthService";
 import "./NotificationPage.css";
 
+const NotificationAvatar = ({ imageUrl, alt }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasImage = Boolean(imageUrl) && !imageFailed;
+
+  if (hasImage) {
+    return (
+      <img
+        src={imageUrl}
+        alt={alt}
+        className="notification-avatar"
+        onError={() => setImageFailed(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="notification-avatar notification-avatar-fallback" aria-label={alt}>
+      <PawPrint size={24} strokeWidth={2.2} />
+    </div>
+  );
+};
+
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -508,13 +530,10 @@ const NotificationPage = () => {
                       >
                         <div className="notification-item-card">
                           <div className="notification-avatar-wrap">
-                            <img
-                              src={notification.senderProfileImage || "/default-avatar.png"}
+                            <NotificationAvatar
+                              key={`${notification.id}-${notification.senderProfileImage || "fallback"}`}
+                              imageUrl={notification.senderProfileImage}
                               alt={senderName}
-                              className="notification-avatar"
-                              onError={(e) => {
-                                e.target.src = "/default-avatar.png";
-                              }}
                             />
                             <div className={`notification-type-badge ${presentation.iconClass}`}>{presentation.icon}</div>
                           </div>
