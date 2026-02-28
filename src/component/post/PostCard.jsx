@@ -29,6 +29,8 @@ import CommentLikeService from "../../service/CommentLikeService";
 import ReactionsPicker from "./ReactionsPicker";
 import "./PostCard.css";
 
+const FEED_VIDEO_SOUND_SESSION_KEY = "cuttypaws-feed-video-sound-enabled";
+
 const formatDate = (dateString) => {
   if (!dateString) return "Unknown time";
 
@@ -78,7 +80,15 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const [showMoreCaption, setShowMoreCaption] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
-  const [feedVideosMuted, setFeedVideosMuted] = useState(false);
+  const [hasFeedVideoSoundPermission, setHasFeedVideoSoundPermission] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage.getItem(FEED_VIDEO_SOUND_SESSION_KEY) === "true";
+  });
+  const [feedVideosMuted, setFeedVideosMuted] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem(FEED_VIDEO_SOUND_SESSION_KEY) !== "true";
+  });
+  const [hasManualVolumePreference, setHasManualVolumePreference] = useState(false);
 
   // Comment Reactions State
   const [commentReactionsLoading, setCommentReactionsLoading] = useState({});
@@ -625,6 +635,26 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   }, [clearControlsHideTimeout]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || hasFeedVideoSoundPermission) {
+      return undefined;
+    }
+
+    const unlockFeedVideoSound = () => {
+      window.sessionStorage.setItem(FEED_VIDEO_SOUND_SESSION_KEY, "true");
+      setHasFeedVideoSoundPermission(true);
+      setFeedVideosMuted((prev) => (hasManualVolumePreference ? prev : false));
+    };
+
+    window.addEventListener("pointerdown", unlockFeedVideoSound, { once: true });
+    window.addEventListener("keydown", unlockFeedVideoSound, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockFeedVideoSound);
+      window.removeEventListener("keydown", unlockFeedVideoSound);
+    };
+  }, [hasFeedVideoSoundPermission, hasManualVolumePreference]);
+
+  useEffect(() => {
     videoPreviewRefs.current.forEach((video) => {
       video.muted = feedVideosMuted;
     });
@@ -637,7 +667,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           const video = entry.target;
           const mediaKey = video.dataset.mediaKey;
 
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
             window.dispatchEvent(
               new CustomEvent("cuttypaws-feed-video-active", {
                 detail: { mediaKey },
@@ -646,7 +676,15 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
             const playPromise = video.play();
             if (playPromise?.catch) {
-              playPromise.catch(() => {});
+              playPromise.catch(() => {
+                // Browser autoplay is most reliable when muted; retry in that mode if needed.
+                video.muted = true;
+                setFeedVideosMuted(true);
+                const mutedPlayPromise = video.play();
+                if (mutedPlayPromise?.catch) {
+                  mutedPlayPromise.catch(() => {});
+                }
+              });
             }
             setVideoPlayingState(mediaKey, true);
           } else {
@@ -655,7 +693,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           }
         });
       },
-      { threshold: [0.25, 0.7] }
+      { threshold: [0.2, 0.35, 0.6] }
     );
 
     const handleActiveVideo = (event) => {
@@ -722,6 +760,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         }}
       >
         <video
+          autoPlay={!isModal}
           muted={isMuted}
           loop={!isModal}
           playsInline
@@ -784,6 +823,11 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
               aria-label={isMuted ? "Unmute video" : "Mute video"}
               onClick={(event) => {
                 event.stopPropagation();
+                setHasManualVolumePreference(true);
+                setHasFeedVideoSoundPermission(true);
+                if (typeof window !== "undefined") {
+                  window.sessionStorage.setItem(FEED_VIDEO_SOUND_SESSION_KEY, "true");
+                }
                 setFeedVideosMuted((prev) => !prev);
               }}
             >
