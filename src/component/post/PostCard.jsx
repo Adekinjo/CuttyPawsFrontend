@@ -78,7 +78,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const [showMoreCaption, setShowMoreCaption] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
-  const [feedVideosMuted, setFeedVideosMuted] = useState(true);
+  const [feedVideosMuted, setFeedVideosMuted] = useState(false);
 
   // Comment Reactions State
   const [commentReactionsLoading, setCommentReactionsLoading] = useState({});
