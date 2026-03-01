@@ -21,7 +21,7 @@ import {
   FaPause,
   FaPlay
 } from "react-icons/fa";
-import { PawPrint, MessageCircle, Share2, Bookmark, Volume2, VolumeX, RotateCcw, RotateCw } from "lucide-react";
+import { PawPrint, MessageCircle, Share2, Bookmark, Volume2, VolumeX, RotateCcw, RotateCw, Cookie, Bone, Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommentService from "../../service/CommentsService";
 import PostLikeService from "../../service/LikesService";
@@ -98,7 +98,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     if (post) {
       // For backward compatibility, check if post has old like data
       if (post.likedByCurrentUser) {
-        setUserReaction('LIKE');
+        setUserReaction("PAWPRINT");
       }
       setTotalReactions(post.likeCount || 0);
       
@@ -155,29 +155,34 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
     try {
       const response = await PostLikeService.reactToPost(post.id, reactionType);
-      
+
       if (response.status === 200) {
-        setUserReaction(reactionType);
-        
-        // Update reaction counts from response
-        if (response.data?.reactions?.counts) {
-          setReactionsCount(response.data.reactions.counts);
-          setTotalReactions(response.data.reactions.total);
-        } else {
-          // Fallback: increment total count if no detailed data
-          setTotalReactions(prev => prev + 1);
+        // Always set from backend values
+        const reactions = response.data?.reactions;
+        const userReactionFromServer = response.data?.userReaction ?? reactionType;
+
+        setUserReaction(userReactionFromServer);
+
+        if (!reactions?.counts || typeof reactions.total !== "number") {
+          throw new Error("Backend did not return reactions counts/total");
         }
+
+        setReactionsCount(reactions.counts);
+        setTotalReactions(reactions.total);
+      } else {
+        setError(response.message || "Failed to react to post");
       }
     } catch (err) {
-      setError("Failed to react to post");
       console.error("Reaction error:", err);
+      setError(err.message || "Failed to react to post");
     } finally {
       setReactionLoading(false);
     }
   };
 
   const handleRemoveReaction = async () => {
-    if (!currentUser || !userReaction) return;
+    if (!currentUser) return;
+    if (!userReaction) return;
     if (reactionLoading) return;
 
     setReactionLoading(true);
@@ -185,22 +190,24 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
     try {
       const response = await PostLikeService.removeReaction(post.id);
-      
+
       if (response.status === 200) {
+        const reactions = response.data?.reactions;
+
         setUserReaction(null);
-        
-        // Update reaction counts from response
-        if (response.data?.reactions?.counts) {
-          setReactionsCount(response.data.reactions.counts);
-          setTotalReactions(response.data.reactions.total);
-        } else {
-          // Fallback: decrement total count if no detailed data
-          setTotalReactions(prev => Math.max(0, prev - 1));
+
+        if (!reactions?.counts || typeof reactions.total !== "number") {
+          throw new Error("Backend did not return reactions counts/total");
         }
+
+        setReactionsCount(reactions.counts);
+        setTotalReactions(reactions.total);
+      } else {
+        setError(response.message || "Failed to remove reaction");
       }
     } catch (err) {
-      setError("Failed to remove reaction");
       console.error("Remove reaction error:", err);
+      setError(err.message || "Failed to remove reaction");
     } finally {
       setReactionLoading(false);
     }
@@ -465,14 +472,12 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   // Reaction Display Helpers for Post
   const getReactionIcon = (reactionType) => {
     const icons = {
-      LIKE: <PawPrint size={14} strokeWidth={2.3} />,
-      LOVE: "❤️",
-      HAHA: "😄",
-      WOW: "😲",
-      SAD: "😢",
-      ANGRY: "😠",
+      PAWPRINT: <PawPrint size={14} strokeWidth={2.3} />,
+      COOKIE: <Cookie size={14} strokeWidth={2.3} />,
+      BONE: <Bone size={14} strokeWidth={2.3} />,
+      HEART: <Heart size={14} strokeWidth={2.3} />,
     };
-    return icons[reactionType] || icons.LIKE;
+    return icons[reactionType] || icons.PAWPRINT;
   };
 
   // Simple comment like button component
@@ -985,7 +990,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         </div>
 
         <div className="post-stats-row">
-          <span className="post-stat">{formatCount(totalReactions)} likes</span>
+          <span className="post-stat">{formatCount(totalReactions)} reactions</span>
           <button type="button" className="post-stat post-stat-button" onClick={toggleComments}>
             {formatCount(totalComments)} comments
           </button>
@@ -998,12 +1003,12 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           <div className="d-flex align-items-center gap-2 mb-2">
             <div className="d-flex gap-1">
               {Object.entries(reactionsCount)
-                .filter((entry) => entry[1] > 0)
+                .filter(([, count]) => count > 0)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 3)
                 .map(([type]) => (
                   <span key={type} style={{ fontSize: "0.9rem" }}>
-                    {type === "LIKE" ? <PawPrint size={14} strokeWidth={2.3} /> : getReactionIcon(type)}
+                    {getReactionIcon(type)}
                   </span>
                 ))}
             </div>

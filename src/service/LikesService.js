@@ -3,12 +3,10 @@ import ApiService from "./ApiService";
 
 export default class PostLikeService extends ApiService {
     static ReactionType = {
-        LIKE: 'LIKE',
-        LOVE: 'LOVE', 
-        HAHA: 'HAHA',
-        WOW: 'WOW',
-        SAD: 'SAD',
-        ANGRY: 'ANGRY'
+        PAWPRINT: 'PAWPRINT',
+        COOKIE: 'COOKIE',
+        BONE: 'BONE',
+        HEART: 'HEART'
     };
 
     static async reactToPost(postId, reactionType) {
@@ -67,7 +65,7 @@ export default class PostLikeService extends ApiService {
 
     // Keep existing methods for backward compatibility
     static async likePost(postId) {
-        return this.reactToPost(postId, this.ReactionType.LIKE);
+        return this.reactToPost(postId, this.ReactionType.PAWPRINT);
     }
 
     static async unlikePost(postId) {
