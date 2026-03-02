@@ -6,7 +6,7 @@
 }
 
 .reaction-trigger {
-  background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
   padding: 8px !important;
   border-radius: 50% !important;
@@ -20,8 +20,11 @@
   color: var(--text-secondary) !important;
 }
 
+.reaction-trigger[style*="background-color"] {
+  box-shadow: none !important;
+}
+
 .reaction-trigger:hover {
-  background-color: rgba(78, 205, 196, 0.1) !important;
   transform: scale(1.1) !important;
   color: var(--accent-primary) !important;
 }
@@ -45,6 +48,11 @@
 
 .reaction-trigger:hover .reaction-icon {
   transform: scale(1.1);
+}
+
+.reaction-icon.is-shaking,
+.reaction-emoji.is-shaking {
+  animation: reaction-shake 0.42s ease;
 }
 
 /* Reactions Picker Popup - OPEN ABOVE TRIGGER */
@@ -91,7 +99,7 @@
 
 /* Smaller reaction emojis */
 .reaction-emoji {
-  background: none;
+  background: transparent;
   border: none;
   font-size: 1.4rem; /* Smaller size */
   cursor: pointer;
@@ -114,14 +122,14 @@
 
 .reaction-emoji:hover {
   transform: scale(1.3) !important;
-  background-color: var(--bg-hover) !important;
+  background-color: var(--reaction-bg, rgba(15, 23, 42, 0.06)) !important;
   z-index: 10;
 }
 
 .reaction-emoji.active {
   transform: scale(1.2);
-  background-color: rgba(var(--reaction-color-rgb, 78, 205, 196), 0.1);
-  border: 1px solid var(--reaction-color, var(--accent-primary));
+  background-color: var(--reaction-bg, rgba(15, 23, 42, 0.08));
+  box-shadow: 0 8px 18px -12px var(--reaction-color, rgba(15, 23, 42, 0.3));
 }
 
 /* Tooltip for reaction labels */
@@ -158,6 +166,27 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes reaction-shake {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.18) rotate(-10deg);
+  }
+  40% {
+    transform: scale(1.18) rotate(10deg);
+  }
+  60% {
+    transform: scale(1.14) rotate(-8deg);
+  }
+  80% {
+    transform: scale(1.08) rotate(6deg);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
