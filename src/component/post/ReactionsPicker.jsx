@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "react-bootstrap";
 import { PawPrint, Cookie, Bone, Heart } from "lucide-react";
 import "./ReactionPicker.css";
 
@@ -7,7 +6,8 @@ const ReactionsPicker = ({
   onReactionSelect, 
   currentReaction, 
   onRemoveReaction,
-  size = 24 
+  size = 24,
+  className = ""
 }) => {
   const [show, setShow] = useState(false);
   const [isPickerHovered, setIsPickerHovered] = useState(false);
@@ -115,12 +115,12 @@ const ReactionsPicker = ({
   return (
     <div 
       ref={containerRef}
-      className="reaction-picker-wrapper"
+      className={`reaction-picker-wrapper ${className}`.trim()}
       onMouseEnter={handleContainerMouseEnter}
       onMouseLeave={handleContainerMouseLeave}
     >
-      <Button
-        variant="link"
+      <button
+        type="button"
         className="reaction-trigger"
         onClick={handleButtonClick}
         style={{ 
@@ -129,14 +129,21 @@ const ReactionsPicker = ({
           backgroundColor: currentReactionData?.bg || undefined,
         }}
       >
-        <span className={`reaction-icon ${animatedReaction && currentReactionData?.type === animatedReaction ? "is-shaking" : ""}`}>
+        <span
+          key={currentReactionData?.type || "default-reaction"}
+          className={`reaction-icon ${currentReactionData ? "is-shaking" : ""}`}
+        >
           {currentReactionData ? (
-            <currentReactionData.icon size={size - 1} strokeWidth={2.3} />
+            <currentReactionData.icon
+              size={size - 1}
+              strokeWidth={2.3}
+              fill={currentReactionData.color}
+            />
           ) : (
             <PawPrint size={size - 1} strokeWidth={2.3} />
           )}
         </span>
-      </Button>
+      </button>
 
       {/* Reactions Picker - POSITIONED BELOW */}
       {show && (
@@ -163,7 +170,11 @@ const ReactionsPicker = ({
                     '--reaction-bg': reaction.bg
                   }}
                 >
-                  <reaction.icon size={20} strokeWidth={2.3} />
+                  <reaction.icon
+                    size={20}
+                    strokeWidth={2.3}
+                    fill={isActive ? reaction.color : "none"}
+                  />
                   <span className="reaction-tooltip">{reaction.label}</span>
                 </button>
               );

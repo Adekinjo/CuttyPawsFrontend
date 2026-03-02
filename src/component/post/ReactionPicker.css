@@ -6,27 +6,27 @@
 }
 
 .reaction-trigger {
-  background-color: transparent !important;
-  border: none !important;
-  padding: 8px !important;
-  border-radius: 50% !important;
-  width: 36px !important;
-  height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.2s ease !important;
-  cursor: pointer !important;
-  color: var(--text-secondary) !important;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  color: var(--text-secondary);
 }
 
 .reaction-trigger[style*="background-color"] {
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 .reaction-trigger:hover {
-  transform: scale(1.1) !important;
-  color: var(--accent-primary) !important;
+  transform: scale(1.08);
 }
 
 .reaction-trigger.active {
@@ -44,6 +44,7 @@
 
 .reaction-icon svg {
   display: block;
+  transition: fill 0.2s ease, stroke 0.2s ease;
 }
 
 .reaction-trigger:hover .reaction-icon {
@@ -121,13 +122,13 @@
 }
 
 .reaction-emoji:hover {
-  transform: scale(1.3) !important;
-  background-color: var(--reaction-bg, rgba(15, 23, 42, 0.06)) !important;
+  transform: scale(1.22);
+  background-color: var(--reaction-bg, rgba(15, 23, 42, 0.06));
   z-index: 10;
 }
 
 .reaction-emoji.active {
-  transform: scale(1.2);
+  transform: scale(1.14);
   background-color: var(--reaction-bg, rgba(15, 23, 42, 0.08));
   box-shadow: 0 8px 18px -12px var(--reaction-color, rgba(15, 23, 42, 0.3));
 }
