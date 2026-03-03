@@ -5,13 +5,16 @@ import {
   FaSync, FaDatabase, FaCheckCircle, FaExclamationTriangle,
   FaTrash, FaInfoCircle, FaBroom, FaRedo, FaSignal,
   FaMemory, FaClock, FaPercentage, FaPlay, FaHeart,
-  FaRocket, FaCog, FaExclamationCircle, FaToggleOn, FaToggleOff
+  FaRocket, FaCog, FaExclamationCircle, FaToggleOn, FaToggleOff,
+  FaStream, FaCommentDots, FaPaw, FaThumbsUp
 } from "react-icons/fa";
 
 const CacheController = () => {
   const [dashboardData, setDashboardData] = useState(null);
+  const [cacheHealthData, setCacheHealthData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [loadError, setLoadError] = useState("");
 
   // NEW: caching toggle status
   const [cacheToggle, setCacheToggle] = useState(null); // { caching: "ENABLED" | "DISABLED" }
@@ -23,16 +26,20 @@ const CacheController = () => {
 
   const bootstrapLoad = async () => {
     setLoading(true);
+    setLoadError("");
     try {
-      const [dash, toggle] = await Promise.all([
+      const [dash, toggle, health] = await Promise.all([
         ApiService.getCacheDashboard(),
-        ApiService.cacheToggleStatus()
+        ApiService.cacheToggleStatus(),
+        ApiService.getCacheHealth().catch(() => null)
       ]);
       setDashboardData(dash);
       setCacheToggle(toggle);
+      setCacheHealthData(health);
       setLastUpdated(new Date());
     } catch (e) {
       console.error("❌ Failed to load cache dashboard:", e);
+      setLoadError("Failed to load cache dashboard data. Check the backend cache endpoints and try again.");
       toast.error("Failed to load cache dashboard");
     } finally {
       setLoading(false);
@@ -41,12 +48,18 @@ const CacheController = () => {
 
   const loadCacheDashboard = async () => {
     setLoading(true);
+    setLoadError("");
     try {
-      const data = await ApiService.getCacheDashboard();
+      const [data, health] = await Promise.all([
+        ApiService.getCacheDashboard(),
+        ApiService.getCacheHealth().catch(() => null)
+      ]);
       setDashboardData(data);
+      setCacheHealthData(health);
       setLastUpdated(new Date());
     } catch (error) {
       console.error("❌ Failed to load cache dashboard:", error);
+      setLoadError("Failed to refresh cache dashboard data.");
       toast.error("Failed to load cache dashboard");
     } finally {
       setLoading(false);
@@ -150,14 +163,71 @@ const CacheController = () => {
 
   const formatDateTime = (dateTime) => {
     if (!dateTime || dateTime === "Never") return "Never";
-    return new Date(dateTime).toLocaleString();
+    const parsed = new Date(dateTime);
+    return Number.isNaN(parsed.getTime()) ? String(dateTime) : parsed.toLocaleString();
   };
 
   const cachingEnabled = useMemo(() => {
     return (cacheToggle?.caching || "").toUpperCase() === "ENABLED";
   }, [cacheToggle]);
 
-  if (!dashboardData) {
+  const safeDashboard = useMemo(() => {
+    const emptySystem = {
+      totalCaches: 0,
+      totalHits: 0,
+      totalMisses: 0,
+      overallHitRate: 0,
+    };
+
+    return {
+      system: dashboardData?.system || emptySystem,
+      caches: dashboardData?.caches || {},
+      redis: dashboardData?.redis || { status: "UNKNOWN", message: "Redis health is unavailable" },
+      timestamp: dashboardData?.timestamp || null,
+    };
+  }, [dashboardData]);
+
+  const socialCacheDefinitions = useMemo(() => ([
+    { id: "post", label: "Post Cache", description: "Post details and feed reads", icon: FaStream, matches: ["postcache", "post", "posts"] },
+    { id: "postlike", label: "Post Like Cache",description: "Post reaction and like counters",icon: FaThumbsUp, matches: ["postreactions", "userpostreaction","userlikedposts", "reaction"]},
+    { id: "comment", label: "Comment Cache", description: "Comment thread and reply reads", icon: FaCommentDots, matches: ["commentcache", "comment", "comments"] },
+    { id: "commentlike", label: "Comment Like Cache", description: "Comment reaction counters", icon: FaHeart, matches: ["commentlike", "commentlikes", "comment-reaction", "commentreaction"] },
+    { id: "pet", label: "Pet Cache", description: "Pet profile and listing reads", icon: FaPaw, matches: ["petcache", "pet", "pets"] },
+  ]), []);
+
+  const normalizedCacheEntries = useMemo(() => {
+    return Object.entries(safeDashboard.caches).map(([cacheName, cache]) => ({
+      cacheName,
+      normalized: cacheName.toLowerCase().replace(/[^a-z0-9]/g, ""),
+      cache: cache || {},
+    }));
+  }, [safeDashboard.caches]);
+
+  const socialCacheCards = useMemo(() => {
+    return socialCacheDefinitions.map((definition) => {
+      const matchedEntry = normalizedCacheEntries.find(({ normalized }) =>
+        definition.matches.some((token) => normalized.includes(token))
+      );
+
+      const healthRecord = cacheHealthData?.[matchedEntry?.cacheName] || cacheHealthData?.[definition.id] || null;
+      const mergedCache = matchedEntry?.cache || {};
+      const healthStatus = healthRecord?.healthStatus || mergedCache.healthStatus || (matchedEntry ? "IDLE" : "UNKNOWN");
+
+      return {
+        ...definition,
+        cacheName: matchedEntry?.cacheName || "Not detected",
+        healthStatus,
+        active: typeof mergedCache.active === "boolean" ? mergedCache.active : Boolean(matchedEntry),
+        hits: Number(healthRecord?.hits ?? mergedCache.hits ?? 0),
+        misses: Number(healthRecord?.misses ?? mergedCache.misses ?? 0),
+        hitRate: Math.min(Number(healthRecord?.hitRate ?? mergedCache.hitRate ?? 0), 100),
+        lastAccess: healthRecord?.lastAccess ?? mergedCache.lastAccess ?? "Never",
+        lastUpdate: healthRecord?.lastUpdate ?? mergedCache.lastUpdate ?? "Never",
+      };
+    });
+  }, [cacheHealthData, normalizedCacheEntries, socialCacheDefinitions]);
+
+  if (!dashboardData && loading) {
     return (
       <div className="container-fluid p-4">
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 300 }}>
@@ -172,7 +242,7 @@ const CacheController = () => {
     );
   }
 
-  const { system, caches, redis, timestamp } = dashboardData;
+  const { system, caches, redis, timestamp } = safeDashboard;
 
   return (
     <div className="container-fluid p-4">
@@ -259,6 +329,20 @@ const CacheController = () => {
         </div>
       </div>
 
+      {loadError && (
+        <div className="row mb-4">
+          <div className="col-12">
+            <div className="alert alert-danger border-0 shadow-sm d-flex align-items-start gap-3">
+              <FaExclamationCircle className="mt-1 flex-shrink-0" />
+              <div>
+                <div className="fw-bold">Cache dashboard failed to load completely</div>
+                <div>{loadError}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Redis Connection */}
       <div className="row mb-4">
         <div className="col-12">
@@ -293,6 +377,77 @@ const CacheController = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Social Cache Health */}
+      <div className="row mb-4 g-3">
+        {socialCacheCards.map((cacheCard) => {
+          const cfg = getHealthConfig(cacheCard.healthStatus);
+          const Icon = cacheCard.icon;
+
+          return (
+            <div className="col-12 col-md-6 col-xl-4" key={cacheCard.id}>
+              <div className="card shadow-sm border-0 h-100" style={{ minHeight: 220 }}>
+                <div className="card-body p-4 d-flex flex-column">
+                  <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
+                    <div className="d-flex align-items-center gap-3">
+                      <div className={`rounded-circle ${cfg.bg} bg-opacity-10 d-inline-flex align-items-center justify-content-center`} style={{ width: 52, height: 52 }}>
+                        <Icon className={`text-${cfg.color}`} size={22} />
+                      </div>
+                      <div>
+                        <div className="fw-bold">{cacheCard.label}</div>
+                        <div className="small text-muted">{cacheCard.description}</div>
+                      </div>
+                    </div>
+                    {getHealthBadge(cacheCard.healthStatus)}
+                  </div>
+
+                  <div className="small text-muted mb-2">
+                    <strong>Detected cache key:</strong> {cacheCard.cacheName}
+                  </div>
+
+                  <div className="row g-2 mb-3">
+                    <div className="col-4">
+                      <div className="rounded-3 bg-light p-2 text-center h-100">
+                        <div className="small text-muted">Hits</div>
+                        <div className="fw-bold text-success">{cacheCard.hits.toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="rounded-3 bg-light p-2 text-center h-100">
+                        <div className="small text-muted">Misses</div>
+                        <div className="fw-bold text-danger">{cacheCard.misses.toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="rounded-3 bg-light p-2 text-center h-100">
+                        <div className="small text-muted">Hit Rate</div>
+                        <div className="fw-bold">{cacheCard.hitRate}%</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto">
+                    <div className="progress mb-3" style={{ height: 8 }}>
+                      <div
+                        className={`progress-bar ${cfg.bg}`}
+                        style={{ width: `${cacheCard.hitRate}%` }}
+                        role="progressbar"
+                        aria-valuenow={cacheCard.hitRate}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      />
+                    </div>
+                    <div className="d-flex justify-content-between gap-3 small text-muted">
+                      <span>{cacheCard.active ? "Active" : "Not active"}</span>
+                      <span>Updated: {formatDateTime(cacheCard.lastUpdate)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Summary */}
@@ -403,6 +558,14 @@ const CacheController = () => {
                   </thead>
 
                   <tbody>
+                    {Object.entries(caches).length === 0 && (
+                      <tr>
+                        <td colSpan="8" className="text-center py-5 text-muted">
+                          No cache entries were returned by the dashboard endpoint.
+                        </td>
+                      </tr>
+                    )}
+
                     {Object.entries(caches).map(([cacheName, cache]) => {
                       const cfg = getHealthConfig(cache.healthStatus);
                       const hitRate = Math.min(Number(cache.hitRate || 0), 100);

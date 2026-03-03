@@ -31,6 +31,12 @@ export default class CacheService extends ApiService {
     }).then(res => res.data);
   }
 
+  static async getCacheHealth() {
+    return axios.get(`${this.BASE_URL}/admin/cache/health`, {
+      headers: this.getHeader(),
+    }).then(res => res.data);
+  }
+
   // ✅ GENERATE ACTIVITY (only if backend exists)
   static async generateCacheActivity() {
     return axios.post(`${this.BASE_URL}/admin/cache/generate-activity`, {}, {
@@ -57,4 +63,3 @@ export default class CacheService extends ApiService {
     }).then(res => res.data);
   }
 }
-
