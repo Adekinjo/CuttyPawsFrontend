@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../service/AuthService";
-import '../../style/Login.css';
+import "../../style/Login.css";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
-        email: '',
-        password: '',
+        email: "",
+        password: "",
         rememberMe: false
     });
-    const [verificationCode, setVerificationCode] = useState('');
+    const [verificationCode, setVerificationCode] = useState("");
     const [showVerificationPopup, setShowVerificationPopup] = useState(false);
-    const [message, setMessage] = useState('');
-    const [verificationError, setVerificationError] = useState('');
+    const [message, setMessage] = useState("");
+    const [verificationError, setVerificationError] = useState("");
     const [remainingTime, setRemainingTime] = useState("10:00");
     const [isResending, setIsResending] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -20,35 +20,38 @@ const LoginPage = () => {
     const [remainingAttempts, setRemainingAttempts] = useState(5);
     const navigate = useNavigate();
 
-    // Countdown timer
     useEffect(() => {
         let timer;
         if (showVerificationPopup && remainingTime !== "Expired" && remainingTime !== "No code") {
             timer = setInterval(() => {
-                const [minutes, seconds] = remainingTime.split(':').map(Number);
-                let totalSeconds = minutes * 60 + seconds - 1;
-                
+                const [minutes, seconds] = remainingTime.split(":").map(Number);
+                const totalSeconds = minutes * 60 + seconds - 1;
+
                 if (totalSeconds <= 0) {
                     setRemainingTime("Expired");
                     setVerificationError("Verification code expired. Please request a new one.");
                 } else {
                     const newMinutes = Math.floor(totalSeconds / 60);
                     const newSeconds = totalSeconds % 60;
-                    setRemainingTime(`${newMinutes.toString().padStart(2, '0')}:${newSeconds.toString().padStart(2, '0')}`);
+                    setRemainingTime(
+                        `${newMinutes.toString().padStart(2, "0")}:${newSeconds
+                            .toString()
+                            .padStart(2, "0")}`
+                    );
                 }
             }, 1000);
         }
-        
+
         return () => clearInterval(timer);
     }, [showVerificationPopup, remainingTime]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData({ 
-            ...formData, 
-            [name]: type === 'checkbox' ? checked : value 
+        setFormData({
+            ...formData,
+            [name]: type === "checkbox" ? checked : value
         });
-        if (message) setMessage('');
+        if (message) setMessage("");
     };
 
     const togglePasswordVisibility = () => {
@@ -57,7 +60,7 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage('');
+        setMessage("");
         setIsLoading(true);
 
         if (!formData.email || !formData.password) {
@@ -86,9 +89,8 @@ const LoginPage = () => {
                 setMessage(response.message || "Login failed");
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 
-                               error.message || 
-                               "Login failed. Please try again.";
+            const errorMessage =
+                error.response?.data?.message || error.message || "Login failed. Please try again.";
             setMessage(errorMessage);
         } finally {
             setIsLoading(false);
@@ -97,22 +99,24 @@ const LoginPage = () => {
 
     const handleResendCode = async () => {
         if (isResending) return;
-        
+
         setIsResending(true);
-        setVerificationError('');
+        setVerificationError("");
         try {
             const response = await ApiService.resendVerificationCode({
                 email: formData.email,
                 password: formData.password
             });
-            
+
             setRemainingTime(response.remainingTime || "10:00");
             setRemainingAttempts(5);
-            setVerificationCode('');
-            setVerificationError('');
+            setVerificationCode("");
+            setVerificationError("");
             setMessage("New verification code sent to your email");
         } catch (error) {
-            setVerificationError("Failed to resend code: " + (error.response?.data?.message || "Please try again"));
+            setVerificationError(
+                `Failed to resend code: ${error.response?.data?.message || "Please try again"}`
+            );
         } finally {
             setIsResending(false);
         }
@@ -125,43 +129,42 @@ const LoginPage = () => {
         }
 
         setIsLoading(true);
-        setVerificationError('');
+        setVerificationError("");
 
         try {
             const verifyData = {
                 email: formData.email,
                 password: formData.password,
                 rememberMe: formData.rememberMe,
-                verificationCode: verificationCode
+                verificationCode
             };
 
-            // ✅ Use verify-code endpoint instead of login
             const response = await ApiService.verifyCode(verifyData);
-            
+
             if (response.token) {
                 handleLoginSuccess(response, formData.rememberMe);
                 setShowVerificationPopup(false);
-                setVerificationError('');
+                setVerificationError("");
             } else if (response.requiresVerification) {
                 setVerificationError(response.message || "Invalid verification code");
                 setRemainingTime(response.remainingTime || remainingTime);
                 setRemainingAttempts(response.remainingAttempts || remainingAttempts - 1);
-                
+
                 if (response.message?.includes("Too many wrong attempts")) {
                     setVerificationError(response.message);
                 }
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 
-                            "Invalid verification code. Please try again.";
+            const errorMessage =
+                error.response?.data?.message || "Invalid verification code. Please try again.";
             setVerificationError(errorMessage);
-            
+
             if (error.response?.data?.remainingAttempts) {
                 setRemainingAttempts(error.response.data.remainingAttempts);
             } else {
-                setRemainingAttempts(prev => Math.max(0, prev - 1));
+                setRemainingAttempts((prev) => Math.max(0, prev - 1));
             }
-            
+
             if (error.response?.data?.remainingTime) {
                 setRemainingTime(error.response.data.remainingTime);
             }
@@ -172,261 +175,254 @@ const LoginPage = () => {
 
     const handleLoginSuccess = (response, rememberMe) => {
         setMessage("Login successful!");
-        
-        // Store tokens and user data
-        localStorage.setItem('token', response.token);
-        if (response.refreshToken) {
-            localStorage.setItem('refreshToken', response.refreshToken);
-        }
-        localStorage.setItem('role', response.role);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        localStorage.setItem('rememberMe', rememberMe.toString()); // Store remember me preference
 
-        // Setup automatic token refresh and inactivity logout
+        localStorage.setItem("token", response.token);
+        if (response.refreshToken) {
+            localStorage.setItem("refreshToken", response.refreshToken);
+        }
+        localStorage.setItem("role", response.role);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("rememberMe", rememberMe.toString());
+
         ApiService.setupAxiosInterceptors();
         ApiService.setupInactivityLogout();
 
         setTimeout(() => navigate("/", { replace: true }), 1500);
     };
 
-
-
     const closeVerificationPopup = () => {
         setShowVerificationPopup(false);
-        setVerificationCode('');
-        setVerificationError('');
+        setVerificationCode("");
+        setVerificationError("");
         setRemainingTime("10:00");
         setRemainingAttempts(5);
     };
 
-    const shouldShowRequestNewCode = verificationError?.includes("Too many wrong attempts") || 
-                                   remainingAttempts <= 0;
+    const shouldShowRequestNewCode =
+        verificationError?.includes("Too many wrong attempts") || remainingAttempts <= 0;
+
+    const alertClassName = message.includes("successful")
+        ? "alert-success"
+        : message.includes("sent")
+          ? "alert-info"
+          : "alert-danger";
 
     return (
-        <div className="container-fluid min-vh-100 bg-light d-flex align-items-center">
-            <div className="container">
-                <div className="row justify-content-center">
-                    <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
-                        {/* Main Login Card */}
-                        <div className="card shadow-lg border-0">
-                            <div className="card-body p-4 p-md-5">
-                                <div className="text-center mb-4">
-                                    <h2 className="card-title fw-bold text-primary mb-2">Welcome Back</h2>
-                                    <p className="text-muted">Sign in to your account</p>
-                                </div>
-
-                                {/* Alert Messages */}
-                                {message && (
-                                    <div className={`alert ${
-                                        message.includes("successful") ? "alert-success" : 
-                                        message.includes("sent") ? "alert-info" : "alert-danger"
-                                    } alert-dismissible fade show`} role="alert">
-                                        {message}
-                                        <button 
-                                            type="button" 
-                                            className="btn-close" 
-                                            onClick={() => setMessage('')}
-                                        ></button>
-                                    </div>
-                                )}
-
-                                {/* Login Form */}
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-3">
-                                        <label htmlFor="email" className="form-label fw-semibold">
-                                            Email Address
-                                        </label>
-                                        <input
-                                            type="email"
-                                            id="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            placeholder="Enter your email"
-                                            required
-                                            className="form-control form-control-lg"
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <label htmlFor="password" className="form-label fw-semibold">
-                                            Password
-                                        </label>
-                                        <div className="input-group">
-                                            <input
-                                                type={showPassword ? "text" : "password"}
-                                                id="password"
-                                                name="password"
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                placeholder="Enter your password"
-                                                required
-                                                className="form-control form-control-lg"
-                                                disabled={isLoading}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={togglePasswordVisibility}
-                                                className="btn btn-outline-secondary"
-                                                disabled={isLoading}
-                                            >
-                                                {showPassword ? "🙈" : "👁️"}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <div className="form-check">
-                                            <input
-                                                type="checkbox"
-                                                name="rememberMe"
-                                                checked={formData.rememberMe}
-                                                onChange={handleChange}
-                                                className="form-check-input"
-                                                id="rememberMe"
-                                                disabled={isLoading}
-                                            />
-                                            <label className="form-check-label" htmlFor="rememberMe">
-                                                Remember me for 30 days
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <button 
-                                        type="submit" 
-                                        className={`btn btn-primary btn-lg w-100 mb-3 ${isLoading ? 'disabled' : ''}`}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                                                Signing in...
-                                            </>
-                                        ) : (
-                                            "Sign In"
-                                        )}
-                                    </button>
-
-                                    <div className="text-center">
-                                        <div className="mb-2">
-                                            <span className="text-muted">Don't have an account? </span>
-                                            <button 
-                                                type="button"
-                                                className="btn btn-link p-0 text-decoration-none"
-                                                onClick={() => !isLoading && navigate("/register")}
-                                                disabled={isLoading}
-                                            >
-                                                Sign up
-                                            </button>
-                                        </div>
-                                        <div>
-                                            <span className="text-muted">Forgot your password? </span>
-                                            <button 
-                                                type="button"
-                                                className="btn btn-link p-0 text-decoration-none"
-                                                onClick={() => !isLoading && navigate("/request-password")}
-                                                disabled={isLoading}
-                                            >
-                                                Reset it here
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+        <div className="login-page">
+            <div className="login-shell">
+                <div className="login-form-card">
+                    <div className="login-form-card__header">
+                        <img src="/faveicon.png" alt="CuttyPaws paw" className="login-form-card__logo" />
+                        <div>
+                            <p className="login-form-card__eyebrow">Welcome back</p>
+                            <h2>Sign in</h2>
                         </div>
                     </div>
+
+                    {message && (
+                        <div className={`alert ${alertClassName} login-alert`} role="alert">
+                            <span>{message}</span>
+                            <button type="button" className="btn-close" onClick={() => setMessage("")} />
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="login-form">
+                        <div className="login-form-field">
+                            <label htmlFor="email" className="form-label">
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="name@example.com"
+                                required
+                                className="form-control form-control-lg"
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        <div className="login-form-field">
+                            <div className="login-form-field__label-row">
+                                <label htmlFor="password" className="form-label">
+                                    Password
+                                </label>
+                                <button
+                                    type="button"
+                                    className="login-inline-link"
+                                    onClick={() => !isLoading && navigate("/request-password")}
+                                    disabled={isLoading}
+                                >
+                                    Forgot password?
+                                </button>
+                            </div>
+
+                            <div className="login-password-group">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder="Enter your password"
+                                    required
+                                    className="form-control form-control-lg"
+                                    disabled={isLoading}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={togglePasswordVisibility}
+                                    className="login-password-toggle"
+                                    disabled={isLoading}
+                                >
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="login-form-meta">
+                            <div className="form-check">
+                                <input
+                                    type="checkbox"
+                                    name="rememberMe"
+                                    checked={formData.rememberMe}
+                                    onChange={handleChange}
+                                    className="form-check-input"
+                                    id="rememberMe"
+                                    disabled={isLoading}
+                                />
+                                <label className="form-check-label" htmlFor="rememberMe">
+                                    Keep me signed in for 30 days
+                                </label>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className={`btn login-submit-button ${isLoading ? "disabled" : ""}`}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" />
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Enter CuttyPaws"
+                            )}
+                        </button>
+
+                        <div className="login-form-footer">
+                            <button
+                                type="button"
+                                className="login-inline-link"
+                                onClick={() => !isLoading && navigate("/request-password")}
+                                disabled={isLoading}
+                            >
+                                Forgot your password?
+                            </button>
+                            <p>New to the pet community?</p>
+                            <button
+                                type="button"
+                                className="login-create-account"
+                                onClick={() => !isLoading && navigate("/register")}
+                                disabled={isLoading}
+                            >
+                                Create your account
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            {/* Verification Modal */}
             {showVerificationPopup && (
-                <div className="modal fade show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+                <div className="modal fade show d-block login-modal" tabIndex="-1">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
+                        <div className="modal-content login-modal__content">
                             <div className="modal-header border-0 pb-0">
-                                <h5 className="modal-title fw-bold">Device Verification Required</h5>
-                                <button 
-                                    type="button" 
-                                    className="btn-close" 
+                                <div>
+                                    <p className="login-modal__eyebrow">Secure sign-in</p>
+                                    <h5 className="modal-title fw-bold">Device Verification Required</h5>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn-close"
                                     onClick={closeVerificationPopup}
                                     disabled={isLoading}
-                                ></button>
+                                />
                             </div>
-                            <div className="modal-body text-center py-4">
+                            <div className="modal-body py-4">
                                 <p className="text-muted mb-4">
-                                    We've sent a 6-digit verification code to your email
+                                    We sent a 6-digit verification code to your email before letting this
+                                    device into your CuttyPaws account.
                                 </p>
-                                
-                                {/* Timer and Attempts */}
-                                <div className="mb-4">
-                                    <div className={`badge ${remainingTime === "Expired" ? 'bg-danger' : 'bg-warning'} fs-6 mb-2`}>
-                                        {remainingTime === "Expired" ? "Code expired" : `Time left: ${remainingTime}`}
+
+                                <div className="login-modal__status">
+                                    <div
+                                        className={`badge ${
+                                            remainingTime === "Expired" ? "bg-danger" : "bg-warning text-dark"
+                                        } fs-6`}
+                                    >
+                                        {remainingTime === "Expired"
+                                            ? "Code expired"
+                                            : `Time left: ${remainingTime}`}
                                     </div>
                                     {remainingAttempts > 0 && remainingAttempts < 5 && (
-                                        <div className="alert alert-warning py-2 mt-2" role="alert">
-                                            <small>
-                                                <i className="bi bi-exclamation-triangle me-1"></i>
-                                                {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
-                                            </small>
+                                        <div className="alert alert-warning py-2 mt-3 mb-0" role="alert">
+                                            {remainingAttempts} attempt{remainingAttempts !== 1 ? "s" : ""} remaining
                                         </div>
                                     )}
                                 </div>
-                                
-                                {/* Code Input */}
+
                                 <div className="mb-4">
                                     <input
                                         type="text"
                                         value={verificationCode}
                                         onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                            const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                                             setVerificationCode(value);
-                                            setVerificationError('');
+                                            setVerificationError("");
                                         }}
                                         placeholder="Enter 6-digit code"
                                         maxLength="6"
-                                        className={`form-control form-control-lg text-center fs-4 letter-spacing ${
-                                            verificationError ? 'is-invalid' : ''
+                                        className={`form-control form-control-lg text-center login-verification-input ${
+                                            verificationError ? "is-invalid" : ""
                                         }`}
                                         disabled={isLoading || shouldShowRequestNewCode}
-                                        style={{letterSpacing: '0.5em'}}
                                     />
                                     {verificationError && (
-                                        <div className="invalid-feedback d-block">
-                                            {verificationError}
-                                        </div>
+                                        <div className="invalid-feedback d-block">{verificationError}</div>
                                     )}
                                 </div>
-                                
-                                {/* Resend Button */}
-                                <div className="mb-4">
-                                    <button 
-                                        type="button"
-                                        onClick={handleResendCode}
-                                        disabled={isResending || (remainingTime !== "Expired" && remainingTime > "01:00")}
-                                        className="btn btn-outline-primary btn-sm"
-                                    >
-                                        {isResending ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                                                Sending...
-                                            </>
-                                        ) : (
-                                            "Resend Code"
-                                        )}
-                                    </button>
-                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleResendCode}
+                                    disabled={isResending || (remainingTime !== "Expired" && remainingTime > "01:00")}
+                                    className="btn btn-outline-primary login-resend-button"
+                                >
+                                    {isResending ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" />
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        "Resend Code"
+                                    )}
+                                </button>
                             </div>
-                            <div className="modal-footer border-0 justify-content-center">
+                            <div className="modal-footer border-0">
                                 {shouldShowRequestNewCode ? (
-                                    <button 
+                                    <button
                                         onClick={handleResendCode}
-                                        className="btn btn-success me-2"
+                                        className="btn login-request-button"
                                         disabled={isResending}
                                     >
                                         {isResending ? (
                                             <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" />
                                                 Sending...
                                             </>
                                         ) : (
@@ -434,14 +430,14 @@ const LoginPage = () => {
                                         )}
                                     </button>
                                 ) : (
-                                    <button 
+                                    <button
                                         onClick={handleVerificationSubmit}
-                                        className="btn btn-primary me-2"
+                                        className="btn login-request-button"
                                         disabled={!verificationCode || verificationCode.length !== 6 || isLoading}
                                     >
                                         {isLoading ? (
                                             <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" />
                                                 Verifying...
                                             </>
                                         ) : (
@@ -449,7 +445,7 @@ const LoginPage = () => {
                                         )}
                                     </button>
                                 )}
-                                <button 
+                                <button
                                     onClick={closeVerificationPopup}
                                     className="btn btn-outline-secondary"
                                     disabled={isLoading}

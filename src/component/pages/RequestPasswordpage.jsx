@@ -1,42 +1,35 @@
-// src/pages/RequestResetPasswordPage.js
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "../../service/ApiService";
-import '../../style/RequestPasswordPage.css';
+import ApiService from "../../service/AuthService";
+import "../../style/RequestPasswordPage.css";
 
 const RequestResetPasswordPage = () => {
-    const [resetEmail, setResetEmail] = useState(''); // State for reset password email
-    const [message, setMessage] = useState(null); // Message for reset password
+    const [resetEmail, setResetEmail] = useState("");
+    const [message, setMessage] = useState(null);
     const navigate = useNavigate();
 
-    // Handle input changes for reset password form
     const handleResetEmailChange = (e) => {
         setResetEmail(e.target.value);
     };
 
-    // Handle reset password form submission
     const handleResetPassword = async (e) => {
         e.preventDefault();
 
-        // Check if email is filled
         if (!resetEmail) {
             setMessage("Email is required");
             return;
         }
 
         try {
-            // Call the reset password API
             const response = await ApiService.requestPasswordReset(resetEmail);
 
-            // If reset request is successful
             if (response.status === 200) {
                 setMessage("Password reset link sent to your email");
-                setResetEmail(''); // Clear the email field
+                setResetEmail("");
             } else {
                 setMessage("Failed to send reset link");
             }
         } catch (error) {
-            // Handle API errors
             if (error?.response?.status === 404) {
                 setMessage("User not found");
             } else {
@@ -45,34 +38,64 @@ const RequestResetPasswordPage = () => {
         }
     };
 
+    const messageClassName = message?.includes("sent")
+        ? "request-password-message request-password-message--success"
+        : "request-password-message request-password-message--error";
+
     return (
-        <div className="reset-password-page">
-            <h2>Reset Password</h2>
-            {message && <p className="message">{message}</p>}
+        <div className="request-password-page">
+            <div className="request-password-shell">
+                <div className="request-password-card">
+                    <div className="request-password-card__header">
+                        <img
+                            src="/faveicon.png"
+                            alt="CuttyPaws paw"
+                            className="request-password-card__logo"
+                        />
+                        <div>
+                            <p className="request-password-card__eyebrow">Password help</p>
+                            <h2>Request a reset link</h2>
+                        </div>
+                    </div>
 
-            <form onSubmit={handleResetPassword}>
-                <label>Email:</label>
-                <input
-                    type="email"
-                    name="resetEmail"
-                    value={resetEmail}
-                    onChange={handleResetEmailChange}
-                    required
-                />
+                    <p className="request-password-card__description">
+                        Enter the email linked to your CuttyPaws account and we will send you a
+                        password reset link.
+                    </p>
 
-                <button type="submit">Send Reset Link</button>
-            </form>
+                    {message && <div className={messageClassName}>{message}</div>}
 
-            <p className="back-to-login">
-                Remember your password?{" "}
-                <button
-                    type="button"
-                    onClick={() => navigate("/login")}
-                    className="back-button"
-                >
-                    Back to Login
-                </button>
-            </p>
+                    <form onSubmit={handleResetPassword} className="request-password-form">
+                        <div className="request-password-form__field">
+                            <label htmlFor="resetEmail">Email Address</label>
+                            <input
+                                id="resetEmail"
+                                type="email"
+                                name="resetEmail"
+                                value={resetEmail}
+                                onChange={handleResetEmailChange}
+                                placeholder="name@example.com"
+                                required
+                            />
+                        </div>
+
+                        <button type="submit" className="request-password-submit">
+                            Send Reset Link
+                        </button>
+                    </form>
+
+                    <div className="request-password-footer">
+                        <p>Remember your password?</p>
+                        <button
+                            type="button"
+                            onClick={() => navigate("/login")}
+                            className="request-password-inline-link"
+                        >
+                            Back to Login
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

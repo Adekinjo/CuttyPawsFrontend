@@ -1,72 +1,61 @@
-// src/pages/ResetPasswordPage.js
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ApiService from "../../service/ApiService"; // Ensure this path is correct
-import '../../style/ResetPassword.css'; // Ensure this path is correct
+import ApiService from "../../service/AuthService";
+import "../../style/ResetPassword.css";
 
 const ResetPasswordPage = () => {
-    const [newPassword, setNewPassword] = useState(''); // State for new password
-    const [confirmPassword, setConfirmPassword] = useState(''); // State for confirm password
-    const [showNewPassword, setShowNewPassword] = useState(false); // Toggle new password visibility
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle confirm password visibility
-    const [message, setMessage] = useState(null); // Message for reset password
-    const [searchParams] = useSearchParams(); // Extract token from URL
-    const token = searchParams.get("token"); // Get the token from the URL
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [message, setMessage] = useState(null);
+    const [searchParams] = useSearchParams();
+    const token = searchParams.get("token");
     const navigate = useNavigate();
 
-    // Log the token for debugging
     useEffect(() => {
         console.log("Token from URL:", token);
     }, [token]);
 
-    // Handle input changes for new password
     const handleNewPasswordChange = (e) => {
         setNewPassword(e.target.value);
     };
 
-    // Handle input changes for confirm password
     const handleConfirmPasswordChange = (e) => {
         setConfirmPassword(e.target.value);
     };
 
-    // Toggle new password visibility
     const toggleNewPasswordVisibility = () => {
         setShowNewPassword(!showNewPassword);
     };
 
-    // Toggle confirm password visibility
     const toggleConfirmPasswordVisibility = () => {
         setShowConfirmPassword(!showConfirmPassword);
     };
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
-    
-        // Check if passwords match
+
         if (newPassword !== confirmPassword) {
             setMessage("Passwords do not match");
             return;
         }
-    
-        // Check if token is present
+
         if (!token) {
             setMessage("Invalid or missing token");
             return;
         }
-    
+
         try {
-            // Call the reset password API
             const response = await ApiService.resetPassword(token, newPassword);
-    
-            // If reset is successful
+
             if (response.status === 200) {
                 setMessage("Password reset successfully");
-                setTimeout(() => navigate("/login"), 2000); // Redirect to login after 2 seconds
+                setTimeout(() => navigate("/login"), 2000);
             } else {
                 setMessage("Failed to reset password");
             }
         } catch (error) {
-            // Handle API errors
             if (error?.response?.status === 400) {
                 if (error.response.data.message === "Token has expired") {
                     setMessage("The password reset link has expired. Please request a new one.");
@@ -79,60 +68,92 @@ const ResetPasswordPage = () => {
         }
     };
 
+    const messageClassName = message?.includes("successfully")
+        ? "reset-password-message reset-password-message--success"
+        : "reset-password-message reset-password-message--error";
+
     return (
-        <div className="reset-password-container">
-            <div className="reset-password-card">
-                <h2>Reset Your Password</h2>
-                {message && <p className={message.includes("successfully") ? "success-message" : "error-message"}>{message}</p>}
-
-                <form onSubmit={handleResetPassword}>
-                    <div className="form-group">
-                        <label>New Password</label>
-                        <div className="password-input">
-                            <input
-                                type={showNewPassword ? "text" : "password"}
-                                value={newPassword}
-                                onChange={handleNewPasswordChange}
-                                placeholder="Enter new password"
-                                required
-                            />
-                            <span
-                                className="toggle-password"
-                                onClick={toggleNewPasswordVisibility}
-                            >
-                                {showNewPassword ? "🙈" : "👁️"}
-                            </span>
+        <div className="reset-password-page">
+            <div className="reset-password-shell">
+                <div className="reset-password-card">
+                    <div className="reset-password-card__header">
+                        <img
+                            src="/faveicon.png"
+                            alt="CuttyPaws paw"
+                            className="reset-password-card__logo"
+                        />
+                        <div>
+                            <p className="reset-password-card__eyebrow">Secure reset</p>
+                            <h2>Reset your password</h2>
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>Confirm Password</label>
-                        <div className="password-input">
-                            <input
-                                type={showConfirmPassword ? "text" : "password"}
-                                value={confirmPassword}
-                                onChange={handleConfirmPasswordChange}
-                                placeholder="Confirm new password"
-                                required
-                            />
-                            <span
-                                className="toggle-password"
-                                onClick={toggleConfirmPasswordVisibility}
-                            >
-                                {showConfirmPassword ? "🙈" : "👁️"}
-                            </span>
+                    <p className="reset-password-card__description">
+                        Choose a new password for your CuttyPaws account. Make sure both fields
+                        match before submitting.
+                    </p>
+
+                    {message && <div className={messageClassName}>{message}</div>}
+
+                    <form onSubmit={handleResetPassword} className="reset-password-form">
+                        <div className="reset-password-form__field">
+                            <label htmlFor="newPassword">New Password</label>
+                            <div className="reset-password-input-group">
+                                <input
+                                    id="newPassword"
+                                    type={showNewPassword ? "text" : "password"}
+                                    value={newPassword}
+                                    onChange={handleNewPasswordChange}
+                                    placeholder="Enter new password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="reset-password-toggle"
+                                    onClick={toggleNewPasswordVisibility}
+                                >
+                                    {showNewPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
                         </div>
+
+                        <div className="reset-password-form__field">
+                            <label htmlFor="confirmPassword">Confirm Password</label>
+                            <div className="reset-password-input-group">
+                                <input
+                                    id="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    value={confirmPassword}
+                                    onChange={handleConfirmPasswordChange}
+                                    placeholder="Confirm new password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="reset-password-toggle"
+                                    onClick={toggleConfirmPasswordVisibility}
+                                >
+                                    {showConfirmPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" className="reset-password-submit">
+                            Reset Password
+                        </button>
+                    </form>
+
+                    <div className="reset-password-footer">
+                        <p>Remember your password?</p>
+                        <button
+                            type="button"
+                            className="reset-password-inline-link"
+                            onClick={() => navigate("/login")}
+                        >
+                            Login here
+                        </button>
                     </div>
-
-                    <button type="submit" className="reset-button">
-                        Reset Password
-                    </button>
-                </form>
-
-                <p className="back-to-login">
-                    Remember your password?{" "}
-                    <span onClick={() => navigate("/login")}>Login here</span>
-                </p>
+                </div>
             </div>
         </div>
     );
