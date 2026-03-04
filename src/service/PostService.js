@@ -3,6 +3,21 @@ import axios from "axios";
 import ApiService from "./ApiService";
 
 export default class PostService extends ApiService {
+  static normalizeCursorPage(data) {
+    const postList = data?.posts || data?.postList || data?.content || [];
+    const nextCursor = data?.nextCursor || null;
+    const hasMore =
+      typeof data?.hasMore === "boolean"
+        ? data.hasMore
+        : Boolean(nextCursor) && postList.length > 0;
+
+    return {
+      ...data,
+      postList,
+      nextCursor,
+      hasMore,
+    };
+  }
 
   static async createPost(postData) {
     try {
@@ -66,13 +81,22 @@ export default class PostService extends ApiService {
     }
   }
 
-  static async getAllPosts() {
+  static async getAllPosts({ cursorCreatedAt = null, cursorId = null, limit = 20 } = {}) {
     try {
-      const response = await axios.get(
-        `${this.BASE_URL}/post/get-all`,
-        { headers: this.getHeader() }
-      );
-      return response.data;
+      const params = { limit };
+
+      // only send cursor params when we have them
+      if (cursorCreatedAt && cursorId) {
+        params.cursorCreatedAt = cursorCreatedAt; // must be ISO string
+        params.cursorId = cursorId;
+      }
+
+      const response = await axios.get(`${this.BASE_URL}/post/get-all`, {
+        params,
+        headers: this.getHeader(),
+      });
+
+      return this.normalizeCursorPage(response.data);
     } catch (error) {
       throw this.handleError(error);
     }
@@ -157,5 +181,4 @@ export default class PostService extends ApiService {
     return e;
   }
 }
-
 

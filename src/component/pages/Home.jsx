@@ -13,8 +13,17 @@ const Home = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMorePosts, setHasMorePosts] = useState(false);
+
+  const mergePosts = (existingPosts, incomingPosts) => {
+    const seenIds = new Set(existingPosts.map((post) => post.id));
+    const uniqueIncomingPosts = incomingPosts.filter((post) => !seenIds.has(post.id));
+    return [...existingPosts, ...uniqueIncomingPosts];
+  };
 
   // Redirect to HTTPS + www in production
   useEffect(() => {
@@ -47,10 +56,13 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const postsResponse = await PostService.getAllPosts();
         setPosts(postsResponse.postList || []);
+        setNextCursor(postsResponse.nextCursor || null);
+        setHasMorePosts(Boolean(postsResponse.hasMore));
       } catch (error) {
-        setError(error.response?.data?.message || "Unable to fetch posts");
+        setError(error.message || "Unable to fetch posts");
       } finally {
         setLoading(false);
       }
@@ -58,6 +70,28 @@ const Home = () => {
 
     fetchData();
   }, []);
+
+  const handleLoadMorePosts = async () => {
+    if (!hasMorePosts || loadingMore || !nextCursor) return;
+
+    try {
+      setLoadingMore(true);
+      setError(null);
+
+      const postsResponse = await PostService.getAllPosts({
+        cursorCreatedAt: nextCursor.createdAt,
+        cursorId: nextCursor.id,
+      });
+
+      setPosts((prevPosts) => mergePosts(prevPosts, postsResponse.postList || []));
+      setNextCursor(postsResponse.nextCursor || null);
+      setHasMorePosts(Boolean(postsResponse.hasMore));
+    } catch (error) {
+      setError(error.message || "Unable to load more posts");
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleCreatePost = () => {
     if (!currentUser) return navigate("/login");
@@ -140,17 +174,38 @@ const Home = () => {
                     </Card.Body>
                   </Card>
                 ) : (
-                  posts.map((post) => (
-                    <div key={post.id} className={`mb-4 ${styles.homePostItem}`}>
-                      <PostCard
-                        post={post}
-                        onDelete={handleDeletePost}
-                        onEdit={handleEditPost}
-                        isOwner={currentUser && post.ownerId === currentUser.id}
-                        currentUser={currentUser}
-                      />
-                    </div>
-                  ))
+                  <>
+                    {posts.map((post) => (
+                      <div key={post.id} className={`mb-4 ${styles.homePostItem}`}>
+                        <PostCard
+                          post={post}
+                          onDelete={handleDeletePost}
+                          onEdit={handleEditPost}
+                          isOwner={currentUser && post.ownerId === currentUser.id}
+                          currentUser={currentUser}
+                        />
+                      </div>
+                    ))}
+
+                    {hasMorePosts && (
+                      <div className="text-center mt-4">
+                        <Button
+                          variant="outline-primary"
+                          onClick={handleLoadMorePosts}
+                          disabled={loadingMore}
+                        >
+                          {loadingMore ? (
+                            <>
+                              <Spinner size="sm" animation="border" className="me-2" />
+                              Loading more posts...
+                            </>
+                          ) : (
+                            "Load More Posts"
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -172,4 +227,3 @@ const Home = () => {
 };
 
 export default Home;
-
