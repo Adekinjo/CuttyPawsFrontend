@@ -4,7 +4,10 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useMemo, useRef, useState, useCallback, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
+  FaHome,
+  FaPlus,
   FaSearch,
+  FaSignInAlt,
   FaShoppingCart,
   FaUserCircle,
   FaBell,
@@ -191,6 +194,14 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const handleCreatePost = () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    navigate("/create-post");
+  };
+
   // Handle nav link click (for closing navbar)
   const handleNavLinkClick = (onClick) => {
     return () => {
@@ -199,30 +210,29 @@ const Navbar = () => {
     };
   };
 
+  const mobileRoleLink = isAdmin
+    ? { to: "/admin", label: "Admin", icon: <FaUserCircle /> }
+    : isSupport
+      ? { to: "/support", label: "Support", icon: <FaUserCircle /> }
+      : isCompany
+        ? { to: "/company/company-dashboard", label: "Seller", icon: <FaUserCircle /> }
+        : null;
+
   return (
+    <>
     <nav className="navbar navbar-expand-lg cutty-navbar sticky-top">
       <div className="container-fluid">
         {/* ===== Mobile Header ===== */}
-        <div className="d-flex d-lg-none justify-content-between align-items-center w-100">
+        <div className="d-flex d-lg-none justify-content-between align-items-center w-100 cutty-mobile-header">
           <NavLink to="/" className="cutty-brand" onClick={closeNavbar}>
             <img className="cutty-brand-logo" src={logo} alt="CuttyPaws" />
           </NavLink>
 
-          <div className="d-flex align-items-center gap-1">
-            <NavLink to="/categories" className="nav-link" onClick={closeNavbar}>
-              Shop
-            </NavLink>
-            {isAuthenticated && (
-              <button
-                className="cutty-icon-btn position-relative"
-                onClick={() => navigate("/notifications")}
-                aria-label="Notifications"
-              >
-                <FaBell />
-                {unreadCount > 0 && (
-                  <span className="cutty-nav-badge">{unreadCount}</span>
-                )}
-              </button>
+          <div className="cutty-mobile-header-actions">
+            {mobileRoleLink && (
+              <NavLink to={mobileRoleLink.to} className="cutty-icon-btn" onClick={closeNavbar}>
+                {mobileRoleLink.icon}
+              </NavLink>
             )}
 
             <NavLink to="/cart-view" className="cutty-icon-btn position-relative" onClick={closeNavbar}>
@@ -231,13 +241,6 @@ const Navbar = () => {
                 <span className="cutty-nav-badge">{totalItemsInCart}</span>
               )}
             </NavLink>
-
-            <button
-              className="navbar-toggler"
-              onClick={toggleNavbar}
-            >
-              <span className="navbar-toggler-icon" />
-            </button>
           </div>
         </div>
 
@@ -247,12 +250,12 @@ const Navbar = () => {
         </NavLink>
 
         {/* ===== UPDATED: Search with suggestions dropdown ===== */}
-        <div className="order-lg-1 flex-grow-1 mb-2 mb-lg-0">
-          <form className="d-flex position-relative" onSubmit={handleSearchSubmit}>
-            <div className="input-group">
+        <div className="order-lg-1 flex-grow-1 mb-0 cutty-search-wrap">
+          <form className="d-flex position-relative cutty-search-form" onSubmit={handleSearchSubmit}>
+            <div className="input-group cutty-search-shell">
               <input
                 type="text"
-                className="form-control"
+                className="form-control cutty-search-input"
                 placeholder="Search products, pets or posts..."
                 value={searchValue}
                 onChange={handleSearchChange}
@@ -260,25 +263,25 @@ const Navbar = () => {
                 onBlur={() => setTimeout(() => setIsInputFocused(false), 200)}
                 aria-label="Search products"
               />
-              <button className="btn btn-outline-secondary" type="submit">
+              <button className="btn btn-outline-secondary cutty-search-action cutty-search-submit" type="submit" aria-label="Search">
                 <FaSearch />
               </button>
-              <div className="btn btn-outline-secondary">
+              <div className="btn btn-outline-secondary cutty-search-action cutty-search-voice" aria-hidden="true">
                 <VoiceSearch onSearch={handleVoiceSearch} />
               </div>
             </div>
 
             {/* Search Suggestions */}
             {suggestions.length > 0 && isInputFocused && (
-              <div className="position-absolute top-100 start-0 w-100 bg-white border rounded shadow-sm mt-1 z-3">
+              <div className="position-absolute top-100 start-0 w-100 cutty-search-suggestions z-3">
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={`${suggestion.type}-${suggestion.id}-${index}`}
-                    className="p-2 hover-bg-light cursor-pointer d-flex align-items-center gap-2 text-truncate"
+                    className="cutty-suggestion-item d-flex align-items-center gap-2 text-truncate"
                     onClick={() => handleSuggestionClick(suggestion)}
                     onMouseDown={(e) => e.preventDefault()}
                   >
-                    <div className="text-secondary">
+                    <div className="cutty-suggestion-icon">
                       {suggestion.type === 'product' && <FaBox className="ms-1" />}
                       {suggestion.type === 'category' && <FaTags className="ms-1" />}
                       {suggestion.type === 'subcategory' && <FaLayerGroup className="ms-1" />}
@@ -288,7 +291,7 @@ const Navbar = () => {
                       <img
                         src={suggestion.imageUrl || '/placeholder-product.jpg'}
                         alt={suggestion.name}
-                        className="suggestion-thumbnail"
+                        className="suggestion-thumbnail cutty-suggestion-thumbnail"
                         style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                       />
                     )}
@@ -296,7 +299,7 @@ const Navbar = () => {
                     <div className="flex-grow-1">
                       <div className="d-flex justify-content-between align-items-center">
                         <span className="text-truncate">{suggestion.name}</span>
-                        <span className="badge bg-secondary text-capitalize ms-2">
+                        <span className="badge cutty-suggestion-badge text-capitalize ms-2">
                           {suggestion.type}
                         </span>
                       </div>
@@ -368,6 +371,56 @@ const Navbar = () => {
         </div>
       </div>
     </nav>
+
+    <div
+      className={`cutty-mobile-bottom-nav d-lg-none ${
+        "cutty-mobile-bottom-nav--five"
+      }`}
+    >
+      <NavLink to="/" className="cutty-mobile-bottom-nav__item" onClick={closeNavbar}>
+        <FaHome />
+        <span>Home</span>
+      </NavLink>
+
+      <NavLink to="/categories" className="cutty-mobile-bottom-nav__item" onClick={closeNavbar}>
+        <FaTags />
+        <span>Shop</span>
+      </NavLink>
+
+      <button
+        type="button"
+        className="cutty-mobile-bottom-nav__item cutty-mobile-bottom-nav__item--button"
+        onClick={handleCreatePost}
+      >
+        <FaPlus />
+        <span>Post</span>
+      </button>
+
+      <NavLink
+        to={isAuthenticated ? "/customer-profile" : "/login"}
+        className="cutty-mobile-bottom-nav__item"
+        onClick={closeNavbar}
+      >
+        {isAuthenticated ? <FaUserCircle /> : <FaSignInAlt />}
+        <span>{isAuthenticated ? "Profile" : "Login"}</span>
+      </NavLink>
+
+      <button
+        type="button"
+        className="cutty-mobile-bottom-nav__item cutty-mobile-bottom-nav__item--button position-relative"
+        onClick={() => navigate(isAuthenticated ? "/notifications" : "/login")}
+        aria-label="Notifications"
+      >
+        <FaBell />
+        <span>Alerts</span>
+        {isAuthenticated && unreadCount > 0 && (
+          <span className="cutty-nav-badge">{unreadCount}</span>
+        )}
+      </button>
+    </div>
+
+    <div className="cutty-mobile-nav-spacer d-lg-none" />
+    </>
   );
 };
 

@@ -135,7 +135,7 @@ const Home = () => {
         <meta name="twitter:image" content="https://www.cuttypaws.com/og-image.png" />
       </Helmet>
 
-      <Container className={`${styles.homeContent} pt-4 pb-5`}>
+      <Container className={`${styles.homeContent} pt-0 pt-lg-4 pb-5`}>
         <Row className="justify-content-center">
           <Col lg={7} md={9} sm={12}>
 
@@ -176,7 +176,7 @@ const Home = () => {
                 ) : (
                   <>
                     {posts.map((post) => (
-                      <div key={post.id} className={`mb-4 ${styles.homePostItem}`}>
+                      <div key={post.id} className={styles.homePostItem}>
                         <PostCard
                           post={post}
                           onDelete={handleDeletePost}

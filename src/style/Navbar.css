@@ -1,14 +1,19 @@
 :root {
   --cutty-orange: #ff7b54;
   --cutty-orange-soft: #fff1ec;
+  --cutty-ink: #24324a;
+  --cutty-search-border: rgba(255, 123, 84, 0.22);
+  --cutty-search-shadow: 0 14px 34px rgba(255, 123, 84, 0.14);
 }
 
 .cutty-navbar {
-  background: #fff;
-  border-bottom: 1px solid #f1f1f1;
-  box-shadow: 0 4px 14px rgba(0,0,0,.06);
-  padding-top: .25rem;
-  padding-bottom: .25rem;
+  background:
+    radial-gradient(circle at top left, rgba(255, 241, 236, 0.95), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #fffaf7 100%);
+  border-bottom: 1px solid rgba(255, 123, 84, 0.08);
+  box-shadow: 0 6px 24px rgba(36, 50, 74, 0.08);
+  padding-top: 0.4rem;
+  padding-bottom: 0.45rem;
 }
 
 /* Brand */
@@ -23,17 +28,14 @@
 }
 
 .cutty-brand-logo {
-
   width: 150px;
   height: 500px;
   object-fit: cover;
   image-rendering: -webkit-optimize-contrast;
   display: block;
-
   width: 9.4em;
   height: 2.4rem;
   object-fit: cover;
-
 }
 
 .cutty-brand-badge {
@@ -54,26 +56,127 @@
 }
 
 /* Search */
-.cutty-search {
+.cutty-search-wrap {
   display: flex;
-  flex: 1;
-  max-width: 520px;
-  margin: .75rem auto;
+  align-items: center;
 }
 
-.cutty-search input {
-  flex: 1;
-  border-radius: 999px 0 0 999px;
-  border: 1px solid #ddd;
-  padding: .55rem 1rem;
+.cutty-search-form {
+  width: 100%;
 }
 
-.cutty-search button {
-  border-radius: 0 999px 999px 0;
-  border: 1px solid #ddd;
-  background: var(--cutty-orange);
-  color: white;
-  padding: 0 .9rem;
+.cutty-search-shell {
+  position: relative;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--cutty-search-border);
+  border-radius: 22px;
+  box-shadow: var(--cutty-search-shadow);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cutty-search-shell:focus-within {
+  border-color: rgba(255, 123, 84, 0.5);
+  box-shadow: 0 18px 40px rgba(255, 123, 84, 0.18);
+  transform: translateY(-1px);
+}
+
+.cutty-search-input {
+  min-height: 52px;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--cutty-ink) !important;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.95rem 1.1rem 0.95rem 1.2rem;
+  box-shadow: none !important;
+}
+
+.cutty-search-input::placeholder {
+  color: #d6886c !important;
+  font-weight: 500;
+}
+
+.cutty-search-input:focus {
+  box-shadow: none !important;
+}
+
+.cutty-search-action {
+  min-width: 54px;
+  min-height: 52px;
+  border: 0 !important;
+  border-left: 1px solid rgba(255, 123, 84, 0.14) !important;
+  background: transparent !important;
+  color: var(--cutty-orange) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.cutty-search-action svg {
+  font-size: 1.1rem;
+}
+
+.cutty-search-submit:hover,
+.cutty-search-submit:focus,
+.cutty-search-voice:hover,
+.cutty-search-voice:focus-within {
+  background: linear-gradient(180deg, #fff2ec 0%, #ffe7de 100%) !important;
+  color: #ef6b43 !important;
+}
+
+.cutty-search-voice button {
+  width: 100%;
+  height: 100%;
+  color: inherit !important;
+}
+
+.cutty-search-suggestions {
+  margin-top: 0.55rem;
+  border: 1px solid rgba(255, 123, 84, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 44px rgba(36, 50, 74, 0.12);
+  padding: 0.45rem;
+  backdrop-filter: blur(12px);
+}
+
+.cutty-suggestion-item {
+  padding: 0.75rem 0.8rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.cutty-suggestion-item:hover {
+  background: #fff2ec;
+  transform: translateX(2px);
+}
+
+.cutty-suggestion-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff2ec 0%, #ffe4d8 100%);
+  color: var(--cutty-orange);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cutty-suggestion-thumbnail {
+  border-radius: 12px;
+}
+
+.cutty-suggestion-badge {
+  background: #fff1ec !important;
+  color: #d9653f !important;
+  border: 1px solid rgba(255, 123, 84, 0.16);
+  font-weight: 700;
 }
 
 /* Icons */
@@ -131,7 +234,7 @@
 
 /* Navbar search color alignment */
 .cutty-navbar .form-control {
-  color: var(--cutty-orange);
+  color: var(--cutty-ink);
   border-color: #ffd1c2;
 }
 
@@ -149,4 +252,116 @@
   background-color: var(--cutty-orange);
   border-color: var(--cutty-orange);
   color: #fff;
+}
+
+@media (max-width: 991.98px) {
+  .cutty-mobile-header {
+    margin-bottom: 0;
+  }
+
+  .cutty-mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+  }
+
+  .cutty-navbar .navbar-collapse {
+    display: none !important;
+  }
+
+  .cutty-navbar .order-lg-1 {
+    width: 100%;
+    order: 2;
+    margin-bottom: 0 !important;
+  }
+
+  .cutty-navbar .container-fluid {
+    row-gap: 0;
+  }
+
+  .cutty-navbar form {
+    margin-bottom: 0;
+  }
+
+  .cutty-navbar .input-group {
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .cutty-search-shell {
+    border-radius: 18px;
+    box-shadow: 0 10px 24px rgba(255, 123, 84, 0.12);
+  }
+
+  .cutty-search-input {
+    min-height: 48px;
+    font-size: 0.98rem;
+    padding-left: 1rem;
+  }
+
+  .cutty-search-action {
+    min-width: 50px;
+    min-height: 48px;
+  }
+
+  .cutty-search-suggestions {
+    border-radius: 18px;
+    margin-top: 0.45rem;
+  }
+
+  .cutty-mobile-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1035;
+    display: grid;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.98);
+    border-top: 1px solid #ececec;
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, .08);
+    padding: .45rem .35rem calc(.45rem + env(safe-area-inset-bottom));
+    backdrop-filter: blur(14px);
+  }
+
+  .cutty-mobile-bottom-nav--five {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .cutty-mobile-bottom-nav__item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .2rem;
+    color: #6f6f6f;
+    text-decoration: none;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .3rem .2rem;
+    border: none;
+    background: transparent;
+  }
+
+  .cutty-mobile-bottom-nav__item svg {
+    font-size: 1.18rem;
+  }
+
+  .cutty-mobile-bottom-nav__item.active {
+    color: var(--cutty-orange);
+  }
+
+  .cutty-mobile-bottom-nav__item--button {
+    width: 100%;
+  }
+
+  .cutty-mobile-bottom-nav .cutty-nav-badge {
+    top: 0;
+    right: 12%;
+  }
+
+  .cutty-mobile-nav-spacer {
+    height: 86px;
+  }
 }
