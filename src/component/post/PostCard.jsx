@@ -21,7 +21,7 @@ import {
   FaPause,
   FaPlay
 } from "react-icons/fa";
-import { PawPrint, MessageCircle, Share2, Bookmark, Volume2, VolumeX, RotateCcw, RotateCw, Cookie, Bone, Heart } from "lucide-react";
+import { PawPrint, MessageSquareHeart, Send, Bookmark, Volume2, VolumeX, RotateCcw, RotateCw, Cookie, Bone, Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommentService from "../../service/CommentsService";
 import PostLikeService from "../../service/LikesService";
@@ -966,7 +966,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
               onClick={toggleComments}
               aria-label="Open comments"
             >
-              <MessageCircle size={24} className="action-icon" />
+              <MessageSquareHeart size={24} className="action-icon" />
             </Button>
 
             <Button
@@ -975,7 +975,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
               onClick={handleShare}
               aria-label="Share post"
             >
-              <Share2 size={24} className="action-icon" />
+              <Send size={24} className="action-icon" />
             </Button>
           </div>
 
