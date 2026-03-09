@@ -4,6 +4,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./component/context/CartContext.jsx";
 import Navbar from "./component/common/Navbar.jsx";
 import LoadingSpinner from "./component/common/LoadingSpinner.jsx";
+import SeoMeta from "./component/common/SeoMeta.jsx";
 import CompanyRegister from "./component/company/CompanyResgister.jsx";
 import SessionExpired from './component/pages/SessionExpired.jsx'; 
 import ApiService from "./service/AuthService.js";
@@ -114,6 +115,7 @@ function App() {
 
   return (
     <CartProvider>
+      <SeoMeta />
       <Navbar />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>

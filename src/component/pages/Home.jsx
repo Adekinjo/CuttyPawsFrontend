@@ -25,16 +25,6 @@ const Home = () => {
     return [...existingPosts, ...uniqueIncomingPosts];
   };
 
-  // Redirect to HTTPS + www in production
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") {
-      const { protocol, hostname } = window.location;
-      if (protocol !== "https:" || !hostname.startsWith("www.")) {
-      const newUrl = `https://www.cuttypaws.com${location.pathname}${location.search}${location.hash}`;        window.location.replace(newUrl);
-      }
-    }
-  }, [location.pathname]);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.search]);
