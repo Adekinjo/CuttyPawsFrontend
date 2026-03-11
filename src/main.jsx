@@ -6,12 +6,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import App from './App.jsx';
 
+const appTree = import.meta.env.DEV ? (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+) : (
+  <HelmetProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </HelmetProvider>
+);
+
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-      <HelmetProvider>
-        <BrowserRouter> 
-          <App />
-        </BrowserRouter>
-      </HelmetProvider>
-  </StrictMode>,
+  import.meta.env.DEV ? appTree : <StrictMode>{appTree}</StrictMode>,
 );

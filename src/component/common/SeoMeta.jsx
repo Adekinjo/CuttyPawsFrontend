@@ -1,10 +1,21 @@
 import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const SITE_URL = "https://www.cuttypaws.com";
+const BRAND_NAME = "CuttyPaws";
+const BRAND_VARIANTS = [
+  "Cutty Paws",
+  "cuttypaws",
+  "cuttypaw",
+  "cutypaws",
+  "cutypaw",
+  "cutepaws",
+  "cutiepaws",
+];
 const DEFAULT_TITLE = "CuttyPaws | Social Pet Community & Pet Accessories Marketplace";
 const DEFAULT_DESCRIPTION =
-  "CuttyPaws connects pet owners to share pet moments and discover trusted pet accessories, essentials, and deals.";
+  "CuttyPaws (Cutty Paws) connects pet owners to share pet moments and discover trusted pet accessories, essentials, and deals.";
 
 const PAGE_META = {
   "/": {
@@ -15,6 +26,14 @@ const PAGE_META = {
   "/categories": {
     title: "Shop Pet Categories | CuttyPaws",
     description: "Browse pet products by category on CuttyPaws and find essentials for dogs, cats, birds, fish, and more.",
+  },
+  "/login": {
+    title: "Login | CuttyPaws",
+    description: "Login to your CuttyPaws account to post, shop, and manage your pet profile.",
+  },
+  "/register": {
+    title: "Register | CuttyPaws",
+    description: "Create your CuttyPaws account to join the pet community and start shopping pet products.",
   },
   "/about-us": {
     title: "About CuttyPaws",
@@ -52,8 +71,6 @@ const PAGE_META = {
 
 const NOINDEX_PREFIXES = ["/admin", "/support", "/company", "/settings", "/notifications", "/edit-", "/add-"];
 const NOINDEX_EXACT = new Set([
-  "/login",
-  "/register",
   "/request-password",
   "/reset-password",
   "/payment-callback",
@@ -75,11 +92,69 @@ const SeoMeta = () => {
   const robots = shouldNoIndex(pathname) ? "noindex,nofollow" : "index,follow";
   const title = pageMeta.title || DEFAULT_TITLE;
   const description = pageMeta.description || DEFAULT_DESCRIPTION;
+  const isDev = import.meta.env.DEV;
+  const keywords =
+    "CuttyPaws, Cutty Paws, cuttypaws, cuttypaw, cutypaws, cutypaw, cutepaws, cutiepaws, pet community, pet shop";
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: BRAND_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/og-image.png`,
+    alternateName: BRAND_VARIANTS,
+  };
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BRAND_NAME,
+    alternateName: BRAND_VARIANTS,
+    url: SITE_URL,
+    inLanguage: "en-US",
+  };
+  const navSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "SiteNavigationElement",
+        position: 1,
+        name: "Login",
+        url: `${SITE_URL}/login`,
+      },
+      {
+        "@type": "SiteNavigationElement",
+        position: 2,
+        name: "Register",
+        url: `${SITE_URL}/register`,
+      },
+      {
+        "@type": "SiteNavigationElement",
+        position: 3,
+        name: "Categories",
+        url: `${SITE_URL}/categories`,
+      },
+      {
+        "@type": "SiteNavigationElement",
+        position: 4,
+        name: "Products",
+        url: `${SITE_URL}/products-list`,
+      },
+    ],
+  };
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+
+  if (isDev) {
+    return null;
+  }
 
   return (
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
       <meta name="robots" content={robots} />
       <link rel="canonical" href={canonical} />
 
@@ -94,6 +169,15 @@ const SeoMeta = () => {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={`${SITE_URL}/og-image.png`} />
+      <script type="application/ld+json">
+        {JSON.stringify(organizationSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(websiteSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(navSchema)}
+      </script>
     </Helmet>
   );
 };
