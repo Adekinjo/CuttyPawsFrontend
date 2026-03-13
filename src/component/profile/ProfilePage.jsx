@@ -65,6 +65,23 @@ export default function ProfilePage() {
 
   const [uploading, setUploading] = useState(false);
 
+  function normalizePetList(response) {
+    const list = response?.petList || response?.pets || response?.data || response || [];
+    return Array.isArray(list) ? list : [];
+  }
+
+  function getPetOwnerId(pet) {
+    return (
+      pet?.userId ||
+      pet?.ownerId ||
+      pet?.user_id ||
+      pet?.owner_id ||
+      pet?.user?.id ||
+      pet?.owner?.id ||
+      null
+    );
+  }
+
   useEffect(() => {
     // sync tab from URL when user navigates settings row -> /profile?tab=wishlist
     if (qsTab) setActiveTab(qsTab);
@@ -106,7 +123,9 @@ export default function ProfilePage() {
       // posts separately (for better perceived perf)
       fetchMyPosts();
 
-      fetchMyPets();
+      if (petsFromUserInfo.length === 0 && u?.id) {
+        fetchMyPets(u.id);
+      }
 
       if (u?.id) {
         try {
@@ -165,22 +184,44 @@ export default function ProfilePage() {
     }
   }
 
-  async function fetchMyPets() {
-  try {
-    const res = await PetService.getMyPets();
-    // Adjust based on your backend shape:
-    const list = res?.petList || res?.pets || res?.data || res || [];
-    console.log("Profile pets from /pet/my-pets:", {
-      petCount: Array.isArray(list) ? list.length : 0,
-      pets: list,
-      rawResponse: res,
-    });
-    setPets(Array.isArray(list) ? list : []);
-  } catch (e) {
-    console.error("Failed to load pets:", e);
-    setPets([]);
+  async function fetchMyPets(userId) {
+    try {
+      const res = await PetService.getMyPets();
+      const list = normalizePetList(res);
+      console.log("Profile pets from /pet/my-pets:", {
+        userId,
+        petCount: list.length,
+        pets: list,
+        rawResponse: res,
+      });
+
+      if (list.length > 0) {
+        setPets(list);
+        return;
+      }
+    } catch (e) {
+      console.error("Failed to load pets from /pet/my-pets:", e);
+    }
+
+    try {
+      const fallbackRes = await PetService.getAllPets();
+      const allPets = normalizePetList(fallbackRes);
+      const userPets = allPets.filter((pet) => String(getPetOwnerId(pet)) === String(userId));
+
+      console.log("Profile pets fallback from /pet/all:", {
+        userId,
+        totalPetCount: allPets.length,
+        matchedPetCount: userPets.length,
+        pets: userPets,
+      });
+
+      if (userPets.length > 0) {
+        setPets(userPets);
+      }
+    } catch (fallbackError) {
+      console.error("Failed to load pets from /pet/all fallback:", fallbackError);
+    }
   }
-}
 
 
   function handleLogout() {
