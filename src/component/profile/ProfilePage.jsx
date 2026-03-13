@@ -91,9 +91,15 @@ export default function ProfilePage() {
 
       const userResponse = await AuthService.getLoggedInInfo();
       const u = userResponse?.user;
+      const petsFromUserInfo = Array.isArray(userResponse?.petList) ? userResponse.petList : [];
+      console.log("Profile pets from /user/my-info:", {
+        userId: u?.id ?? null,
+        petCount: petsFromUserInfo.length,
+        pets: petsFromUserInfo,
+      });
       setUserInfo(u || null);
 
-      setPets(userResponse?.petList || []);
+      setPets(petsFromUserInfo);
       setWishlist(userResponse?.wishlist || []);
       setOrders(userResponse?.orderItemList || []);
 
@@ -164,6 +170,11 @@ export default function ProfilePage() {
     const res = await PetService.getMyPets();
     // Adjust based on your backend shape:
     const list = res?.petList || res?.pets || res?.data || res || [];
+    console.log("Profile pets from /pet/my-pets:", {
+      petCount: Array.isArray(list) ? list.length : 0,
+      pets: list,
+      rawResponse: res,
+    });
     setPets(Array.isArray(list) ? list : []);
   } catch (e) {
     console.error("Failed to load pets:", e);
@@ -587,7 +598,19 @@ export default function ProfilePage() {
               <div className="row g-3">
                 {pets.map((pet) => (
                   <div key={pet.id} className="col-12 col-md-6">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div
+                      className="card border-0 shadow-sm rounded-4 overflow-hidden"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/pet/${pet.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          navigate(`/pet/${pet.id}`);
+                        }
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card-body d-flex gap-3">
                         <img
                           src={pet.imageUrls?.[0] || "https://via.placeholder.com/120"}
@@ -600,10 +623,25 @@ export default function ProfilePage() {
                           <div className="text-muted small mt-1">{pet.age || ""} {pet.gender ? `• ${pet.gender}` : ""}</div>
 
                           <div className="d-flex gap-2 mt-3">
-                            <button className="btn btn-outline-secondary rounded-pill px-3" onClick={() => navigate(`/pet/${pet.id}`)}>
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary rounded-pill px-3"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/pet/${pet.id}`);
+                              }}
+                            >
                               View
                             </button>
-                            <button className="btn btn-primary rounded-pill px-3" style={{ backgroundColor: "#FF7B54", borderColor: "#FF7B54" }} onClick={() => navigate(`/edit-pet/${pet.id}`)}>
+                            <button
+                              type="button"
+                              className="btn btn-primary rounded-pill px-3"
+                              style={{ backgroundColor: "#FF7B54", borderColor: "#FF7B54" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/edit-pet/${pet.id}`);
+                              }}
+                            >
                               Edit
                             </button>
                           </div>

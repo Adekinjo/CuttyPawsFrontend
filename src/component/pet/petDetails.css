@@ -1,0 +1,215 @@
+.pet-details-page {
+  min-height: calc(100vh - 90px);
+  background:
+    radial-gradient(1200px 260px at 85% -10%, #ffe7db 0%, rgba(255, 231, 219, 0) 65%),
+    #fffaf7;
+}
+
+.pet-details-actions {
+  gap: 0.65rem;
+}
+
+.pet-details-back-btn {
+  border: 1px solid #d6d6d6;
+  background: #fff;
+  color: #313131;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.pet-details-edit-btn {
+  border: none;
+  background: linear-gradient(135deg, #ff7b54 0%, #ff5b7f 100%);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pet-details-back-btn:hover {
+  border-color: #bdbdbd;
+  background: #f6f6f6;
+}
+
+.pet-details-edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(255, 91, 127, 0.25);
+}
+
+.pet-hero-card {
+  background: radial-gradient(circle at 90% 10%, #ffe0cf 0%, #fff7f2 44%, #ffffff 100%);
+  border: 1px solid #ffe6d9;
+}
+
+.pet-hero-image-wrap {
+  min-height: 320px;
+  background: #f8f8f8;
+}
+
+.pet-hero-image {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+}
+
+.pet-hero-fallback {
+  width: 100%;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff7b54;
+  background: linear-gradient(135deg, #fff4ee 0%, #ffe7dd 100%);
+}
+
+.pet-pill {
+  background-color: #ff7b54 !important;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+}
+
+.pet-title {
+  color: #2a2a2a;
+  font-size: clamp(1.4rem, 2.3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.pet-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.pet-metric {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 0.9rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.pet-metric span {
+  display: block;
+  color: #8a8a8a;
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+.pet-metric strong {
+  color: #333;
+  font-size: 0.96rem;
+}
+
+.pet-details-info-card {
+  border: 1px solid #f4e7df;
+}
+
+@media (max-width: 991px) {
+  .pet-details-page {
+    padding-top: 0 !important;
+    padding-bottom: 1.2rem !important;
+  }
+
+  .pet-hero-image,
+  .pet-hero-fallback {
+    height: 300px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pet-details-page {
+    background:
+      linear-gradient(180deg, #fff2eb 0%, #fffaf7 32%, #fff 100%);
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .pet-details-actions {
+    position: sticky;
+    top: 0.2rem;
+    z-index: 8;
+    background: rgba(255, 250, 247, 0.9);
+    backdrop-filter: blur(6px);
+    border: 1px solid #f5e4db;
+    border-radius: 1rem;
+    padding: 0.5rem;
+    margin-bottom: 0.9rem !important;
+  }
+
+  .pet-details-back-btn,
+  .pet-details-edit-btn {
+    width: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.88rem;
+    letter-spacing: 0.01em;
+  }
+
+  .pet-hero-card {
+    border-radius: 1rem !important;
+    overflow: hidden;
+    box-shadow: 0 12px 26px rgba(255, 123, 84, 0.14) !important;
+  }
+
+  .pet-hero-image-wrap {
+    min-height: 235px;
+  }
+
+  .pet-hero-image,
+  .pet-hero-fallback {
+    height: 240px;
+  }
+
+  .pet-pill {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.62rem;
+  }
+
+  .pet-title {
+    font-size: 1.45rem;
+    line-height: 1.2;
+    margin-top: 0.2rem;
+  }
+
+  .pet-metrics-grid {
+    gap: 0.6rem;
+  }
+
+  .pet-metric {
+    border-radius: 0.75rem;
+    padding: 0.62rem 0.72rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fff6f2 100%);
+    border-color: #f9dfd2;
+  }
+
+  .pet-metric span {
+    font-size: 0.72rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .pet-metric strong {
+    font-size: 0.88rem;
+  }
+
+  .pet-details-info-card {
+    border-radius: 1rem !important;
+    box-shadow: 0 8px 18px rgba(12, 12, 13, 0.06) !important;
+  }
+
+  .pet-details-info-card .card-body {
+    padding: 1rem !important;
+  }
+
+  .pet-details-info-card .badge {
+    font-size: 0.72rem;
+    border-radius: 999px;
+    padding: 0.38rem 0.58rem;
+  }
+}

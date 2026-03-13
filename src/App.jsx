@@ -81,6 +81,7 @@ const FollowersPage = lazy(() => import("./component/post/FollowersPage.jsx"));
 const FollowingPage = lazy(() => import("./component/post/FollowingPage.jsx"));
 const AddPetPage = lazy(() => import("./component/pet/AddPetPage.jsx"));
 const EditPetPage = lazy(() => import("./component/pet/EditPetPage.jsx"));
+const PetDetailsPage = lazy(() => import("./component/pet/PetDetailsPage.jsx"));
 const OrderHistoryPage =lazy(() => import("./component/profile/OrderHistoryPage.jsx"))
 const UpdateProfile =lazy(() => import("./component/profile/UpdateProfile.jsx"))
 
@@ -154,6 +155,7 @@ function App() {
           {/* ==================== PROTECTED ROUTES ==================== */}
           <Route path="/customer-profile" element={<ProtectedRoute element={ProfilePage} />} />
           <Route path="/add-pet" element={<ProtectedRoute element={AddPetPage} />} />
+          <Route path="/pet/:petId" element={<ProtectedRoute element={PetDetailsPage} />} />
           <Route path="/settings" element={<ProtectedRoute element={SettingsPage} />} />
           <Route path="/edit-pet/:petId" element={<ProtectedRoute element={EditPetPage} />} />
           <Route path="/create-post" element={<ProtectedRoute element={CreatePostPage} />} />

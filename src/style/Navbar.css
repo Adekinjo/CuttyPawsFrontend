@@ -362,6 +362,6 @@
   }
 
   .cutty-mobile-nav-spacer {
-    height: 86px;
+    height: calc(106px + env(safe-area-inset-bottom));
   }
 }
