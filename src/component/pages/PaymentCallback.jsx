@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import ApiService from "../../service/ApiService";
+import OrderService from "../../service/OrderService";
+import PaymentService from "../../service/PaymentService";
 import { useCart } from "../../component/context/CartContext";
 
 const PaymentCallback = () => {
@@ -12,8 +13,7 @@ const PaymentCallback = () => {
   useEffect(() => {
     const processPaymentCallback = async () => {
       const queryParams = new URLSearchParams(location.search);
-      const reference = queryParams.get("reference");
-      const trxref = queryParams.get("trxref");
+      const reference = queryParams.get("reference") || queryParams.get("trxref");
 
       if (!reference) {
         setStatus("❌ Payment reference not found");
@@ -25,7 +25,7 @@ const PaymentCallback = () => {
         setStatus("🔍 Verifying payment with Paystack...");
 
         // Step 1: Verify payment
-        const verificationResponse = await ApiService.verifyPayment(reference);
+        const verificationResponse = await PaymentService.verifyPayment(reference);
         
         if (verificationResponse.status !== 200) {
           throw new Error("Payment verification failed");
@@ -40,9 +40,15 @@ const PaymentCallback = () => {
           throw new Error("Order details not found");
         }
 
+        const paymentId = verificationResponse.paymentId || pendingPayment.paymentId;
+
+        if (!paymentId) {
+          throw new Error("Payment ID not found for order creation");
+        }
+
         // Step 3: Create order after successful payment
-        const orderResponse = await ApiService.createOrderAfterPayment(
-          verificationResponse.paymentId,
+        const orderResponse = await OrderService.createOrderAfterPayment(
+          paymentId,
           pendingPayment.cart,
           pendingPayment.totalPrice
         );

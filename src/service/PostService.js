@@ -91,13 +91,34 @@ export default class PostService extends ApiService {
         params.cursorId = cursorId;
       }
 
+      console.debug("[PostService.getAllPosts] Request", {
+        url: `${this.BASE_URL}/post/get-all`,
+        params,
+      });
+
       const response = await axios.get(`${this.BASE_URL}/post/get-all`, {
         params,
         headers: this.getHeader(),
       });
 
+      console.debug("[PostService.getAllPosts] Response", {
+        status: response.status,
+        data: response.data,
+      });
+
       return this.normalizeCursorPage(response.data);
     } catch (error) {
+      console.error("[PostService.getAllPosts] Error", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        request: {
+          url: `${this.BASE_URL}/post/get-all`,
+          cursorCreatedAt,
+          cursorId,
+          limit,
+        },
+      });
       throw this.handleError(error);
     }
   }
@@ -181,4 +202,3 @@ export default class PostService extends ApiService {
     return e;
   }
 }
-

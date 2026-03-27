@@ -27,6 +27,8 @@ import CommentService from "../../service/CommentsService";
 import PostLikeService from "../../service/LikesService";
 import CommentLikeService from "../../service/CommentLikeService";
 import ReactionsPicker from "./ReactionsPicker";
+import ServiceProviderService from "../../service/ServiceProviderService";
+import { getPetOwnerDisplayLabel, getServiceDisplayLabel } from "../../utils/serviceProvider";
 import "./PostCard.css";
 
 const FEED_VIDEO_SOUND_SESSION_KEY = "cuttypaws-feed-video-sound-enabled";
@@ -89,6 +91,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     return window.sessionStorage.getItem(FEED_VIDEO_SOUND_SESSION_KEY) !== "true";
   });
   const [hasManualVolumePreference, setHasManualVolumePreference] = useState(false);
+  const [serviceProfile, setServiceProfile] = useState(null);
 
   // Comment Reactions State
   const [commentReactionsLoading, setCommentReactionsLoading] = useState({});
@@ -125,9 +128,67 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     }
   }, [post]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadServiceProfile = async () => {
+      if (!post?.ownerId) return;
+
+      // If the feed already tells us this owner is a regular user, avoid an extra lookup.
+      if (
+        post?.ownerRole &&
+        post.ownerRole !== "ROLE_SERVICE" &&
+        post.ownerRole !== "ROLE_SERVICE_PROVIDER"
+      ) {
+        if (mounted) {
+          setServiceProfile(null);
+        }
+        return;
+      }
+
+      const cached = ServiceProviderService.getCachedPublicServiceProfile(post.ownerId);
+      if (cached?.status === 200 && mounted) {
+        setServiceProfile(cached.serviceProfile || null);
+        return;
+      }
+
+      const response = await ServiceProviderService.getPublicServiceProfile(post.ownerId);
+      if (mounted && response?.status === 200) {
+        ServiceProviderService.setCachedPublicServiceProfile(post.ownerId, response);
+        setServiceProfile(response.serviceProfile || null);
+      } else if (mounted) {
+        setServiceProfile(null);
+      }
+    };
+
+    loadServiceProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [post?.ownerId]);
+
+  const ownerProfileLink = serviceProfile?.status === "ACTIVE"
+    ? `/services/${post.ownerId}`
+    : `/customer-profile/${post.ownerId}`;
+  const ownerDisplayLabel = getServiceDisplayLabel(serviceProfile) || getPetOwnerDisplayLabel(post);
+
   // Fetch user reaction on component mount
   useEffect(() => {
     const fetchUserReaction = async () => {
+      if (!currentUser || !post?.id) {
+        return;
+      }
+
+      // If the feed already returned the viewer's reaction state, don't make another request.
+      if (
+        post?.userReaction !== undefined ||
+        post?.likedByCurrentUser !== undefined ||
+        post?.hasReacted !== undefined
+      ) {
+        return;
+      }
+
       if (currentUser && post?.id) {
         try {
           const response = await PostLikeService.getUserReaction(post.id);
@@ -890,10 +951,11 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     <Card className="post-card">
       {/* Header */}
       <Card.Header className="post-header d-flex justify-content-between align-items-center">
-        <Link to={`/customer-profile/${post.ownerId}`} className="d-flex text-decoration-none align-items-center">
+        <Link to={ownerProfileLink} className="d-flex text-decoration-none align-items-center">
           {renderAvatar(post.ownerProfileImage, "Avatar", "post-avatar me-3", 22)}
           <div>
             <strong className="post-owner-name">{post.ownerName}</strong>
+            <div className="post-time text-muted small">{ownerDisplayLabel}</div>
             <div className="post-time text-muted small">
               {formatDate(post.createdAt)}
             </div>
@@ -1018,7 +1080,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         {post.caption && (
           <div className="post-caption mb-3">
             <Link
-              to={`/customer-profile/${post.ownerId}`}
+              to={ownerProfileLink}
               className="post-caption-username text-decoration-none"
             >
               {post.ownerName || "Unknown"}

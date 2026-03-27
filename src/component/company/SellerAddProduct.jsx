@@ -3,7 +3,7 @@ import ApiService from "../../service/ApiService";
 import { useNavigate } from "react-router-dom";
 import "../../style/AddProduct.css";
 
-const CompanyAddProduct = () => {
+const SellerAddProduct = () => {
   const [images, setImages] = useState([]); 
   const [categories, setCategories] = useState([]); 
   const [subCategories, setSubCategories] = useState([]); 
@@ -80,12 +80,12 @@ const CompanyAddProduct = () => {
       }
 
       // Call the API to add the product
-      const response = await ApiService.companyAddProduct(formData);
+      const response = await ApiService.sellerAddProduct(formData);
       if (response.status === 200) {
         setMessage("Product created successfully!");
         setTimeout(() => {
           setMessage("");
-          navigate("/company/company-products"); 
+          navigate("/seller/seller-products"); 
         }, 3000);
       }
     } catch (error) {
@@ -270,4 +270,4 @@ const CompanyAddProduct = () => {
   );
 };
 
-export default CompanyAddProduct;
+export default SellerAddProduct;

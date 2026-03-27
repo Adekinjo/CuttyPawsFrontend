@@ -152,7 +152,7 @@ const statusColors = {
   RETURNED: "#667eea",
 };
 
-const CompanyOrderDetails = () => {
+const SellerOrderDetails = () => {
   const { itemId } = useParams();
   const [orderItems, setOrderItems] = useState([]);
   const [message, setMessage] = useState("");
@@ -392,4 +392,4 @@ const CompanyOrderDetails = () => {
   );
 };
 
-export default CompanyOrderDetails;
+export default SellerOrderDetails;

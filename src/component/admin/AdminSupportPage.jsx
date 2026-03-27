@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import ApiService from "../../service/api";
+import ApiService from "../../service/ApiService";
 import '../../style/AdminSupport.css';
 
 const AdminSupportPage = () => {

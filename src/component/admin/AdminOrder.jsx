@@ -17,7 +17,7 @@ import {
 } from "react-icons/fa";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Pagination from "../common/Pagination";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/OrderService";
 import "../../style/AdminOrder.css";
 
 const OrderStatus = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];

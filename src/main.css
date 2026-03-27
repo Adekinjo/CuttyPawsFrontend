@@ -1,8 +1,37 @@
 /* Add these styles to your main CSS file */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+:root {
+  --cutty-mobile-bottom-safe-space: calc(112px + env(safe-area-inset-bottom));
+}
+
 body {
   font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 991.98px) {
+  html {
+    scroll-padding-bottom: var(--cutty-mobile-bottom-safe-space);
+  }
+
+  body {
+    padding-bottom: var(--cutty-mobile-bottom-safe-space);
+  }
+
+  #root {
+    padding-bottom: var(--cutty-mobile-bottom-safe-space);
+  }
+
+  .register-page,
+  .login-page,
+  .request-password-page,
+  .reset-password-page,
+  .service-provider-page {
+    min-height: calc(100vh + var(--cutty-mobile-bottom-safe-space));
+    padding-bottom: calc(var(--cutty-mobile-bottom-safe-space) + 1.5rem) !important;
+    overflow: visible !important;
+    align-items: flex-start !important;
+  }
 }
 
 /* Custom gradient classes */

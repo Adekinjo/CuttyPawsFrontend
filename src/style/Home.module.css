@@ -2,6 +2,9 @@
 .homeContainer {
   min-height: 100vh;
   background-color: var(--bg-primary);
+  margin-top: 75px;
+  margin-left: 2px;
+  margin-right: 2px;
 }
 
 .homeContent {
@@ -59,35 +62,46 @@
   transform: translateY(-2px);
 }
 
-.homeFloatingBtn {
-  position: fixed !important;
-  bottom: max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem)) !important;
-  right: max(1rem, calc(env(safe-area-inset-right, 0px) + 0.75rem)) !important;
+/* Floating AI button */
+.homeFloatingActions {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 50px;
+}
+
+.homeFloatingAiBtn {
   width: 60px !important;
   height: 60px !important;
-  font-size: 1.5rem !important;
-  background: #ff6a00 !important;
-  border: none !important;
-  color: #ffffff !important;
   border-radius: 50% !important;
-  z-index: 1200 !important;
+  border: none !important;
+  background: #102a43 !important;
+  color: #ffffff !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  font-size: 1.5rem !important;
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.35),
+    0 0 0 3px rgba(255, 255, 255, 0.95) !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.95) !important;
 }
 
-.homeFloatingBtn:hover {
-  background-color: #e85f00 !important;
-  transform: scale(1.1);
-  box-shadow: 0 12px 28px rgba(232, 95, 0, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.95) !important;
+.homeFloatingAiBtn:hover {
+  background-color: #0d2236 !important;
+  transform: scale(1.08);
+  box-shadow: 0 12px 28px rgba(16, 42, 67, 0.45),
+    0 0 0 3px rgba(255, 255, 255, 0.95) !important;
 }
 
-.homeFloatingBtn:focus,
-.homeFloatingBtn:focus-visible {
-  background-color: #e85f00 !important;
-  box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.28), 0 10px 26px rgba(17, 24, 39, 0.4) !important;
+.homeFloatingAiBtn:focus,
+.homeFloatingAiBtn:focus-visible {
+  background-color: #0d2236 !important;
+  box-shadow: 0 0 0 4px rgba(16, 42, 67, 0.25),
+    0 10px 26px rgba(17, 24, 39, 0.35) !important;
 }
 
 /* Responsive adjustments */
@@ -107,8 +121,15 @@
     margin-top: -1.6rem !important;
     margin-bottom: 0.85rem;
   }
-  
-  .homeFloatingBtn {
-    display: none !important;
+
+  .homeFloatingActions {
+    right: 16px;
+    bottom: 18px;
+  }
+
+  .homeFloatingAiBtn {
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 1.35rem !important;
   }
 }

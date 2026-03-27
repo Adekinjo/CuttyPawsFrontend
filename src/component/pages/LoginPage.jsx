@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../service/AuthService";
+import ServiceProviderService from "../../service/ServiceProviderService";
 import "../../style/Login.css";
 
 const LoginPage = () => {
@@ -62,8 +63,17 @@ const LoginPage = () => {
         e.preventDefault();
         setMessage("");
         setIsLoading(true);
+        console.log("[LoginPage] submit:start", {
+            email: formData.email,
+            rememberMe: formData.rememberMe,
+            hasPassword: Boolean(formData.password),
+        });
 
         if (!formData.email || !formData.password) {
+            console.warn("[LoginPage] submit:missing-fields", {
+                email: formData.email,
+                hasPassword: Boolean(formData.password),
+            });
             setMessage("Email and password are required");
             setIsLoading(false);
             return;
@@ -77,18 +87,34 @@ const LoginPage = () => {
             };
 
             const response = await ApiService.loginUser(loginData);
+            console.log("[LoginPage] submit:response", {
+                hasToken: Boolean(response?.token),
+                hasRefreshToken: Boolean(response?.refreshToken),
+                requiresVerification: Boolean(response?.requiresVerification),
+                role: response?.role,
+            });
 
             if (response.requiresVerification) {
+                console.log("[LoginPage] submit:requires-verification");
                 setShowVerificationPopup(true);
                 setRemainingTime(response.remainingTime || "10:00");
                 setRemainingAttempts(response.remainingAttempts || 5);
                 setMessage(response.message || "Verification code sent to your email");
             } else if (response.token) {
+                console.log("[LoginPage] submit:login-success");
                 handleLoginSuccess(response, formData.rememberMe);
             } else {
+                console.warn("[LoginPage] submit:no-token", {
+                    message: response?.message,
+                });
                 setMessage(response.message || "Login failed");
             }
         } catch (error) {
+            console.error("[LoginPage] submit:error", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+            });
             const errorMessage =
                 error.response?.data?.message || error.message || "Login failed. Please try again.";
             setMessage(errorMessage);
@@ -124,12 +150,20 @@ const LoginPage = () => {
 
     const handleVerificationSubmit = async () => {
         if (!verificationCode || verificationCode.length !== 6) {
+            console.warn("[LoginPage] verify:invalid-code", {
+                length: verificationCode?.length || 0,
+            });
             setVerificationError("Please enter a valid 6-digit code");
             return;
         }
 
         setIsLoading(true);
         setVerificationError("");
+        console.log("[LoginPage] verify:start", {
+            email: formData.email,
+            rememberMe: formData.rememberMe,
+            verificationCodeLength: verificationCode.length,
+        });
 
         try {
             const verifyData = {
@@ -140,8 +174,14 @@ const LoginPage = () => {
             };
 
             const response = await ApiService.verifyCode(verifyData);
+            console.log("[LoginPage] verify:response", {
+                hasToken: Boolean(response?.token),
+                requiresVerification: Boolean(response?.requiresVerification),
+                remainingAttempts: response?.remainingAttempts,
+            });
 
             if (response.token) {
+                console.log("[LoginPage] verify:login-success");
                 handleLoginSuccess(response, formData.rememberMe);
                 setShowVerificationPopup(false);
                 setVerificationError("");
@@ -155,6 +195,11 @@ const LoginPage = () => {
                 }
             }
         } catch (error) {
+            console.error("[LoginPage] verify:error", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+            });
             const errorMessage =
                 error.response?.data?.message || "Invalid verification code. Please try again.";
             setVerificationError(errorMessage);
@@ -174,20 +219,59 @@ const LoginPage = () => {
     };
 
     const handleLoginSuccess = (response, rememberMe) => {
+        console.log("[LoginPage] handleLoginSuccess:start", {
+            role: response?.role,
+            hasToken: Boolean(response?.token),
+            hasRefreshToken: Boolean(response?.refreshToken),
+            userId: response?.user?.id,
+            isServiceProvider: Boolean(response?.user?.isServiceProvider),
+            rememberMe,
+        });
         setMessage("Login successful!");
 
         localStorage.setItem("token", response.token);
         if (response.refreshToken) {
             localStorage.setItem("refreshToken", response.refreshToken);
         }
-        localStorage.setItem("role", response.role);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        const resolvedRole =
+            response?.role ||
+            response?.user?.role ||
+            response?.user?.userRole ||
+            "";
+        localStorage.setItem("role", resolvedRole);
+        ApiService.setStoredUser(response.user);
         localStorage.setItem("rememberMe", rememberMe.toString());
 
         ApiService.setupAxiosInterceptors();
         ApiService.setupInactivityLogout();
+        console.log("[LoginPage] handleLoginSuccess:storage-written", {
+            hasToken: Boolean(localStorage.getItem("token")),
+            hasRefreshToken: Boolean(localStorage.getItem("refreshToken")),
+            role: localStorage.getItem("role"),
+            rememberMe: localStorage.getItem("rememberMe"),
+        });
 
-        setTimeout(() => navigate("/", { replace: true }), 1500);
+        const finishLogin = async () => {
+            let nextPath = "/";
+
+            if (response.user?.isServiceProvider) {
+                try {
+                    await ServiceProviderService.refreshDashboard();
+                    nextPath = "/service/dashboard";
+                } catch (error) {
+                    console.error("Unable to load service dashboard after login:", error);
+                }
+            } else {
+                ServiceProviderService.clearStoredDashboard();
+            }
+
+            console.log("[LoginPage] handleLoginSuccess:navigate", {
+                nextPath,
+            });
+            setTimeout(() => navigate(nextPath, { replace: true }), 1000);
+        };
+
+        finishLogin();
     };
 
     const closeVerificationPopup = () => {

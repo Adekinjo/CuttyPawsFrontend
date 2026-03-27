@@ -1,9 +1,81 @@
 import ApiService from "./ApiService";
 import axios from "axios";
 import { toast } from "react-toastify";
+import ServiceProviderService from "./ServiceProviderService";
 
 export default class AuthService extends ApiService {
   /** AUTH && USER API */
+
+  static logAuthState(context, extra = {}) {
+    const token = localStorage.getItem("token");
+    const refreshToken = localStorage.getItem("refreshToken");
+    const storedUser = localStorage.getItem("user");
+
+    console.log(`[AuthService] ${context}`, {
+      hasToken: Boolean(token),
+      tokenLength: token?.length || 0,
+      token,
+      hasRefreshToken: Boolean(refreshToken),
+      refreshTokenLength: refreshToken?.length || 0,
+      refreshToken,
+      hasStoredUser: Boolean(storedUser),
+      ...extra,
+    });
+  }
+
+  static getRoleFromToken() {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.role || null;
+    } catch (error) {
+      console.error("[AuthService] getRoleFromToken:error", error);
+      return null;
+    }
+  }
+
+  static getEffectiveRole() {
+    const storedUser = this.getStoredUser();
+    return (
+      this.getRoleFromToken() ||
+      storedUser?.role ||
+      storedUser?.userRole ||
+      localStorage.getItem("role") ||
+      null
+    );
+  }
+
+  static hasRole(...roles) {
+    const effectiveRole = this.getEffectiveRole();
+    const matched = roles.includes(effectiveRole);
+    console.log("[AuthService] hasRole", {
+      effectiveRole,
+      expectedRoles: roles,
+      matched,
+    });
+    return matched;
+  }
+
+  static getStoredUser() {
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      console.error("Error parsing stored user:", error);
+      return null;
+    }
+  }
+
+  static setStoredUser(user) {
+    if (!user) {
+      localStorage.removeItem("user");
+      return;
+    }
+
+    localStorage.setItem("user", JSON.stringify(user));
+  }
 
   static async getAllUsers() {
     try {
@@ -66,10 +138,23 @@ export default class AuthService extends ApiService {
   }
 
   static async loginUser(loginDetails) {
+    this.logAuthState("loginUser:request", {
+      email: loginDetails?.email,
+      rememberMe: loginDetails?.rememberMe,
+    });
     const response = await axios.post(
       `${this.BASE_URL}/auth/login`,
       loginDetails
     );
+    console.log("[AuthService] loginUser:response", {
+      status: response?.data?.status,
+      hasToken: Boolean(response?.data?.token),
+      token: response?.data?.token,
+      hasRefreshToken: Boolean(response?.data?.refreshToken),
+      refreshToken: response?.data?.refreshToken,
+      requiresVerification: Boolean(response?.data?.requiresVerification),
+      role: response?.data?.role,
+    });
     return response.data;
   }
 
@@ -98,7 +183,9 @@ export default class AuthService extends ApiService {
   // Enhanced refreshToken method
   static async refreshToken(refreshToken) {
     try {
-      console.log("🔄 Sending refresh token to backend...");
+      this.logAuthState("refreshToken:request", {
+        providedRefreshToken: Boolean(refreshToken),
+      });
       const response = await axios.post(
         `${this.BASE_URL}/auth/refresh-token`, 
         null, 
@@ -110,10 +197,20 @@ export default class AuthService extends ApiService {
         }
       );
       
-      console.log("✅ Refresh response received:", response.data);
+      console.log("[AuthService] refreshToken:response", {
+        status: response?.data?.status,
+        hasToken: Boolean(response?.data?.token),
+        token: response?.data?.token,
+        hasRefreshToken: Boolean(response?.data?.refreshToken),
+        refreshToken: response?.data?.refreshToken,
+      });
       return response.data;
     } catch (error) {
-      console.error("❌ Refresh token error:", error.response?.data || error.message);
+      console.error("[AuthService] refreshToken:error", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       throw error;
     }
   }
@@ -140,17 +237,28 @@ export default class AuthService extends ApiService {
   // ✅ FIXED: Changed from /users/my-info to /user/my-info
   static async getLoggedInInfo() {
     try {
-      console.log("🔍 Fetching user info from /user/my-info...");
+      this.logAuthState("getLoggedInInfo:request");
       const response = await axios.get(
         `${this.BASE_URL}/user/my-info`,  // ✅ Correct endpoint
         {
           headers: this.getHeader(),
         }
       );
-      console.log("✅ User info response:", response.data);
+      console.log("[AuthService] getLoggedInInfo:response", {
+        status: response?.data?.status,
+        userId: response?.data?.user?.id,
+        role:
+          response?.data?.user?.role ||
+          response?.data?.user?.userRole ||
+          response?.data?.role,
+      });
       return response.data;
     } catch (error) {
-      console.error("❌ Error getting user info:", error);
+      console.error("[AuthService] getLoggedInInfo:error", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       throw error;
     }
   }
@@ -198,57 +306,61 @@ export default class AuthService extends ApiService {
     return response.data;
   }
 
-  /** AUTHENTICATION & TOKEN MANAGEMENT */
-
-  // ✅ Check if token is expired
-  // static isTokenExpired() {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) return true;
-    
-  //   try {
-  //     // Decode JWT to check expiration
-  //     const payload = JSON.parse(atob(token.split('.')[1]));
-  //     const expiry = payload.exp * 1000; // Convert to milliseconds
-  //     return Date.now() >= expiry;
-  //   } catch (error) {
-  //     console.error("Error checking token expiration:", error);
-  //     return true;
-  //   }
-  // }
-
   static isTokenExpired(bufferSeconds = 60) {
     const token = localStorage.getItem("token");
-    if (!token) return true;
+    if (!token) {
+      this.logAuthState("isTokenExpired:no-token");
+      return true;
+    }
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const expiryMs = payload.exp * 1000;
-      return Date.now() >= (expiryMs - bufferSeconds * 1000);
+      const expired = Date.now() >= (expiryMs - bufferSeconds * 1000);
+      console.log("[AuthService] isTokenExpired:result", {
+        expired,
+        exp: payload.exp,
+        now: Date.now(),
+        bufferSeconds,
+      });
+      return expired;
     } catch (e) {
+      console.error("[AuthService] isTokenExpired:error", e);
       return true;
     }
   }
 
   // ✅ Preemptive token refresh
   static async refreshTokenIfNeeded() {
-    if (this.isTokenExpired()) {
-      console.log("⚠️ Token expired or about to expire, refreshing...");
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        try {
-          const response = await this.refreshToken(refreshToken);
-          localStorage.setItem('token', response.token);
-          if (response.refreshToken) {
-            localStorage.setItem('refreshToken', response.refreshToken);
-          }
-          console.log("✅ Token refreshed preemptively");
-          return true;
-        } catch (error) {
-          console.error("Failed to refresh token:", error);
-          return false;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      this.logAuthState("refreshTokenIfNeeded:no-token");
+      return false;
+    }
+
+    if (!this.isTokenExpired()) {
+      this.logAuthState("refreshTokenIfNeeded:token-still-valid");
+      return true;
+    }
+
+    this.logAuthState("refreshTokenIfNeeded:refreshing");
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      try {
+        const response = await this.refreshToken(refreshToken);
+        localStorage.setItem('token', response.token);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
         }
+        this.logAuthState("refreshTokenIfNeeded:refresh-success");
+        return true;
+      } catch (error) {
+        console.error("[AuthService] refreshTokenIfNeeded:refresh-failed", error);
+        return false;
       }
     }
+
+    this.logAuthState("refreshTokenIfNeeded:no-refresh-token");
     return false;
   }
 
@@ -280,6 +392,11 @@ export default class AuthService extends ApiService {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        console.log("[AuthService] axios:request", {
+          url: config?.url,
+          method: config?.method,
+          hasAuthorizationHeader: Boolean(config?.headers?.Authorization),
+        });
         return config;
       },
       (error) => Promise.reject(error)
@@ -293,8 +410,15 @@ export default class AuthService extends ApiService {
         
         // If 401 and not already retrying
         if (error.response?.status === 401 && !originalRequest._retry) {
+          console.warn("[AuthService] axios:401-detected", {
+            url: originalRequest?.url,
+            method: originalRequest?.method,
+          });
           
           if (isRefreshing) {
+            console.log("[AuthService] axios:queue-request-during-refresh", {
+              url: originalRequest?.url,
+            });
             // If already refreshing, add to queue
             return new Promise((resolve, reject) => {
               failedQueue.push({ resolve, reject });
@@ -310,14 +434,18 @@ export default class AuthService extends ApiService {
           const refreshToken = localStorage.getItem('refreshToken');
           if (!refreshToken) {
             // No refresh token, logout user
-            console.log("❌ No refresh token available, logging out...");
+            this.logAuthState("axios:no-refresh-token-logout", {
+              url: originalRequest?.url,
+            });
             this.logout();
             window.location.href = '/login';
             return Promise.reject(error);
           }
 
           try {
-            console.log("🔄 Token expired, attempting automatic refresh...");
+            this.logAuthState("axios:attempt-refresh", {
+              url: originalRequest?.url,
+            });
             // Try to refresh the token
             const refreshResponse = await this.refreshToken(refreshToken);
             const newToken = refreshResponse.token;
@@ -329,7 +457,9 @@ export default class AuthService extends ApiService {
               localStorage.setItem('refreshToken', newRefreshToken);
             }
 
-            console.log("✅ Token refreshed successfully!");
+            this.logAuthState("axios:refresh-success", {
+              url: originalRequest?.url,
+            });
             
             // Update the failed requests
             processQueue(null, newToken);
@@ -340,7 +470,11 @@ export default class AuthService extends ApiService {
             return axios(originalRequest);
             
           } catch (refreshError) {
-            console.error("❌ Token refresh failed:", refreshError);
+            console.error("[AuthService] axios:refresh-failed", {
+              url: originalRequest?.url,
+              message: refreshError.message,
+              response: refreshError.response?.data,
+            });
             // Refresh failed, logout user
             processQueue(refreshError, null);
             isRefreshing = false;
@@ -414,77 +548,49 @@ export default class AuthService extends ApiService {
   }
 
   static logout() {
+    this.logAuthState("logout:before-clear");
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
     localStorage.removeItem("rememberMe");
-    console.log("👋 User logged out");
+    ServiceProviderService.clearStoredDashboard();
+    this.logAuthState("logout:after-clear");
   }
 
   static isAuthenticated() {
     const refreshToken = localStorage.getItem("refreshToken");
-    return !!refreshToken;
+    const authenticated = !!refreshToken;
+    console.log("[AuthService] isAuthenticated", {
+      authenticated,
+      hasRefreshToken: Boolean(refreshToken),
+    });
+    return authenticated;
   }
 
   static isAdmin() {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role === "ROLE_ADMIN";
-    } catch (error) {
-      console.error("Error checking admin role:", error);
-      return false;
-    }
+    return this.hasRole("ROLE_ADMIN");
   }
 
   static isSupport() {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role === "ROLE_CUSTOMER_SUPPORT";
-    } catch (error) {
-      console.error("Error checking support role:", error);
-      return false;
-    }
+    return this.hasRole("ROLE_CUSTOMER_SUPPORT", "ROLE_CUSTOMER_SERVICE");
   }
 
-  static isCompany() {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role === "ROLE_COMPANY";
-    } catch (error) {
-      console.error("Error checking company role:", error);
-      return false;
-    }
+  static isSeller() {
+    return this.hasRole("ROLE_SELLER", "ROLE_COMPANY");
   }
 
-  // ✅ Initialize app - call this in your main App.jsx
-  // static initializeApp() {
-  //   // Setup axios interceptors for automatic token refresh
-  //   this.setupAxiosInterceptors();
-    
-  //   // Setup inactivity logout
-  //   this.setupInactivityLogout();
-    
-  //   // Check token on app startup
-  //   const token = localStorage.getItem('token');
-  //   const refreshToken = localStorage.getItem('refreshToken');
-    
-  //   if (token && refreshToken) {
-  //     console.log("🔍 Checking token status on app startup...");
-  //     this.refreshTokenIfNeeded().catch(error => {
-  //       console.log("Token refresh failed on startup:", error);
-  //     });
-  //   }
-  // }
+  static isServiceProvider() {
+    const storedUser = this.getStoredUser();
+    const matchedRole = this.hasRole("ROLE_SERVICE", "ROLE_SERVICE_PROVIDER");
+    const matchedFlag = Boolean(storedUser?.isServiceProvider);
+    console.log("[AuthService] isServiceProvider", {
+      matchedRole,
+      matchedFlag,
+      effectiveRole: this.getEffectiveRole(),
+    });
+    return matchedRole || matchedFlag;
+  }
 
   static async initializeApp() {
     this.setupAxiosInterceptors();
@@ -494,8 +600,17 @@ export default class AuthService extends ApiService {
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (token && refreshToken) {
-      console.log("🔍 Checking token status on app startup...");
+      this.logAuthState("initializeApp:check-token-status");
       await this.refreshTokenIfNeeded();
+    }
+
+    const storedUser = this.getStoredUser();
+    if (storedUser?.isServiceProvider && this.isAuthenticated()) {
+      try {
+        await ServiceProviderService.refreshDashboard();
+      } catch (error) {
+        console.error("Failed to refresh service dashboard on startup:", error);
+      }
     }
   }
 

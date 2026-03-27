@@ -7,8 +7,9 @@ import { Container, Row, Col, Button, Spinner, Card } from "react-bootstrap";
 import { Snackbar, Alert, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const CompaniesProducts = () => {
-  const { companyName } = useParams();
+const SellersProducts = () => {
+  const { sellerName, companyName } = useParams();
+  const storeName = sellerName || companyName;
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,18 +20,18 @@ const CompaniesProducts = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const { cart, dispatch, isError, setIsError } = useCart();
 
-  // Fetch company products
+  // Fetch seller products
   useEffect(() => {
-    const fetchCompanyProducts = async () => {
+    const fetchSellerProducts = async () => {
       try {
         setLoading(true);
         const response = await ApiService.getAllProduct();
         const allProducts = response.productList || [];
         const filteredProducts = allProducts.filter(product => 
-          product.companyName?.trim().toLowerCase() === companyName?.trim().toLowerCase()
+          (product.sellerName || product.companyName)?.trim().toLowerCase() === storeName?.trim().toLowerCase()
         );
         setProducts(filteredProducts);
-        if (filteredProducts.length === 0) setError(`No products found for ${companyName}`);
+        if (filteredProducts.length === 0) setError(`No products found for ${storeName}`);
       } catch (error) {
         setError(error.message || "Failed to load products");
         setAlertMessage("Failed to load products");
@@ -40,8 +41,8 @@ const CompaniesProducts = () => {
         setLoading(false);
       }
     };
-    fetchCompanyProducts();
-  }, [companyName]);
+    fetchSellerProducts();
+  }, [storeName]);
 
   // Fetch wishlist
   useEffect(() => {
@@ -169,7 +170,7 @@ const CompaniesProducts = () => {
       </Snackbar>
 
       <div className="text-center mb-4">
-        <h1 className="mb-3">{companyName} Products</h1>
+        <h1 className="mb-3">{storeName} Products</h1>
         <Button variant="outline-primary" onClick={() => navigate(-1)}>
           Back to Home
         </Button>
@@ -271,4 +272,4 @@ const CompaniesProducts = () => {
   );
 };
 
-export default CompaniesProducts;
+export default SellersProducts;

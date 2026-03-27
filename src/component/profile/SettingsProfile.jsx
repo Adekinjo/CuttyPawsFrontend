@@ -5,6 +5,7 @@ import "./settings.css";
 
 import AuthService from "../../service/AuthService";
 import NotificationService from "../../service/NotificationService";
+import ServiceProviderService from "../../service/ServiceProviderService";
 
 import {
   FaArrowLeft,
@@ -17,7 +18,9 @@ import {
   FaBell,
   FaShieldAlt,
   FaQuestionCircle,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaBriefcase,
+  FaCalendarCheck
 } from "react-icons/fa";
 
 export default function SettingsPage() {
@@ -27,9 +30,9 @@ export default function SettingsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  /* =========================
-     LOAD USER + NOTIFICATIONS
-  ========================== */
+  const serviceDashboard = ServiceProviderService.getStoredDashboard();
+  const isServiceProvider = AuthService.isServiceProvider();
+
   useEffect(() => {
     loadSettingsData();
   }, []);
@@ -47,7 +50,6 @@ export default function SettingsPage() {
       } catch {
         setUnreadCount(0);
       }
-
     } catch (error) {
       console.error("Failed to load settings:", error);
     } finally {
@@ -55,9 +57,6 @@ export default function SettingsPage() {
     }
   }
 
-  /* =========================
-     LOGOUT
-  ========================== */
   function handleLogout() {
     if (!window.confirm("Are you sure you want to log out?")) return;
     AuthService.logout();
@@ -65,12 +64,9 @@ export default function SettingsPage() {
   }
 
   const handleAddressClick = () => {
-    navigate(userInfo.address ? "/edit-address" : "/address")
-  }
+    navigate(userInfo?.address ? "/edit-address" : "/address");
+  };
 
-  /* =========================
-     SETTINGS ROW
-  ========================== */
   const Row = ({ icon, bg, title, sub, onClick, danger, badge }) => (
     <button
       type="button"
@@ -99,9 +95,6 @@ export default function SettingsPage() {
     </button>
   );
 
-  /* =========================
-     LOADING STATE
-  ========================== */
   if (loading) {
     return (
       <div className="cp-settings-page d-flex justify-content-center align-items-center">
@@ -112,8 +105,6 @@ export default function SettingsPage() {
 
   return (
     <div className="cp-settings-page">
-
-      {/* ================= HEADER ================= */}
       <div className="sticky-top bg-white border-bottom">
         <div className="container py-3 d-flex align-items-center gap-3">
           <button
@@ -128,8 +119,6 @@ export default function SettingsPage() {
       </div>
 
       <div className="container py-4" style={{ maxWidth: 720 }}>
-
-        {/* ================= USER CARD ================= */}
         <div className="cp-settings-hero p-4 mb-4">
           <div className="d-flex align-items-center justify-content-between gap-3">
             <div className="d-flex align-items-center gap-3">
@@ -152,9 +141,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* ================= SETTINGS LIST ================= */}
         <div className="cp-settings-card">
-
           <Row
             icon={<FaUserCircle color="#7c3aed" />}
             bg="#f3e8ff"
@@ -172,6 +159,14 @@ export default function SettingsPage() {
           />
 
           <Row
+            icon={<FaCalendarCheck color="#059669" />}
+            bg="#d1fae5"
+            title="My Service Bookings"
+            sub="View all services you have booked"
+            onClick={() => navigate("/service-bookings/my-bookings")}
+          />
+
+          <Row
             icon={<FaBookmark color="#ef4444" />}
             bg="#fee2e2"
             title="Saved Products"
@@ -186,6 +181,24 @@ export default function SettingsPage() {
             sub="Manage shipping addresses"
             onClick={handleAddressClick}
           />
+
+          {isServiceProvider ? (
+            <Row
+              icon={<FaBriefcase color="#111827" />}
+              bg="#e2e8f0"
+              title="Service Dashboard"
+              sub={serviceDashboard?.statusMessage || "Manage your service provider profile"}
+              onClick={() => navigate("/service/dashboard")}
+            />
+          ) : (
+            <Row
+              icon={<FaBriefcase color="#111827" />}
+              bg="#e2e8f0"
+              title="Become a Service Provider"
+              sub="Apply to offer pet services on CuttyPaws"
+              onClick={() => navigate("/service-provider/register")}
+            />
+          )}
 
           <Row
             icon={<FaCreditCard color="#4f46e5" />}
@@ -228,10 +241,8 @@ export default function SettingsPage() {
             danger
             onClick={handleLogout}
           />
-
         </div>
 
-        {/* ================= FOOTER ================= */}
         <div className="text-center mt-4 pt-4 border-top">
           <div className="text-muted small mb-2">CuttyPaws Version 1.0.0</div>
           <div className="cp-footer-links">
@@ -240,7 +251,6 @@ export default function SettingsPage() {
             <button className="btn btn-link text-muted p-0 small">Privacy Policy</button>
           </div>
         </div>
-
       </div>
     </div>
   );

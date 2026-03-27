@@ -23,7 +23,7 @@ const SellerLanding = () => {
           <Button 
             variant="light" 
             className="ms-auto"
-            onClick={() => navigate('/company-register-page')}
+            onClick={() => navigate('/seller-register-page')}
           >
             Become a Seller <FaRocket className="ms-2" />
           </Button>
@@ -44,7 +44,7 @@ const SellerLanding = () => {
               <Button 
                 variant="primary" 
                 size="lg" 
-                onClick={() => navigate('/company-register-page')}
+                onClick={() => navigate('/seller-register-page')}
                 className="rounded-pill px-4"
               >
                 Start Selling Today <FaRocket className="ms-2" />
@@ -124,7 +124,7 @@ const SellerLanding = () => {
             variant="light" 
             size="lg" 
             className="rounded-pill px-5"
-            onClick={() => navigate('/company-register-page')}
+            onClick={() => navigate('/seller-register-page')}
           >
             Get Started Now <FaRocket className="ms-2" />
           </Button>

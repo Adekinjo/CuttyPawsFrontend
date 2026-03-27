@@ -8,11 +8,11 @@ import {
 import { Line, Pie } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import ApiService from '../../service/ApiService';
-import './CompanyDashboard.css';
+import './SellerDashboard.css';
 
-const CompanyDashboard = () => {
+const SellerDashboard = () => {
   const navigate = useNavigate();
-  const [companyData, setCompanyData] = useState({
+  const [sellerData, setSellerData] = useState({
     businessName: "N/A",
     email: "N/A",
     regDate: "N/A"
@@ -92,12 +92,12 @@ const CompanyDashboard = () => {
         // Fetch logged-in user info
         const userInfoRes = await ApiService.getLoggedInInfo();
         const userInfo = userInfoRes.user;
-        if (!userInfo || userInfo.role !== "ROLE_COMPANY") {
+        if (!userInfo || userInfo.role !== "ROLE_SELLER") {
           throw new Error("Unauthorized access");
         }
     
         // Set company data
-        setCompanyData({
+        setSellerData({
           businessName: userInfo.companyName || "N/A",
           email: userInfo.email || "N/A",
           regDate: userInfo.regDate || "N/A"
@@ -118,7 +118,7 @@ const CompanyDashboard = () => {
         // Fetch orders
         let orderItems = [];
         try {
-          const ordersRes = await ApiService.getCompanyProductOrders(companyId);
+          const ordersRes = await ApiService.getSellerProductOrders(companyId);
           orderItems = ordersRes.orderItemList || [];
         } catch (error) {
           console.error("Error fetching orders:", error);
@@ -199,17 +199,17 @@ const CompanyDashboard = () => {
 
   
   const handleOrderDetails = (id) => {
-    navigate(`/company/company-order-details/${id}`);
+    navigate(`/seller/seller-order-details/${id}`);
 };
 
 
   return (
     <div className="seller-dashboard">
       <header className="dashboard-header">
-        <h1><FaUserTie /> {companyData.businessName} Dashboard</h1>
+        <h1><FaUserTie /> {sellerData.businessName} Seller Dashboard</h1>
         <button
           className="logout-btn"
-          onClick={() => navigate('/company/company-products')}
+          onClick={() => navigate('/seller/seller-products')}
         >
           Manage Products
         </button>
@@ -328,13 +328,13 @@ const CompanyDashboard = () => {
         <h2><FaInfoCircle /> Seller Information</h2>
         <div className="info-card">
           <div className="info-item">
-            <strong>Business Name:</strong> {companyData.businessName}
+            <strong>Business Name:</strong> {sellerData.businessName}
           </div>
           <div className="info-item">
-            <strong>Email:</strong> {companyData.email}
+            <strong>Email:</strong> {sellerData.email}
           </div>
           <div className="info-item">
-            <strong>Registration Date:</strong> {formatDate(companyData.regDate)}
+            <strong>Registration Date:</strong> {formatDate(sellerData.regDate)}
           </div>
         </div>
       </div>
@@ -358,4 +358,4 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-export default CompanyDashboard;
+export default SellerDashboard;

@@ -196,7 +196,7 @@ import {
 } from 'react-bootstrap';
 import ApiService from '../../service/ApiService';
 
-const CompanyRegister = () => {
+const SellerRegister = () => {
   const [formData, setFormData] = useState({
     companyName: '',
     name: '',
@@ -256,9 +256,9 @@ const CompanyRegister = () => {
     }
 
     try {
-      await ApiService.registerCompany({
+      await ApiService.registerSeller({
         ...formData,
-        role: 'ROLE_COMPANY',
+        role: 'ROLE_SELLER',
       });
       setMessage('Registration successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
@@ -289,7 +289,7 @@ const CompanyRegister = () => {
 
               <Form onSubmit={handleSignup}>
                 <Form.Group className="mb-4">
-                  <Form.Label className="text-muted small mb-2">Company Name</Form.Label>
+                  <Form.Label className="text-muted small mb-2">Seller Name</Form.Label>
                   <InputGroup>
                     <InputGroup.Text className="bg-light border-end-0">
                       <FaBuilding className="text-primary" />
@@ -299,7 +299,7 @@ const CompanyRegister = () => {
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleInputChange}
-                      placeholder="Enter company name"
+                      placeholder="Enter seller name"
                       required
                       className="border-start-0"
                     />
@@ -421,4 +421,4 @@ const CompanyRegister = () => {
   );
 };
 
-export default CompanyRegister;
+export default SellerRegister;

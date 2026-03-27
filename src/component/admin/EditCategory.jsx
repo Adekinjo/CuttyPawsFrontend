@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/CategoryService";
 import { useNavigate, useParams } from "react-router-dom";
 
 const EditCategory = () => {

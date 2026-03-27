@@ -5,12 +5,12 @@ import { CartProvider } from "./component/context/CartContext.jsx";
 import Navbar from "./component/common/Navbar.jsx";
 import LoadingSpinner from "./component/common/LoadingSpinner.jsx";
 import SeoMeta from "./component/common/SeoMeta.jsx";
-import CompanyRegister from "./component/company/CompanyResgister.jsx";
+import SellerRegister from "./component/company/SellerRegister.jsx";
 import SessionExpired from './component/pages/SessionExpired.jsx'; 
 import ApiService from "./service/AuthService.js";
 import "react-toastify/dist/ReactToastify.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import AIHelpPage from "./component/pages/AIHelpPage.jsx";
 
 
 const Home = lazy(() => import("./component/pages/Home.jsx"));
@@ -20,6 +20,7 @@ const CategoryListPage = lazy(() => import("./component/pages/CategoryListPage.j
 const CategoryProduct = lazy(() => import("./component/pages/CategoryProduct.jsx"));
 const CartPage = lazy(() => import("./component/pages/CartPage.jsx"));
 const RegisterPage = lazy(() => import("./component/pages/RegisterPage.jsx"));
+const RegisterServiceChoicePage = lazy(() => import("./component/pages/RegisterServiceChoicePage.jsx"));
 const LoginPage = lazy(() => import("./component/pages/LoginPage.jsx"));
 const ProfilePage = lazy(() => import("./component/profile/ProfilePage.jsx"));
 const SettingsPage = lazy(() => import("./component/profile/SettingsProfile.jsx"))
@@ -60,12 +61,12 @@ const Deal = lazy(() => import("./component/pages/Deal.jsx"));
 const NewArrivals = lazy(() => import("./component/pages/NewArrivals.jsx"));
 const TrendingProducts = lazy(() => import("./component/pages/TrendinProducts.jsx"));
 const SellerLanding = lazy(() => import("./component/company/LandingPage.jsx"));
-const CompanyDashboard = lazy(() => import("./component/company/CompanyDashboard.jsx"));
-const CompanyProduct = lazy(() => import("./component/company/CompanyProduct.jsx"));
-const CompanyAddProduct = lazy(() => import("./component/company/CompanyAddProduct.jsx"));
-const CompanyEditProduct = lazy(() => import("./component/company/CompanyEditProduct.jsx"));
-const CompanyOrderDetails = lazy(() => import("./component/company/CompanyOrderDetails.jsx"));
-const CompaniesProducts = lazy(() => import("./component/company/CompaniesProducts.jsx"));
+const SellerDashboard = lazy(() => import("./component/company/SellerDashboard.jsx"));
+const SellerProduct = lazy(() => import("./component/company/SellerProduct.jsx"));
+const SellerAddProduct = lazy(() => import("./component/company/SellerAddProduct.jsx"));
+const SellerEditProduct = lazy(() => import("./component/company/SellerEditProduct.jsx"));
+const SellerOrderDetails = lazy(() => import("./component/company/SellerOrderDetails.jsx"));
+const SellerProducts = lazy(() => import("./component/company/SellersProducts.jsx"));
 const ProductList = lazy(() => import("./component/common/ProductList.jsx"));
 const SecurityDashboard = lazy(() => import("./component/security/SecurityDashboard.jsx"));
 const SecurityMonitoring = lazy(() => import("./component/security/SecurityMonitoring.jsx"));
@@ -84,13 +85,28 @@ const EditPetPage = lazy(() => import("./component/pet/EditPetPage.jsx"));
 const PetDetailsPage = lazy(() => import("./component/pet/PetDetailsPage.jsx"));
 const OrderHistoryPage =lazy(() => import("./component/profile/OrderHistoryPage.jsx"))
 const UpdateProfile =lazy(() => import("./component/profile/UpdateProfile.jsx"))
+const ServiceProviderRegisterPage = lazy(() => import("./component/service-provider/ServiceProviderRegisterPage.jsx"));
+const ServiceDashboardPage = lazy(() => import("./component/service-provider/ServiceDashboardPage.jsx"));
+const ServiceProfileEditPage = lazy(() => import("./component/service-provider/ServiceProfileEditPage.jsx"));
+const PublicServiceProfilePage = lazy(() => import("./component/service-provider/PublicServiceProfilePage.jsx"));
+const AdminPendingServicesPage = lazy(() => import("./component/service-provider/AdminPendingServicesPage.jsx"));
+const ServiceAdsPage = lazy(() => import("./component/post/PostAdsCard.jsx"));
+const ServiceAdPaymentSuccessPage = lazy(() => import("./component/service-provider/ServiceAdPaymentSuccessPage.jsx"));
+const ServiceBookingSuccess = lazy (() => import("./component/service-provider/ServiceBookingSuccess.jsx"));
+const MyServiceBookings = lazy (() => import("./component/profile/MyServiceBookings.jsx"));
+const AiHelpPage = lazy (() => import("./component/pages/AIHelpPage.jsx"));
+const VideoFeed = lazy (() => import("./component/post/VideoFeed.jsx"));
+
+
+
 
 
 
 const ProtectedRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.ProtectedRoute })));
 const AdminRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.AdminRoute })));
 const SupportRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.SupportRoute })));
-const CompanyRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.CompanyRoute })));
+const SellerRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.SellerRoute })));
+const ServiceProviderRoute = lazy(() => import("./service/Guard.jsx").then(module => ({ default: module.ServiceProviderRoute })));
 
 function App() {
   const location = useLocation();
@@ -128,8 +144,10 @@ function App() {
           <Route path="/category/:categoryId" element={<CategoryProduct />} />
           <Route path="/cart-view" element={<CartPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/services" element={<RegisterServiceChoicePage />} />
           <Route path="/search" element={<SearchPricePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/service-provider/register" element={<ServiceProviderRegisterPage />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/faqs" element={<FAQPage />} />
           <Route path="/about-us" element={<AboutUs />} />
@@ -144,13 +162,17 @@ function App() {
           <Route path="/deals" element={<Deal />} />
           <Route path="/products-list" element={<ProductList />} />
           <Route path="/sellers-landing-page" element={<SellerLanding />} />
-          <Route path="/company-register-page" element={<CompanyRegister />} />
-          <Route path="/companies/:companyName" element={<CompaniesProducts />} />
+          <Route path="/seller-register-page" element={<SellerRegister />} />
+          <Route path="/company-register-page" element={<SellerRegister />} />
+          <Route path="/sellers/:sellerName" element={<SellerProducts />} />
+          <Route path="/companies/:companyName" element={<SellerProducts />} />
+          <Route path="/videos" element={<VideoFeed />} />
 
           
           {/* Social/Post Routes */}
           <Route path="/post/:postId" element={<PostDetailsPage />} />
           <Route path="/customer-profile/:userId" element={<PublicProfilePage />} />
+          <Route path="/services/:userId" element={<PublicServiceProfilePage />} />
 
           {/* ==================== PROTECTED ROUTES ==================== */}
           <Route path="/customer-profile" element={<ProtectedRoute element={ProfilePage} />} />
@@ -166,6 +188,8 @@ function App() {
           <Route path="/customer-profile/:userId/followers" element={<ProtectedRoute element={FollowersPage} />} />
           <Route path="/customer-profile/:userId/following" element={<ProtectedRoute element={FollowingPage} />} />
           <Route path="/order-history-page" element={<ProtectedRoute element={OrderHistoryPage}/>} />
+          <Route path="/support/kinjo-support" element={<ProtectedRoute element={AiHelpPage}/>} />
+
 
           {/* Protected Routes */}
           <Route path="/customer-profile" element={<ProtectedRoute element={ProfilePage} />} />
@@ -176,6 +200,13 @@ function App() {
           <Route path="/payment-success" element={<ProtectedRoute element={PaymentSuccess} />} />
           <Route path="/payment-failed" element={<ProtectedRoute element={PaymentFail} />} />
           <Route path="/update-user-profile" element={<ProtectedRoute element={UpdateProfile} />} />
+          <Route path="/service/dashboard" element={<ServiceProviderRoute element={ServiceDashboardPage} />} />
+          <Route path="/service/profile" element={<ServiceProviderRoute element={ServiceProfileEditPage} />} />
+          <Route path="/service/ads" element={<ServiceProviderRoute element={ServiceAdsPage} />} />
+          <Route path="/service-ads/success" element={<ServiceProviderRoute element={ServiceAdPaymentSuccessPage} />} />
+          <Route path="/service-bookings/success" element={<ProtectedRoute element={ServiceBookingSuccess} />} />
+          <Route path="/service-bookings/my-bookings" element={<ProtectedRoute element={MyServiceBookings} />} />
+
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminRoute element={AdminPage} />} />
@@ -197,6 +228,7 @@ function App() {
           <Route path="/admin/cache-management" element={<AdminRoute element={CacheController} />} />
           <Route path="/admin/subcategories" element={<AdminRoute element={AdminSubCategories} />} />
           <Route path="/admin/edit-subcategory/:subCategoryId" element={<AdminRoute element={EditSubCategory} />} />
+          <Route path="/admin/service-approvals" element={<AdminRoute element={AdminPendingServicesPage} />} />
           
 
 
@@ -207,12 +239,17 @@ function App() {
           <Route path="/support/customer-view-complaines" element={<SupportRoute element={SupportCustomerSupport} />} />
           <Route path="/support/reviews" element={<SupportRoute element={SupportReviewsPage} />} />
 
-          {/* Company Routes */}
-          <Route path="/company/company-dashboard" element={<CompanyRoute element={CompanyDashboard} />} />
-          <Route path="/company/company-products" element={<CompanyRoute element={CompanyProduct} />} />
-          <Route path="/company/company-add-product" element={<CompanyRoute element={CompanyAddProduct} />} />
-          <Route path="/company/company-edit-product/:productId" element={<CompanyRoute element={CompanyEditProduct} />} />
-          <Route path="/company/company-order-details/:itemId" element={<CompanyRoute element={CompanyOrderDetails} />} />
+          {/* Seller Routes */}
+          <Route path="/seller/seller-dashboard" element={<SellerRoute element={SellerDashboard} />} />
+          <Route path="/seller/seller-products" element={<SellerRoute element={SellerProduct} />} />
+          <Route path="/seller/seller-add-product" element={<SellerRoute element={SellerAddProduct} />} />
+          <Route path="/seller/seller-edit-product/:productId" element={<SellerRoute element={SellerEditProduct} />} />
+          <Route path="/seller/seller-order-details/:itemId" element={<SellerRoute element={SellerOrderDetails} />} />
+          <Route path="/company/company-dashboard" element={<SellerRoute element={SellerDashboard} />} />
+          <Route path="/company/company-products" element={<SellerRoute element={SellerProduct} />} />
+          <Route path="/company/company-add-product" element={<SellerRoute element={SellerAddProduct} />} />
+          <Route path="/company/company-edit-product/:productId" element={<SellerRoute element={SellerEditProduct} />} />
+          <Route path="/company/company-order-details/:itemId" element={<SellerRoute element={SellerOrderDetails} />} />
           <Route path="*" element={
             <div className="container text-center py-5">
               <h2>404 - Page Not Found</h2>

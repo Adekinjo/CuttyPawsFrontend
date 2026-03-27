@@ -11,7 +11,7 @@ import styles from "../../style/HomeAppliance.module.css";
 import { Snackbar, Alert, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const Companies = ({ companyName }) => {
+const Seller = ({ sellerName }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
@@ -22,20 +22,19 @@ const Companies = ({ companyName }) => {
   const [isError, setIsError] = useState(false);
   const { cart, dispatch } = useCart();
 
-  // Fetch products for the specified company
+  // Fetch products for the specified seller
   useEffect(() => {
-    const fetchCompanyProducts = async () => {
+    const fetchSellerProducts = async () => {
       try {
         const response = await ApiService.getAllProduct();
         const allProducts = response.productList || [];
 
-        // Filter products by company name
-        const companyProducts = allProducts.filter(
-          (product) => product.companyName === companyName
+        // Filter products by seller name
+        const sellerProducts = allProducts.filter(
+          (product) => (product.sellerName || product.companyName) === sellerName
         );
 
-        // Set the filtered products in state
-        setProducts(companyProducts);
+        setProducts(sellerProducts);
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -48,8 +47,8 @@ const Companies = ({ companyName }) => {
       }
     };
 
-    fetchCompanyProducts();
-  }, [companyName]);
+    fetchSellerProducts();
+  }, [sellerName]);
 
   // Fetch wishlist
   useEffect(() => {
@@ -150,7 +149,7 @@ const Companies = ({ companyName }) => {
 
   // Navigate to all products page
   const handleViewAllProducts = () => {
-    navigate(`/companies/${companyName.toLowerCase()}`);
+    navigate(`/sellers/${sellerName.toLowerCase()}`);
   };
 
   // Do not render anything if no products are available
@@ -187,7 +186,7 @@ const Companies = ({ companyName }) => {
       </Snackbar>
 
       <div className={styles.homeApplianceHeader}>
-        <h1 className="text-center mb-0 py-2">{companyName} Products</h1>
+        <h1 className="text-center mb-0 py-2">{sellerName} Products</h1>
         <Button
           variant="primary"
           style={{
@@ -322,4 +321,4 @@ const Companies = ({ companyName }) => {
   );
 };
 
-export default Companies;
+export default Seller;

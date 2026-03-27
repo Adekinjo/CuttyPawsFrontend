@@ -1,7 +1,6 @@
-
-
 import { useState, useEffect } from "react";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/ProductService";
+import CategoryService from "../../service/CategoryService";
 import { useNavigate } from "react-router-dom";
 import "../../style/AddProduct.css";
 
@@ -23,7 +22,7 @@ const AddProduct = () => {
 
   // Fetch all categories on component mount
   useEffect(() => {
-    ApiService.getAllCategories()
+    CategoryService.getAllCategories()
       .then((res) => setCategories(res.categoryList))
       .catch((error) => {
         console.error("Failed to fetch categories:", error);
@@ -34,7 +33,7 @@ const AddProduct = () => {
   // Fetch subcategories when a category is selected
   useEffect(() => {
     if (categoryId) {
-      ApiService.getCategoryById(categoryId)
+      CategoryService.getCategoryById(categoryId)
         .then((res) => setSubCategories(res.category.subCategories || []))
         .catch((error) => {
           console.error("Failed to fetch subcategories:", error);

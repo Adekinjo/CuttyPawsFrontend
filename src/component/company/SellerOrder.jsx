@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../common/Pagination";
 import ApiService from "../../service/ApiService";
-import "./CompanyOrders.css";
+import "./SellerOrders.css";
 
 const OrderStatus = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
-const CompanyOrders = () => {
+const SellerOrders = () => {
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
@@ -24,7 +24,7 @@ const CompanyOrders = () => {
     const fetchOrders = async () => {
         try {
             const companyId = localStorage.getItem("companyId"); // Assuming companyId is stored during login
-            const response = await ApiService.getCompanyProductOrders(companyId, currentPage - 1, itemsPerPage);
+            const response = await ApiService.getSellerProductOrders(companyId, currentPage - 1, itemsPerPage);
 
             const orderList = response.orderItemList || [];
             setTotalPages(response.totalPage);
@@ -54,13 +54,13 @@ const CompanyOrders = () => {
 
     // Handle navigation to order details
     const handleOrderDetails = (id) => {
-        navigate(`/company/order-details/${id}`);
+        navigate(`/seller/seller-order-details/${id}`);
     };
 
     return (
         <div className="company-product-orders">
             {error && <p className="error">{error}</p>}
-            <h2>Company Product Orders</h2>
+            <h2>Seller Product Orders</h2>
 
             {/* Filter by Status */}
             <div className="filter-container">
@@ -126,4 +126,4 @@ const CompanyOrders = () => {
     );
 };
 
-export default CompanyOrders;
+export default SellerOrders;

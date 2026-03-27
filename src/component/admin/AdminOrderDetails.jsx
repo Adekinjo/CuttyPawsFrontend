@@ -8,7 +8,7 @@ import {
   FaMapMarkerAlt,
 } from "react-icons/fa";
 import "../../style/AdminOrderDetails.css";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/OrderService";
 
 const OrderStatus = [
   "PENDING",

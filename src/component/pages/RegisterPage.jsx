@@ -98,7 +98,7 @@ const RegisterPage = () => {
                         <img src="/faveicon.png" alt="CuttyPaws paw" className="register-card__logo" />
                         <div>
                             <p className="register-card__eyebrow">Join CuttyPaws</p>
-                            <h2>Create your account</h2>
+                            <h2>Create account</h2>
                         </div>
                     </div>
 
@@ -219,6 +219,17 @@ const RegisterPage = () => {
                                 onClick={() => navigate("/login")}
                             >
                                 Sign in
+                            </button>
+                        </div>
+
+                        <div className="register-footer register-footer--secondary">
+                            <p>Registering a business or pet service instead?</p>
+                            <button
+                                type="button"
+                                className="register-inline-link"
+                                onClick={() => navigate("/register/services")}
+                            >
+                                Choose seller or service registration
                             </button>
                         </div>
                     </form>

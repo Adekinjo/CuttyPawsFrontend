@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../common/Pagination";
 import '../../style/AdminProduct.css';
 
-const CompanyProduct = () => {
+const SellerProduct = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]); 
   const [currentPage, setCurrentPage] = useState(1); 
   const [totalPages, setTotalPages] = useState(0); 
   const [error, setError] = useState(null); 
-  const [companyName, setCompanyName] = useState(""); 
+  const [sellerName, setSellerName] = useState("");
+  const [sellerId, setSellerId] = useState(null);
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 10; 
 
@@ -20,8 +21,9 @@ const CompanyProduct = () => {
     try {
       const response = await ApiService.getLoggedInInfo();
       const userInfo = response.user;
-      if (userInfo && userInfo.role === "ROLE_COMPANY") {
-        setCompanyName(userInfo.companyName || "Company"); // Set company name
+      if (userInfo && userInfo.role === "ROLE_SELLER") {
+        setSellerName(userInfo.companyName || "Seller");
+        setSellerId(userInfo.id);
       }
       return userInfo;
     } catch (error) {
@@ -32,10 +34,10 @@ const CompanyProduct = () => {
     }
   };
 
-  // Fetch products for the logged-in company
-  const fetchCompanyProducts = async (companyId) => {
+  // Fetch products for the logged-in seller
+  const fetchSellerProducts = async (sellerId) => {
     try {
-      const response = await ApiService.getAllProductsByUser(companyId);
+      const response = await ApiService.getAllProductsByUser(sellerId);
       const productList = response.productList || [];
       setTotalPages(Math.ceil(productList.length / itemsPerPage));
       setProducts(productList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
@@ -52,8 +54,8 @@ const CompanyProduct = () => {
   useEffect(() => {
     const initialize = async () => {
       const userInfo = await fetchUserInfo();
-      if (userInfo && userInfo.role === "ROLE_COMPANY") {
-        fetchCompanyProducts(userInfo.id);
+      if (userInfo && userInfo.role === "ROLE_SELLER") {
+        fetchSellerProducts(userInfo.id);
       } else {
         setLoading(false);
       }
@@ -65,8 +67,8 @@ const CompanyProduct = () => {
   useEffect(() => {
     const fetchProductsForCurrentPage = async () => {
       const userInfo = await fetchUserInfo();
-      if (userInfo && userInfo.role === "ROLE_COMPANY") {
-        fetchCompanyProducts(userInfo.id);
+      if (userInfo && userInfo.role === "ROLE_SELLER") {
+        fetchSellerProducts(userInfo.id);
         console.log(userInfo.id);
       }
     };
@@ -75,15 +77,17 @@ const CompanyProduct = () => {
 
   // Handle product edit action
   const handleEdit = (id) => {
-    navigate(`/company/company-edit-product/${id}`);
+    navigate(`/seller/seller-edit-product/${id}`);
   };
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Are you sure you want to delete this product?");
     if (confirmed) {
       try {
-        await ApiService.deleteProductForCompany(id);
-        fetchCompanyProducts();
+        await ApiService.deleteProductForSeller(id);
+        if (sellerId) {
+          fetchSellerProducts(sellerId);
+        }
       } catch (error) {
         setError(error.response?.data?.message || error.message || "Unable to delete product");
       }
@@ -101,10 +105,10 @@ const CompanyProduct = () => {
       ) : (
         <div>
           {/* Display company name */}
-          <h1>{companyName} Products</h1>
+          <h1>{sellerName} Products</h1>
 
           {/* Add Product Button */}
-          <button className="add-product" onClick={() => navigate('/company/company-add-product')}>
+          <button className="add-product" onClick={() => navigate('/seller/seller-add-product')}>
             Add Product
           </button>
 
@@ -139,4 +143,4 @@ const CompanyProduct = () => {
   );
 };
 
-export default CompanyProduct;
+export default SellerProduct;

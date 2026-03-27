@@ -11,7 +11,8 @@ import {
   FaShieldAlt,
   FaEye,
   FaDatabase,
-  FaLayerGroup
+  FaLayerGroup,
+  FaBriefcase
 } from "react-icons/fa";
 
 const AdminPage = () => {
@@ -94,6 +95,13 @@ const AdminPage = () => {
             icon: <FaDatabase className="card-icon" />,
             color: "#A52A2A",
             description: "Manage Redis cache settings and performance"
+        },
+        {
+            title: "Service Approvals",
+            path: "/admin/service-approvals",
+            icon: <FaBriefcase className="card-icon" />,
+            color: "#0f172a",
+            description: "Review pending service provider applications"
         }
     ];
 

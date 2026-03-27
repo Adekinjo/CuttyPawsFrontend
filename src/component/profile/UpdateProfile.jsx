@@ -43,7 +43,7 @@ export default function EditProfilePage() {
   const [profileFile, setProfileFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
 
-  const isCompany = useMemo(() => AuthService.isCompany(), []);
+  const isSeller = useMemo(() => AuthService.isSeller(), []);
 
   useEffect(() => {
     // Ensure interceptors exist (safe to call multiple times if you prefer)
@@ -126,7 +126,7 @@ export default function EditProfilePage() {
       // If you want to also save company fields (you currently don't update these in service),
       // you must add support in backend updateUserProfile() first.
       // If your backend already supports it later, uncomment:
-      // if (isCompany) {
+      // if (isSeller) {
       //   payload.companyName = form.companyName?.trim();
       //   payload.businessRegistrationNumber = form.businessRegistrationNumber?.trim();
       // }
@@ -414,17 +414,17 @@ export default function EditProfilePage() {
                       </div>
                     </div>
 
-                    {/* Company fields (UI only) */}
-                    {isCompany && (
+                    {/* Seller fields (UI only) */}
+                    {isSeller && (
                       <>
                         <div className="col-md-6">
-                          <label className="form-label fw-semibold">Company Name</label>
+                          <label className="form-label fw-semibold">Seller Name</label>
                           <input
                             name="companyName"
                             value={form.companyName}
                             onChange={onChange}
                             className="form-control"
-                            placeholder="Company name"
+                            placeholder="Seller name"
                           />
                           <small className="text-muted">
                             Note: Your backend currently does not update this field in updateUserProfile().

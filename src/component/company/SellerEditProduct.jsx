@@ -4,7 +4,7 @@ import ApiService from "../../service/ApiService";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../style/EditProduct.css";
 
-const CompanyEditProduct = () => {
+const SellerEditProduct = () => {
   const { productId } = useParams();
   const [images, setImages] = useState([]); 
   const [existingImages, setExistingImages] = useState([]); 
@@ -121,12 +121,12 @@ const CompanyEditProduct = () => {
         formData.append("colors", colors);
       }
 
-      const response = await ApiService.companyUpdateProduct(productId, formData);
+      const response = await ApiService.sellerUpdateProduct(productId, formData);
       if (response.status === 200) {
         setMessage("Product updated successfully!");
         setTimeout(() => {
           setMessage("");
-          navigate("/company/company-products");
+          navigate("/seller/seller-products");
         }, 3000);
       }
     } catch (error) {
@@ -343,4 +343,4 @@ const CompanyEditProduct = () => {
   );
 };
 
-export default CompanyEditProduct;
+export default SellerEditProduct;
