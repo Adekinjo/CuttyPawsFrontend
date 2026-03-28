@@ -128,6 +128,18 @@ const ProductSubCategory = () => {
   const calculateDiscount = (oldPrice, newPrice) => 
     oldPrice > newPrice ? Math.round(((oldPrice - newPrice) / oldPrice) * 100) : 0;
 
+  const generateSlug = (value) => {
+    const rawValue =
+      typeof value === "string" ? value : value?.name || value?.title || "";
+
+    if (!rawValue) return "uncategorized";
+
+    return rawValue
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  };
+
   const handleCloseAlert = () => {
     setShowAlert(false);
   };
@@ -168,6 +180,9 @@ const ProductSubCategory = () => {
           const isInWishlist = wishlist.some(item => item.productId === product.id);
           const discount = calculateDiscount(product.oldPrice, product.newPrice);
           const imageUrl = product.imageUrls?.[0] || "https://via.placeholder.com/300";
+          const categorySlug = generateSlug(product.category);
+          const subCategorySlug = generateSlug(product.subCategory);
+          const productSlug = generateSlug(product.name);
 
           return (
             <Col key={product.id} xs={6} sm={4} md={4} lg={3}>
@@ -187,7 +202,7 @@ const ProductSubCategory = () => {
                 />
 
                 {/* Product Image */}
-                <Link to={`/product/${product.category?.toLowerCase()}/${product.subCategory?.toLowerCase()}/${product.name.toLowerCase()}/dp/${product.id}`}>
+                <Link to={`/product/${categorySlug}/${subCategorySlug}/${productSlug}/dp/${product.id}`}>
                   <div className="ratio ratio-1x1">
                     <img 
                       src={imageUrl} 

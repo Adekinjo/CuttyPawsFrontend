@@ -139,7 +139,6 @@ function App() {
           <Route exact path="/" element={<Home />} />
 
           <Route path="/product/:category/:subCategory/:productName/dp/:productId" element={<ProductDetailsPage />} />
-          {/* <Route path="/accessories" element={<ProductPage />} /> */}
           <Route path="/categories" element={<CategoryListPage />} />
           <Route path="/category/:categoryId" element={<CategoryProduct />} />
           <Route path="/cart-view" element={<CartPage />} />
