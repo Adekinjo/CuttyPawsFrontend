@@ -220,13 +220,13 @@ const ProductSubCategory = () => {
                   {/* Old Price (Red) */}
                     {product.oldPrice > 0 && (
                       <p className="text-danger text-decoration-line-through mb-1 small">
-                        ₦{product.oldPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${product.oldPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     )}
 
                     {/* New Price */}
                     <p className="h6 mb-1 text-primary">
-                      ₦{product.newPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${product.newPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   {/* Add to Cart / Quantity Controls */}
                   {cartItem ? (

@@ -294,7 +294,7 @@ const ProductDetailsPage = () => {
           <div className="d-flex flex-column gap-1">
             {product.oldPrice > 0 && (
               <span className="text-decoration-line-through text-danger">
-                ₦
+                $
                 {product.oldPrice.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -302,7 +302,7 @@ const ProductDetailsPage = () => {
               </span>
             )}
             <span className="h4 text-primary">
-              ₦
+              $
               {product.newPrice.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -432,7 +432,7 @@ const ProductDetailsPage = () => {
                   <div className="d-flex flex-column">
                     {product.oldPrice > 0 && (
                       <small className="text-danger text-decoration-line-through">
-                        ₦
+                        $
                         {product.oldPrice.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
@@ -440,7 +440,7 @@ const ProductDetailsPage = () => {
                       </small>
                     )}
                     <span className="text-primary">
-                      ₦
+                      $
                       {product.newPrice.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -493,7 +493,7 @@ const ProductDetailsPage = () => {
                   <div className="d-flex flex-column">
                     {relatedProduct.oldPrice > 0 && (
                       <small className="text-danger text-decoration-line-through">
-                        ₦
+                        $
                         {relatedProduct.oldPrice.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
@@ -501,7 +501,7 @@ const ProductDetailsPage = () => {
                       </small>
                     )}
                     <span className="text-primary">
-                      ₦
+                      $
                       {relatedProduct.newPrice.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,

@@ -23,10 +23,10 @@ const RecentView = () => {
       .replace(/(^-|-$)+/g, ""); // Remove leading/trailing hyphens
   };
 
-  // Function to format price with Nigerian Naira symbol and commas
+  // Function to format price with dollar symbol and commas
   const formatPrice = (price) => {
     if (!price) return "Price not available";
-    return `₦${price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}`;
+    return `$${price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}`;
   };
 
   // If no recently viewed products, don't render anything
