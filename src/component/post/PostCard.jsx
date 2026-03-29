@@ -575,23 +575,30 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     const normalizedFromMedia = Array.isArray(post?.media)
       ? post.media
           .map((item) => ({
-            url: item?.url || item?.mediaUrl,
+            url: item?.url || item?.mediaUrl || null,
+            streamUrl: item?.streamUrl || null,
             type: (item?.type || item?.mediaType || "IMAGE").toUpperCase(),
             thumbnailUrl: item?.thumbnailUrl || null,
           }))
-          .filter((item) => item.url)
+          .filter((item) => item.url || item.streamUrl)
       : [];
 
     const normalizedFromImageUrls = Array.isArray(post?.imageUrls)
       ? post.imageUrls
           .filter(Boolean)
-          .map((url) => ({ url, type: "IMAGE", thumbnailUrl: null }))
+          .map((url) => ({
+            url,
+            streamUrl: null,
+            type: "IMAGE",
+            thumbnailUrl: null,
+          }))
       : [];
 
-    // Merge and de-duplicate so one real file does not create fake "multiple media"
     const unique = new Map();
+
     [...normalizedFromMedia, ...normalizedFromImageUrls].forEach((item) => {
-      const key = `${item.type}|${item.url}`;
+      const finalUrl = item.streamUrl || item.url;
+      const key = `${item.type}|${finalUrl}`;
       if (!unique.has(key)) {
         unique.set(key, item);
       }
@@ -792,9 +799,11 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     }
   }, [showImageModal, hideVideoControls]);
 
+
   const renderInteractiveVideo = (item, idx, isModal = false) => {
     const videoKey = `${post?.id || "post"}-${isModal ? "modal" : "feed"}-${idx}`;
     const mediaKey = videoKey;
+    const videoSrc = item.streamUrl || item.url;
     const isMuted = !isModal ? feedVideosMuted : false;
     const controlsVisible = activeVideoControls === videoKey;
 
@@ -802,13 +811,11 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
       const video = event.currentTarget;
       if (isModal) return;
 
-      // iOS Safari often shows a black frame unless playback/seek is nudged.
       if (video.readyState >= 2 && !video.dataset.previewReady) {
         video.dataset.previewReady = "true";
         try {
           video.currentTime = 0.1;
         } catch {
-          // Ignore seek failures on browsers that restrict it.
         }
       }
     };
@@ -830,7 +837,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           muted={isMuted}
           loop={!isModal}
           playsInline
-          preload={isModal ? "metadata" : "auto"}
+          preload="metadata"
           className={isModal ? "modal-image post-interactive-video" : "post-image post-video-preview post-interactive-video"}
           poster={item.thumbnailUrl || undefined}
           ref={(node) => {
@@ -845,7 +852,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           onPlay={() => setVideoPlayingState(videoKey, true)}
           onPause={() => setVideoPlayingState(videoKey, false)}
         >
-          <source src={item.url} />
+          <source src={videoSrc} />
           Your browser does not support the video tag.
         </video>
 
@@ -862,6 +869,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
             <RotateCcw size={18} />
             <span>10</span>
           </button>
+
           <button
             type="button"
             className="post-video-center-btn post-video-center-btn-main"
@@ -870,6 +878,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           >
             {playingStates[videoKey] ? <FaPause size={18} /> : <FaPlay size={18} />}
           </button>
+
           <button
             type="button"
             className="post-video-center-btn"
@@ -882,24 +891,22 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         </div>
 
         {!isModal && (
-          <>
-            <button
-              type="button"
-              className="post-video-volume-btn"
-              aria-label={isMuted ? "Unmute video" : "Mute video"}
-              onClick={(event) => {
-                event.stopPropagation();
-                setHasManualVolumePreference(true);
-                setHasFeedVideoSoundPermission(true);
-                if (typeof window !== "undefined") {
-                  window.sessionStorage.setItem(FEED_VIDEO_SOUND_SESSION_KEY, "true");
-                }
-                setFeedVideosMuted((prev) => !prev);
-              }}
-            >
-              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
-          </>
+          <button
+            type="button"
+            className="post-video-volume-btn"
+            aria-label={isMuted ? "Unmute video" : "Mute video"}
+            onClick={(event) => {
+              event.stopPropagation();
+              setHasManualVolumePreference(true);
+              setHasFeedVideoSoundPermission(true);
+              if (typeof window !== "undefined") {
+                window.sessionStorage.setItem(FEED_VIDEO_SOUND_SESSION_KEY, "true");
+              }
+              setFeedVideosMuted((prev) => !prev);
+            }}
+          >
+            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          </button>
         )}
       </div>
     );
