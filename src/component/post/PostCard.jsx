@@ -98,23 +98,26 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
 
   // Initialize reactions from post data
   useEffect(() => {
-    if (post) {
-      // For backward compatibility, check if post has old like data
-      if (post.likedByCurrentUser) {
-        setUserReaction("PAWPRINT");
-      }
+    if (!post) return;
+
+    if (post.userReaction) {
+      setUserReaction(post.userReaction);
+    } else if (post.isLikedByCurrentUser === true || post.likedByCurrentUser === true) {
+      setUserReaction("PAWPRINT");
+    } else {
+      setUserReaction(null);
+    }
+
+    if (post.reactionsCount) {
+      setReactionsCount(post.reactionsCount);
+    } else {
+      setReactionsCount({});
+    }
+
+    if (post.totalReactions !== undefined && post.totalReactions !== null) {
+      setTotalReactions(post.totalReactions);
+    } else {
       setTotalReactions(post.likeCount || 0);
-      
-      // If post has reaction data, use it
-      if (post.userReaction) {
-        setUserReaction(post.userReaction);
-      }
-      if (post.reactionsCount) {
-        setReactionsCount(post.reactionsCount);
-      }
-      if (post.totalReactions) {
-        setTotalReactions(post.totalReactions);
-      }
     }
   }, [post]);
 
@@ -176,35 +179,37 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   // Fetch user reaction on component mount
   useEffect(() => {
     const fetchUserReaction = async () => {
-      if (!currentUser || !post?.id) {
-        return;
-      }
+      if (!currentUser || !post?.id) return;
 
-      // If the feed already returned the viewer's reaction state, don't make another request.
-      if (
+      const hasReactionStateFromFeed =
         post?.userReaction !== undefined ||
         post?.likedByCurrentUser !== undefined ||
-        post?.hasReacted !== undefined
-      ) {
-        return;
-      }
+        post?.isLikedByCurrentUser !== undefined ||
+        post?.hasReacted !== undefined;
 
-      if (currentUser && post?.id) {
-        try {
-          const response = await PostLikeService.getUserReaction(post.id);
-          if (response.status === 200 && response.data) {
-            if (response.data.hasReacted) {
-              setUserReaction(response.data.reactionType);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching user reaction:", error);
+      if (hasReactionStateFromFeed) return;
+
+      try {
+        const response = await PostLikeService.getUserReaction(post.id);
+        if (response.status === 200 && response.data?.hasReacted) {
+          setUserReaction(response.data.reactionType);
+        } else {
+          setUserReaction(null);
         }
+      } catch (error) {
+        console.error("Error fetching user reaction:", error);
       }
     };
 
     fetchUserReaction();
-  }, [currentUser, post?.id]);
+  }, [
+    currentUser,
+    post?.id,
+    post?.userReaction,
+    post?.likedByCurrentUser,
+    post?.isLikedByCurrentUser,
+    post?.hasReacted
+  ]);
 
   // Post Reaction Handlers
   const handleReaction = async (reactionType) => {

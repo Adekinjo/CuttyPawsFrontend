@@ -11,7 +11,7 @@ const MixedFeed = ({ currentUser }) => {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const response = await FeedService.getMixedFeed(20);
+        const response = await FeedService.getMixedFeed(12);
         console.debug("[MixedFeed] mixed feed response", response);
         setFeedItems(Array.isArray(response?.items) ? response.items : []);
       } catch (error) {
@@ -38,7 +38,7 @@ const MixedFeed = ({ currentUser }) => {
           case "POST":
             return (
               <PostCard
-                key={`post-${item.post.id}-${index}`}
+                key={`post-${item.post?.id || index}`}
                 post={item.post}
                 currentUser={currentUser}
               />
@@ -47,7 +47,7 @@ const MixedFeed = ({ currentUser }) => {
           case "SERVICE_AD":
             return (
               <ServiceAdCard
-                key={`service-${index}`}
+                key={`service-${item.serviceAd?.id || index}`}
                 serviceAd={item.serviceAd}
               />
             );
@@ -55,7 +55,7 @@ const MixedFeed = ({ currentUser }) => {
           case "PRODUCT_RECOMMENDATION":
             return (
               <ProductRecommendationCard
-                key={`product-${item.product.id}-${index}`}
+                key={`product-${item.product?.id || index}`}
                 product={item.product}
               />
             );
