@@ -12,7 +12,8 @@ import {
   FaEye,
   FaDatabase,
   FaLayerGroup,
-  FaBriefcase
+  FaBriefcase,
+  FaExclamationTriangle
 } from "react-icons/fa";
 
 const AdminPage = () => {
@@ -102,11 +103,18 @@ const AdminPage = () => {
             icon: <FaBriefcase className="card-icon" />,
             color: "#0f172a",
             description: "Review pending service provider applications"
+        },
+        {
+            title: "Service Reports",
+            path: "/admin/service-booking-reports",
+            icon: <FaExclamationTriangle className="card-icon" />,
+            color: "#ef4444",
+            description: "Review customer reports about service providers"
         }
     ];
 
     return(
-        <div className="container py-4">
+        <div className="container py-4 mb-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 className="h2 mb-1">Admin Dashboard</h1>

@@ -90,6 +90,7 @@ const ServiceDashboardPage = lazy(() => import("./component/service-provider/Ser
 const ServiceProfileEditPage = lazy(() => import("./component/service-provider/ServiceProfileEditPage.jsx"));
 const PublicServiceProfilePage = lazy(() => import("./component/service-provider/PublicServiceProfilePage.jsx"));
 const AdminPendingServicesPage = lazy(() => import("./component/service-provider/AdminPendingServicesPage.jsx"));
+const AdminServiceBookingReports = lazy(() => import("./component/admin/AdminServiceBookingReports.jsx"));
 const ServiceAdsPage = lazy(() => import("./component/post/PostAdsCard.jsx"));
 const ServiceAdPaymentSuccessPage = lazy(() => import("./component/service-provider/ServiceAdPaymentSuccessPage.jsx"));
 const ServiceBookingSuccess = lazy (() => import("./component/service-provider/ServiceBookingSuccess.jsx"));
@@ -228,6 +229,7 @@ function App() {
           <Route path="/admin/subcategories" element={<AdminRoute element={AdminSubCategories} />} />
           <Route path="/admin/edit-subcategory/:subCategoryId" element={<AdminRoute element={EditSubCategory} />} />
           <Route path="/admin/service-approvals" element={<AdminRoute element={AdminPendingServicesPage} />} />
+          <Route path="/admin/service-booking-reports" element={<AdminRoute element={AdminServiceBookingReports} />} />
           
 
 

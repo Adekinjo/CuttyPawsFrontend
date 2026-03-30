@@ -277,11 +277,11 @@ export default function ServicePublicProfilePage() {
                       Verified
                     </Badge>
                   ) : null}
-                  {featuredUntil ? (
+                  {/* {featuredUntil ? (
                     <Badge bg="warning-subtle" text="dark" className="service-ad-chip">
                       Featured until {featuredUntil}
                     </Badge>
-                  ) : null}
+                  ) : null}     MESSAGING SERVICE PROVIDER WILL BE HERE IN FUTURE */}
                 </div>
               </header>
 
