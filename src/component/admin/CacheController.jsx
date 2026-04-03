@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ApiService from "../../service/CacheService";
+import FeedService from "../../service/FeedService";
 import { toast } from "react-toastify";
 import {
   FaSync, FaDatabase, FaCheckCircle, FaExclamationTriangle,
@@ -96,7 +97,11 @@ const CacheController = () => {
 
   const clearCache = async (cacheName) => {
     try {
-      const result = await ApiService.clearCache(cacheName);
+      const normalizedCacheName = String(cacheName || "").toLowerCase();
+      const result = normalizedCacheName === "mixed-feed"
+        ? await FeedService.clearMixedFeedCache()
+        : await ApiService.clearCache(cacheName);
+
       toast.success(result.message || "Cache cleared");
       await loadCacheDashboard();
     } catch (error) {
@@ -136,6 +141,10 @@ const CacheController = () => {
       console.error("❌ Failed to generate activity:", error);
       toast.error("Failed to generate cache activity");
     }
+  };
+
+  const clearMixedFeedCache = async () => {
+    await clearCache("mixed-feed");
   };
 
   const getHealthConfig = (health) => {
@@ -193,6 +202,7 @@ const CacheController = () => {
     { id: "comment", label: "Comment Cache", description: "Comment thread and reply reads", icon: FaCommentDots, matches: ["commentcache", "comment", "comments"] },
     { id: "commentlike", label: "Comment Like Cache", description: "Comment reaction counters", icon: FaHeart, matches: ["commentlike", "commentlikes", "comment-reaction", "commentreaction"] },
     { id: "pet", label: "Pet Cache", description: "Pet profile and listing reads", icon: FaPaw, matches: ["petcache", "pet", "pets"] },
+    { id: "mixedfeed", label: "Mixed Feed Cache", description: "Combined mixed-feed payloads for the home timeline", icon: FaStream, matches: ["mixedfeed", "mixed-feed"] },
   ]), []);
 
   const normalizedCacheEntries = useMemo(() => {
@@ -442,6 +452,17 @@ const CacheController = () => {
                       <span>{cacheCard.active ? "Active" : "Not active"}</span>
                       <span>Updated: {formatDateTime(cacheCard.lastUpdate)}</span>
                     </div>
+                    {cacheCard.id === "mixedfeed" && cacheCard.cacheName !== "Not detected" ? (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm mt-3 w-100"
+                        onClick={() => clearCache(cacheCard.cacheName)}
+                        disabled={toggleLoading}
+                      >
+                        <FaTrash className="me-1" />
+                        Clear Mixed Feed Cache
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -508,6 +529,10 @@ const CacheController = () => {
                 <button className="btn btn-danger btn-lg px-4 py-3" onClick={clearAllCaches}>
                   <FaBroom className="me-2" />
                   Clear All Caches
+                </button>
+                <button className="btn btn-outline-danger btn-lg px-4 py-3" onClick={clearMixedFeedCache}>
+                  <FaTrash className="me-2" />
+                  Clear Mixed Feed Cache
                 </button>
                 <button className="btn btn-warning btn-lg px-4 py-3" onClick={resetStats}>
                   <FaRedo className="me-2" />

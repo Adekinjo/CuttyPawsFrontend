@@ -7,27 +7,72 @@ import ProductRecommendationCard from "./ProductRecommendationCard";
 const MixedFeed = ({ currentUser }) => {
   const [feedItems, setFeedItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursorCreatedAt, setNextCursorCreatedAt] = useState(null);
+  const [nextCursorId, setNextCursorId] = useState(null);
+
+  const mergeUniqueItems = (oldItems, newItems) => {
+    const seen = new Set();
+
+    const combined = [...oldItems, ...newItems].filter((item) => {
+      const key =
+        item?.type === "POST"
+          ? `POST-${item?.post?.id}`
+          : item?.type === "SERVICE_AD"
+          ? `SERVICE_AD-${item?.serviceAd?.id}`
+          : item?.type === "PRODUCT_RECOMMENDATION"
+          ? `PRODUCT-${item?.product?.id}`
+          : null;
+
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return combined;
+  };
+
+  const loadFeed = async ({ cursorCreatedAt = null, cursorId = null, append = false } = {}) => {
+    try {
+      const response = await FeedService.getMixedFeed({
+        cursorCreatedAt,
+        cursorId,
+        limit: 12,
+      });
+
+      const items = Array.isArray(response?.items) ? response.items : [];
+
+      setFeedItems((prev) => (append ? mergeUniqueItems(prev, items) : items));
+      setHasMore(Boolean(response?.hasMore));
+      setNextCursorCreatedAt(response?.nextCursorCreatedAt || null);
+      setNextCursorId(response?.nextCursorId || null);
+    } catch (error) {
+      console.error("[MixedFeed] Failed to load mixed feed", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchFeed = async () => {
-      try {
-        const response = await FeedService.getMixedFeed(12);
-        console.debug("[MixedFeed] mixed feed response", response);
-        setFeedItems(Array.isArray(response?.items) ? response.items : []);
-      } catch (error) {
-        console.error("[MixedFeed] Failed to load mixed feed", {
-          message: error?.message,
-          status: error?.response?.status,
-          data: error?.response?.data,
-          error,
-        });
-      } finally {
-        setLoading(false);
-      }
+    const init = async () => {
+      setLoading(true);
+      await loadFeed();
+      setLoading(false);
     };
 
-    fetchFeed();
+    init();
   }, []);
+
+  const handleLoadMore = async () => {
+    if (!hasMore || loadingMore) return;
+
+    setLoadingMore(true);
+    await loadFeed({
+      cursorCreatedAt: nextCursorCreatedAt,
+      cursorId: nextCursorId,
+      append: true,
+    });
+    setLoadingMore(false);
+  };
 
   if (loading) return <p>Loading feed...</p>;
 
@@ -64,6 +109,19 @@ const MixedFeed = ({ currentUser }) => {
             return null;
         }
       })}
+
+      {hasMore ? (
+        <div className="text-center mt-3">
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };

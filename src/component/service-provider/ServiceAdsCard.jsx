@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "../service-provider/ServiceAds.css"
-import "../post/ProductRecommendation.css"
-import ServiceProviderService from "../../service/ServiceProviderService";
+import "../service-provider/ServiceAds.css";
+import "../post/ProductRecommendation.css";
 
 const formatServiceType = (value) => {
   if (!value) return "Service Provider";
@@ -30,179 +28,102 @@ const formatPrice = (priceFrom, priceTo) => {
 const getServiceAdImage = (profile) => {
   if (!profile) return null;
 
-  const coverCandidate =
-    profile?.coverMedia?.type === "IMAGE"
-      ? profile.coverMedia?.url || profile.coverMedia?.thumbnailUrl
-      : null;
+  if (profile?.coverImageUrl) return profile.coverImageUrl;
 
-  if (coverCandidate) return coverCandidate;
-
-  const mediaImage = (profile?.serviceMedia || []).find(
-    (item) => item?.type === "IMAGE" && (item?.url || item?.thumbnailUrl)
+  const mediaImage = (profile?.media || []).find(
+    (item) =>
+      item?.mediaType === "IMAGE" &&
+      item?.mediaUrl
   );
 
-  return mediaImage?.url || mediaImage?.thumbnailUrl || null;
+  return mediaImage?.mediaUrl || null;
 };
 
 const ServiceAdsCard = ({ serviceAd }) => {
-  const [failedCoverUrl, setFailedCoverUrl] = useState(null);
-  const [publicProfile, setPublicProfile] = useState(null);
-
-  const normalizedServiceAd = useMemo(
-    () => ServiceProviderService.normalizeServiceProfile(serviceAd),
-    [serviceAd]
-  );
-
-  const displayProfile = publicProfile || normalizedServiceAd || serviceAd;
+  if (!serviceAd?.userId) return null;
 
   const profileTitle =
-    displayProfile?.businessName ||
-    displayProfile?.ownerName ||
+    serviceAd?.businessName ||
+    serviceAd?.ownerName ||
     "Service Provider";
 
-  const coverImageUrl = getServiceAdImage(displayProfile);
-  const hasCoverImage = Boolean(
-    coverImageUrl && failedCoverUrl !== coverImageUrl
-  );
+  const coverImageUrl = getServiceAdImage(serviceAd);
 
   const location = [
-    displayProfile?.city,
-    displayProfile?.state,
-    displayProfile?.country,
+    serviceAd?.city,
+    serviceAd?.state,
+    serviceAd?.country,
   ]
     .filter(Boolean)
     .join(", ");
 
   const highlights = [
-    displayProfile?.acceptsHomeVisits ? "Home visits available" : null,
-    displayProfile?.offersEmergencyService ? "Emergency support" : null,
-    displayProfile?.yearsOfExperience
-      ? `${displayProfile.yearsOfExperience}+ years experience`
+    serviceAd?.acceptsHomeVisits ? "Home visits available" : null,
+    serviceAd?.offersEmergencyService ? "Emergency support" : null,
+    serviceAd?.yearsOfExperience
+      ? `${serviceAd.yearsOfExperience}+ years experience`
       : null,
   ].filter(Boolean);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadPublicProfile = async () => {
-      if (!serviceAd?.userId) return;
-
-      try {
-        const cached = ServiceProviderService.getCachedPublicServiceProfile(
-          serviceAd.userId
-        );
-
-        if (cached?.status === 200 && mounted) {
-          setPublicProfile(cached.serviceProfile || null);
-        }
-
-        const response = await ServiceProviderService.getPublicServiceProfile(
-          serviceAd.userId
-        );
-
-        if (mounted && response?.status === 200) {
-          ServiceProviderService.setCachedPublicServiceProfile(
-            serviceAd.userId,
-            response
-          );
-          setPublicProfile(response.serviceProfile || null);
-        }
-      } catch (error) {
-        console.error("[ServiceAdsCard] Failed to load public profile:", error);
-      }
-    };
-
-    loadPublicProfile();
-
-    return () => {
-      mounted = false;
-    };
-  }, [serviceAd?.userId]);
-
   return (
     <Link
-      to={`/services/${displayProfile?.userId || serviceAd?.userId}`}
+      to={`/services/${serviceAd.userId}`}
       className="service-ad-card-v2__link service-ad-card-v2__card-link text-decoration-none text-reset d-block"
     >
-      <Card
-        className={`service-ad-card-v2 border-0${hasCoverImage ? " product-recommendation-card service-ad-card-v2--product-style shadow-sm overflow-hidden" : ""}`}
-      >
-        <div className={hasCoverImage ? "service-ad-card-v2__stack" : undefined}>
-          <div
-            className={hasCoverImage ? "product-recommendation-card__layout service-ad-card-v2__body-row" : "service-ad-card-v2__layout"}
-          >
-            <div
-              className={hasCoverImage ? "product-recommendation-card__media service-ad-card-v2__media service-ad-card-v2__media--product" : "service-ad-card-v2__media"}
-            >
-              {hasCoverImage ? (
-                <img
-                  src={coverImageUrl}
-                  alt={profileTitle}
-                  className="product-recommendation-card__image service-ad-card-v2__image service-ad-card-v2__image--product"
-                  onError={() => setFailedCoverUrl(coverImageUrl)}
-                />
-              ) : (
-                <div className="service-ad-card-v2__image service-ad-card-v2__image--fallback">
-                  <span>{profileTitle}</span>
-                </div>
-              )}
-            </div>
-
-            <div
-              className={hasCoverImage ? "product-recommendation-card__content service-ad-card-v2__content" : "service-ad-card-v2__content"}
-            >
-              <small
-                className={hasCoverImage ? "product-recommendation-card__eyebrow service-ad-card-v2__eyebrow" : "service-ad-card-v2__eyebrow"}
-              >
-                Public service ad
-              </small>
-
-              <h5
-                className={hasCoverImage ? "product-recommendation-card__title service-ad-card-v2__title" : "service-ad-card-v2__title"}
-              >
-                {profileTitle}
-              </h5>
-
-              <p
-                className={hasCoverImage ? "product-recommendation-card__category service-ad-card-v2__type" : "service-ad-card-v2__type"}
-              >
-                {formatServiceType(displayProfile?.serviceType)}
-              </p>
-
-              {location ? (
-                <p className="service-ad-card-v2__location">{location}</p>
-              ) : null}
-
-              <p
-                className={hasCoverImage ? "product-recommendation-card__description service-ad-card-v2__tagline" : "service-ad-card-v2__tagline"}
-              >
-                {displayProfile?.tagline ||
-                  displayProfile?.description ||
-                  "Trusted pet care tailored to your location and service needs."}
-              </p>
-
-              {highlights.length > 0 ? (
-                <p className="service-ad-card-v2__highlights">
-                  {highlights.join(" • ")}
-                </p>
-              ) : null}
-            </div>
+      <Card className="service-ad-card-v2 border-0 product-recommendation-card shadow-sm overflow-hidden">
+        <div className="product-recommendation-card__layout service-ad-card-v2__body-row">
+          <div className="product-recommendation-card__media service-ad-card-v2__media service-ad-card-v2__media--product">
+            {coverImageUrl ? (
+              <img
+                src={coverImageUrl}
+                alt={profileTitle}
+                className="product-recommendation-card__image service-ad-card-v2__image service-ad-card-v2__image--product"
+              />
+            ) : (
+              <div className="service-ad-card-v2__image service-ad-card-v2__image--fallback">
+                <span>{profileTitle}</span>
+              </div>
+            )}
           </div>
 
-          <div
-            className={hasCoverImage ? "product-recommendation-card__footer service-ad-card-v2__footer service-ad-card-v2__footer-row" : "service-ad-card-v2__footer"}
-          >
-            <strong
-              className={hasCoverImage ? "product-recommendation-card__price service-ad-card-v2__price" : "service-ad-card-v2__price"}
-            >
-              {formatPrice(displayProfile?.priceFrom, displayProfile?.priceTo)}
-            </strong>
+          <div className="product-recommendation-card__content service-ad-card-v2__content">
+            <small className="product-recommendation-card__eyebrow service-ad-card-v2__eyebrow">
+              Sponsored service
+            </small>
 
-            <span
-              className={hasCoverImage ? "product-recommendation-card__button service-ad-card-v2__button" : "service-ad-card-v2__button"}
-            >
-              Learn More
-            </span>
+            <h5 className="product-recommendation-card__title service-ad-card-v2__title">
+              {profileTitle}
+            </h5>
+
+            <p className="product-recommendation-card__category service-ad-card-v2__type">
+              {formatServiceType(serviceAd?.serviceType)}
+            </p>
+
+            {location ? (
+              <p className="service-ad-card-v2__location">{location}</p>
+            ) : null}
+
+            <p className="product-recommendation-card__description service-ad-card-v2__tagline">
+              {serviceAd?.tagline ||
+                serviceAd?.description ||
+                "Trusted pet care tailored to your location and service needs."}
+            </p>
+
+            {highlights.length > 0 ? (
+              <p className="service-ad-card-v2__highlights">
+                {highlights.join(" • ")}
+              </p>
+            ) : null}
+
+            <div className="product-recommendation-card__footer service-ad-card-v2__footer service-ad-card-v2__footer-row">
+              <strong className="product-recommendation-card__price service-ad-card-v2__price">
+                {formatPrice(serviceAd?.priceFrom, serviceAd?.priceTo)}
+              </strong>
+
+              <span className="product-recommendation-card__button service-ad-card-v2__button">
+                Learn More
+              </span>
+            </div>
           </div>
         </div>
       </Card>

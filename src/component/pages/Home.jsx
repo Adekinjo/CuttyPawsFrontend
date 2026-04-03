@@ -73,7 +73,7 @@ const Home = () => {
 
       setError("");
 
-      const response = await FeedService.getMixedFeed(20);
+      const response = await FeedService.getMixedFeed({limit: 20});
       const normalizedItems = Array.isArray(response?.items) ? response.items : [];
 
       console.debug("[Home] mixed feed processed", {
