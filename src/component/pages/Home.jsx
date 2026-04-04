@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
 import { FaImages, FaPlus, FaRobot } from "react-icons/fa";
 
 import FeedService from "../../service/FeedService";
@@ -20,6 +20,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const activeRequestRef = useRef(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,7 +44,7 @@ const Home = () => {
     }
   }, []);
 
-  const fallbackToPostsOnly = useCallback(async (reason) => {
+  const loadPostsOnlyItems = useCallback(async (reason) => {
     console.warn("[Home] Falling back to posts-only feed", { reason });
 
     const postsResponse = await PostService.getAllPosts({ limit: 20 });
@@ -60,10 +61,13 @@ const Home = () => {
       postsResponse,
     });
 
-    setFeedItems(fallbackItems);
+    return fallbackItems;
   }, []);
 
   const fetchFeed = useCallback(async (showInitialLoader = false) => {
+    const requestId = Date.now();
+    activeRequestRef.current = requestId;
+
     try {
       if (showInitialLoader) {
         setLoading(true);
@@ -73,21 +77,57 @@ const Home = () => {
 
       setError("");
 
-      const response = await FeedService.getMixedFeed({limit: 20});
-      const normalizedItems = Array.isArray(response?.items) ? response.items : [];
+      const mixedFeedPromise = FeedService.getMixedFeed({
+        limit: 20,
+        timeoutMs: 900,
+      }).then((response) => {
+        const normalizedItems = Array.isArray(response?.items) ? response.items : [];
 
-      console.debug("[Home] mixed feed processed", {
-        showInitialLoader,
-        itemCount: normalizedItems.length,
-        response,
+        console.debug("[Home] mixed feed processed", {
+          showInitialLoader,
+          itemCount: normalizedItems.length,
+          response,
+        });
+
+        if (!normalizedItems.length) {
+          throw new Error("mixed-feed-empty-or-unrecognized");
+        }
+
+        return normalizedItems;
       });
 
-      if (!normalizedItems.length) {
-        await fallbackToPostsOnly("mixed-feed-empty-or-unrecognized");
+      const postsPromise = loadPostsOnlyItems("mixed-feed-slow-path");
+      const fastFallbackPromise = new Promise((resolve) => {
+        window.setTimeout(async () => {
+          try {
+            const fallbackItems = await postsPromise;
+            resolve({ source: "posts", items: fallbackItems });
+          } catch (error) {
+            resolve({ source: "posts-error", error });
+          }
+        }, 800);
+      });
+
+      const firstResult = await Promise.race([
+        mixedFeedPromise.then((items) => ({ source: "mixed", items })),
+        fastFallbackPromise,
+      ]);
+
+      if (activeRequestRef.current !== requestId) {
         return;
       }
 
-      setFeedItems(normalizedItems);
+      if (firstResult.source === "mixed") {
+        setFeedItems(firstResult.items);
+        return;
+      }
+
+      if (firstResult.source === "posts") {
+        setFeedItems(firstResult.items);
+        return;
+      }
+
+      throw firstResult.error || new Error("Unable to load home feed");
     } catch (err) {
       console.error("[Home] Failed to load mixed feed", {
         message: err?.message,
@@ -97,7 +137,13 @@ const Home = () => {
       });
 
       try {
-        await fallbackToPostsOnly(`mixed-feed-error:${err?.message || "unknown"}`);
+        const fallbackItems = await loadPostsOnlyItems(`mixed-feed-error:${err?.message || "unknown"}`);
+
+        if (activeRequestRef.current !== requestId) {
+          return;
+        }
+
+        setFeedItems(fallbackItems);
       } catch (fallbackError) {
         console.error("[Home] Posts-only fallback failed", {
           message: fallbackError?.message,
@@ -113,10 +159,12 @@ const Home = () => {
         setFeedItems([]);
       }
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (activeRequestRef.current === requestId) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
-  }, [fallbackToPostsOnly]);
+  }, [loadPostsOnlyItems]);
 
   useEffect(() => {
     fetchFeed(true);
@@ -221,12 +269,7 @@ const Home = () => {
         <Row className="justify-content-center">
           <Col lg={7} md={9} sm={12}>
             {loading && (
-              <div className="text-center py-5">
-                <Spinner
-                  variant="primary"
-                  animation="border"
-                  className={styles.homeSpinner}
-                />
+              <div className={`text-center py-4 ${styles.homeLoadingMessage}`}>
                 <p className="mt-2 text-muted mb-0">Getting your feed ready...</p>
               </div>
             )}

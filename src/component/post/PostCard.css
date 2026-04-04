@@ -106,6 +106,7 @@
   margin: 0 !important;
   padding: 0 !important;
   background: #000000 !important;
+  position: relative;
 }
 
 .post-images .carousel,
@@ -140,6 +141,55 @@
   margin: 0 !important;
   cursor: pointer;
   background: #000000;
+}
+
+.post-images-gallery .carousel-item {
+  touch-action: pan-y pinch-zoom;
+}
+
+.post-image-gallery-meta {
+  position: relative;
+  margin-top: -2.9rem;
+  padding: 0 1rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.post-image-gallery-count {
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(10px);
+}
+
+.post-image-gallery-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: auto;
+}
+
+.post-image-gallery-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  transition: all 0.2s ease;
+}
+
+.post-image-gallery-dot.active {
+  width: 22px;
+  background: #ffffff;
 }
 
 .post-video-wrapper {

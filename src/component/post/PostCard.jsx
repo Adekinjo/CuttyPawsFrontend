@@ -60,6 +60,7 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [activeImageSlide, setActiveImageSlide] = useState(0);
   const [activeVideoControls, setActiveVideoControls] = useState(null);
   const [playingStates, setPlayingStates] = useState({});
 
@@ -612,6 +613,15 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
     return Array.from(unique.values());
   }, [post]);
 
+  const isImageOnlyGallery = useMemo(() => {
+    return mediaItems.length > 1 && mediaItems.every((item) => (item?.type || "").toUpperCase() !== "VIDEO");
+  }, [mediaItems]);
+
+  useEffect(() => {
+    setActiveImageSlide(0);
+    setSelectedImage(0);
+  }, [post?.id, mediaItems.length]);
+
   const registerFeedVideo = useCallback((mediaKey) => {
     return (node) => {
       if (node) {
@@ -1005,7 +1015,44 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         </div>
       )}
 
-      {mediaItems.length > 1 && (
+      {isImageOnlyGallery && (
+        <Carousel
+          activeIndex={activeImageSlide}
+          onSelect={(selectedIndex) => setActiveImageSlide(selectedIndex)}
+          controls={false}
+          indicators={false}
+          interval={null}
+          touch
+          slide
+          className="post-images post-images-gallery"
+        >
+          {mediaItems.map((item, idx) => (
+            <Carousel.Item key={idx}>
+              {renderMedia(item, idx)}
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      )}
+
+      {isImageOnlyGallery && (
+        <div className="post-image-gallery-meta">
+          <div className="post-image-gallery-count">
+            {activeImageSlide + 1}/{mediaItems.length}
+          </div>
+          <div className="post-image-gallery-dots" aria-hidden="true">
+            {mediaItems.map((_, idx) => (
+              <button
+                key={`image-dot-${idx}`}
+                type="button"
+                className={`post-image-gallery-dot ${idx === activeImageSlide ? "active" : ""}`}
+                onClick={() => setActiveImageSlide(idx)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!isImageOnlyGallery && mediaItems.length > 1 && (
         <Carousel
           controls={false}
           indicators={true}

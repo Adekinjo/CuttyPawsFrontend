@@ -29,6 +29,7 @@ export default class FeedService extends ApiService {
     cursorCreatedAt = null,
     cursorId = null,
     limit = 12,
+    timeoutMs = 15000,
   } = {}) {
     const response = await axios.get(`${this.BASE_URL}/feed/mixed`, {
       params: {
@@ -37,7 +38,7 @@ export default class FeedService extends ApiService {
         limit,
       },
       headers: this.getHeader(),
-      timeout: 15000,
+      timeout: timeoutMs,
       validateStatus: () => true,
     });
 
