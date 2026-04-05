@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Alert, Spinner } from "react-bootstrap";
 import { FaImages, FaPlus, FaRobot } from "react-icons/fa";
 
 import FeedService from "../../service/FeedService";
@@ -63,99 +63,51 @@ const Home = () => {
 
     return fallbackItems;
   }, []);
-
   const fetchFeed = useCallback(async (showInitialLoader = false) => {
     const requestId = Date.now();
     activeRequestRef.current = requestId;
 
     try {
-      if (showInitialLoader) {
-        setLoading(true);
-      } else {
-        setRefreshing(true);
-      }
+      if (showInitialLoader) setLoading(true);
+      else setRefreshing(true);
 
       setError("");
 
-      const mixedFeedPromise = FeedService.getMixedFeed({
-        limit: 20,
-        timeoutMs: 900,
-      }).then((response) => {
-        const normalizedItems = Array.isArray(response?.items) ? response.items : [];
-
-        console.debug("[Home] mixed feed processed", {
-          showInitialLoader,
-          itemCount: normalizedItems.length,
-          response,
-        });
-
-        if (!normalizedItems.length) {
-          throw new Error("mixed-feed-empty-or-unrecognized");
-        }
-
-        return normalizedItems;
+      const response = await FeedService.getMixedFeed({
+        limit: 12,
+        timeoutMs: 5000,
       });
 
-      const postsPromise = loadPostsOnlyItems("mixed-feed-slow-path");
-      const fastFallbackPromise = new Promise((resolve) => {
-        window.setTimeout(async () => {
-          try {
-            const fallbackItems = await postsPromise;
-            resolve({ source: "posts", items: fallbackItems });
-          } catch (error) {
-            resolve({ source: "posts-error", error });
-          }
-        }, 800);
-      });
+      const normalizedItems = Array.isArray(response?.items)
+        ? response.items
+        : [];
 
-      const firstResult = await Promise.race([
-        mixedFeedPromise.then((items) => ({ source: "mixed", items })),
-        fastFallbackPromise,
-      ]);
-
-      if (activeRequestRef.current !== requestId) {
-        return;
+      // if mixed feed returned nothing, treat as failure
+      if (!normalizedItems.length) {
+        throw new Error("mixed-feed-empty");
       }
 
-      if (firstResult.source === "mixed") {
-        setFeedItems(firstResult.items);
-        return;
-      }
+      if (activeRequestRef.current !== requestId) return;
 
-      if (firstResult.source === "posts") {
-        setFeedItems(firstResult.items);
-        return;
-      }
-
-      throw firstResult.error || new Error("Unable to load home feed");
+      setFeedItems(normalizedItems);
     } catch (err) {
-      console.error("[Home] Failed to load mixed feed", {
-        message: err?.message,
-        status: err?.response?.status,
-        data: err?.response?.data,
-        err,
-      });
+      console.error("[Home] Failed to load mixed feed", err);
 
       try {
-        const fallbackItems = await loadPostsOnlyItems(`mixed-feed-error:${err?.message || "unknown"}`);
+        const fallbackItems = await loadPostsOnlyItems(
+          `mixed-feed-error:${err?.message || "unknown"}`
+        );
 
-        if (activeRequestRef.current !== requestId) {
-          return;
-        }
+        if (activeRequestRef.current !== requestId) return;
+
+        // clear error because fallback worked
+        setError("");
 
         setFeedItems(fallbackItems);
       } catch (fallbackError) {
-        console.error("[Home] Posts-only fallback failed", {
-          message: fallbackError?.message,
-          status: fallbackError?.status || fallbackError?.response?.status,
-          data: fallbackError?.data || fallbackError?.response?.data,
-          fallbackError,
-        });
-        setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Unable to load your feed right now."
-        );
+        if (activeRequestRef.current !== requestId) return;
+
+        setError("Unable to load your feed right now.");
         setFeedItems([]);
       }
     } finally {
