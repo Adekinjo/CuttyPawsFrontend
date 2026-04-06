@@ -205,7 +205,7 @@ const OrderDetails = () => {
                       </div>
                       {isActive && (
                         <div className="timeline-date">
-                          {new Date(orderItem.createdAt).toLocaleDateString()}
+                          {new Date(orderItem.updatedAt || orderItem.createdAt).toLocaleDateString()}
                         </div>
                       )}
                     </div>

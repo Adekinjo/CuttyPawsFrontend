@@ -16,7 +16,7 @@ import AIHelpPage from "./component/pages/AIHelpPage.jsx";
 const Home = lazy(() => import("./component/pages/Home.jsx"));
 // const ProductPage = lazy(() => import("./component/common/ProductPage.jsx"));
 const ProductDetailsPage = lazy(() => import("./component/pages/ProductDetailsPage.jsx"));
-const CategoryListPage = lazy(() => import("./component/pages/CategoryListPage.jsx"));
+const CategoryListPage = lazy(() => import("./component/common/Categories.jsx"));
 const CategoryProduct = lazy(() => import("./component/pages/CategoryProduct.jsx"));
 const CartPage = lazy(() => import("./component/pages/CartPage.jsx"));
 const RegisterPage = lazy(() => import("./component/pages/RegisterPage.jsx"));

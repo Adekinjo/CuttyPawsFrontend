@@ -69,9 +69,16 @@ export default class ProductService extends ApiService{
     return response.data;
   }
 
-  static async getAllProduct() {
-    const response = await axios.get(`${this.BASE_URL}/product/get-all`);
-    return response.data;
+  static async getAllProduct(page = 0, size = 12) {
+    try {
+      const response = await axios.get(`${this.BASE_URL}/product/get-all`, {
+        params: { page, size },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching latest products:", error);
+      throw error;
+    }
   }
 
   static async getAllProductsBySubCategory(subCategoryId) {
@@ -122,6 +129,18 @@ export default class ProductService extends ApiService{
       return response.data;
     } catch (error) {
       console.error("Error searching products with price:", error);
+      throw error;
+    }
+  }
+
+  static async getProductDetails(productId) {
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/product/details/${productId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching product details:", error);
       throw error;
     }
   }

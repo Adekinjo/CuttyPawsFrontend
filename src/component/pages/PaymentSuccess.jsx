@@ -72,7 +72,7 @@ const PaymentSuccess = () => {
   };
 
   const handleViewOrders = () => {
-    navigate("/orders");
+    navigate("/order-history-page");
   };
 
   const handleGoHome = () => {

@@ -76,8 +76,9 @@ const AdminOrderDetails = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return isNaN(date) ? "Invalid Date" : date.toLocaleDateString();
+    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString();
   };
 
   return (
@@ -120,14 +121,17 @@ const AdminOrderDetails = () => {
                       Name: <strong>{orderItem.productName}</strong>
                     </div>
                     <div className="info-row">
-                      Color:
-                      <div
-                        className="color-swatch"
-                        style={{ backgroundColor: orderItem.selectedColor }}
-                      ></div>
+                      Color: <strong>{orderItem.selectedColor || "N/A"}</strong>
+                      {orderItem.selectedColor && (
+                        <span
+                          className="color-swatch"
+                          style={{ backgroundColor: orderItem.selectedColor, marginLeft: "8px" }}
+                        />
+                      )}
                     </div>
+
                     <div className="info-row">
-                      Size: <strong>{orderItem.selectedSize}</strong>
+                      Size: <strong>{orderItem.selectedSize || "N/A"}</strong>
                     </div>
                   </div>
                   <div className="info-group">
@@ -171,7 +175,7 @@ const AdminOrderDetails = () => {
                       <span className="status-label">{status}</span>
                       {orderItem.status === status && (
                         <span className="status-date">
-                          {formatDate(orderItem.updatedAt)}
+                          {formatDate(orderItem.updatedAt || orderItem.createdAt)}
                         </span>
                       )}
                     </div>
