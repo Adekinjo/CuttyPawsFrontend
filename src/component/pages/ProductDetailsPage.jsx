@@ -410,6 +410,10 @@ const ProductDetailsPage = () => {
                 maximumFractionDigits: 2,
               })}
             </span>
+
+            {Number(product.stock ?? 0) > 1 && (
+              <span className="text-muted">In stock</span>
+            )}
           </div>
 
           {product.colors?.length > 0 && (
