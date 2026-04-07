@@ -51,7 +51,7 @@ export default function OrderHistoryPage() {
       setLoading(true);
       setError("");
 
-      const res = await OrderService.getAllOrders();
+      const res = await OrderService.getMyOrderHistory();
 
       // Normalize response shapes
       const list =

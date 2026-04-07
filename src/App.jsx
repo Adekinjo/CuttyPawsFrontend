@@ -97,6 +97,8 @@ const ServiceBookingSuccess = lazy (() => import("./component/service-provider/S
 const MyServiceBookings = lazy (() => import("./component/profile/MyServiceBookings.jsx"));
 const AiHelpPage = lazy (() => import("./component/pages/AIHelpPage.jsx"));
 const VideoFeed = lazy (() => import("./component/post/VideoFeed.jsx"));
+const CheckoutPaymentPage = lazy (() => import("./component/pages/CheckoutPaymentPage.jsx"));
+
 
 
 
@@ -196,6 +198,7 @@ function App() {
           <Route path="/user-order-details/:itemId" element={<ProtectedRoute element={OrderDetails} />} />
           <Route path="/add-address" element={<ProtectedRoute element={AddressPage} />} />
           <Route path="/edit-address" element={<ProtectedRoute element={AddressPage} />} />
+          <Route path="/checkout/payment" element={<ProtectedRoute element={CheckoutPaymentPage} />} />
           <Route path="/payment-callback" element={<ProtectedRoute element={PaymentCallback} />} />
           <Route path="/payment-success" element={<ProtectedRoute element={PaymentSuccess} />} />
           <Route path="/payment-failed" element={<ProtectedRoute element={PaymentFail} />} />

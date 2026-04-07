@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
 import ServiceBookingService from "../../service/ServiceBookingService";
+import PaymentService from "../../service/PaymentService";
+import { useNavigate } from "react-router-dom";
 
 const DEFAULT_TIMEZONE = "America/Chicago";
 
@@ -30,6 +32,7 @@ export default function ServiceBookingModal({
   serviceProfile,
   defaultAmount = 0,
 }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     petName: "",
     petType: "",
@@ -118,27 +121,37 @@ export default function ServiceBookingModal({
       const bookingData =
         response?.serviceBooking || response?.data?.serviceBooking || null;
 
-      const paymentUrl =
-        bookingData?.paymentUrl || response?.paymentUrl;
-
       if (!bookingData?.paymentReference) {
         throw new Error("Booking payment reference was not returned.");
       }
 
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.id || !user?.email) {
+        throw new Error("User not found. Please log in again.");
+      }
+
+      const paymentResponse = await PaymentService.initializeBookingPayment(
+        amount,
+        "USD",
+        user.email,
+        user.id,
+        bookingData.id
+      );
+
       localStorage.setItem(
-        "pendingServiceBooking",
+        "pendingPayment",
         JSON.stringify({
-          paymentReference: bookingData.paymentReference,
+          paymentId: paymentResponse.paymentId,
+          reference: paymentResponse.reference,
+          paymentIntentClientSecret: paymentResponse.paymentIntentClientSecret,
+          publishableKey: paymentResponse.publishableKey,
+          paymentPurpose: "SERVICE_BOOKING",
           bookingId: bookingData.id,
-          serviceProfileId: bookingData.serviceProfileId,
         })
       );
 
-      if (!paymentUrl) {
-        throw new Error("Stripe checkout URL was not returned.");
-      }
-
-      window.location.href = paymentUrl;
+      onHide();
+      navigate("/checkout/payment");
     } catch (submitError) {
       console.error("[ServiceBookingModal] Booking creation failed:", submitError);
       setError(

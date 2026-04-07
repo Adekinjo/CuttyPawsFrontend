@@ -19,6 +19,21 @@ class ServiceBookingService extends ApiService {
     }
   }
 
+  static async getMyBookingStatus(bookingId) {
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/service-bookings/my-bookings/${bookingId}/status`,
+        { headers: this.getHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(error.response.data.message || "Failed to get booking status");
+      }
+      throw error;
+    }
+  }
+
   static async confirmBookingPayment(paymentReference) {
     try {
       if (!paymentReference) {

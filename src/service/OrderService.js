@@ -3,11 +3,12 @@ import axios from "axios";
 
 export default class OrderService extends ApiService {
 
-     /**    Order ENDPOINT */
-
-
   // Create order after successful payment
   static async createOrderAfterPayment(paymentId, cartItems, totalPrice) {
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      throw new Error("Cart items are required to create an order.");
+    }
+
     try {
       const orderPayload = {
         paymentId: paymentId,
@@ -47,10 +48,16 @@ export default class OrderService extends ApiService {
     return response.data;
   }
 
-  static async getOrderItemById(itemId) {
-    const response = await axios.get(`${this.BASE_URL}/order/filter`, {
+  static async getAdminOrderItemById(itemId) {
+    const response = await axios.get(`${this.BASE_URL}/order/admin-item/${itemId}`, {
       headers: this.getHeader(),
-      params: { itemId },
+    });
+    return response.data;
+  }
+
+  static async getOrderItemById(itemId) {
+    const response = await axios.get(`${this.BASE_URL}/order/my-order-item/${itemId}`, {
+      headers: this.getHeader(),
     });
     return response.data;
   }

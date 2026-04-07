@@ -7,6 +7,8 @@ import { AD_PLAN_TYPES, formatCurrency, formatDateTime } from "../../utils/servi
 import ActiveSubscriptionCard from "../service-provider/ActiveSubscriptionCard";
 import AdPlanCard from "../service-provider/AdPlanCard";
 import ServiceStatusBanner from "../service-provider/ServiceStatusBanner";
+import { useNavigate } from "react-router-dom";
+import PaymentService from "../../service/PaymentService";
 import "../../style/ServiceProvider.css";
 
 export default function ServiceAdsPage() {
@@ -18,6 +20,7 @@ export default function ServiceAdsPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const selectedPlanData = useMemo(
     () => AD_PLAN_TYPES.find((plan) => plan.value === selectedPlan),
@@ -61,8 +64,6 @@ export default function ServiceAdsPage() {
         planType: selectedPlan,
       };
 
-      console.log("Creating advert subscription with payload:", payload);
-
       const response = await ServiceProviderService.createAdSubscription(payload);
 
       if (!response || response.status >= 400) {
@@ -71,22 +72,47 @@ export default function ServiceAdsPage() {
       }
 
       const subscription = response?.serviceAdSubscription || null;
-      const paymentUrl = subscription?.paymentUrl;
+
+      if (!subscription?.id) {
+        toast.error("Subscription was created but no subscription ID was returned.");
+        return;
+      }
+
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      if (!user?.id || !user?.email) {
+        toast.error("User not found. Please log in again.");
+        return;
+      }
+
+      const paymentResponse = await PaymentService.initializeAdPayment(
+        subscription.amount,
+        "USD",
+        user.email,
+        user.id,
+        subscription.id
+      );
+
+      localStorage.setItem(
+        "pendingPayment",
+        JSON.stringify({
+          paymentId: paymentResponse.paymentId,
+          reference: paymentResponse.reference,
+          paymentIntentClientSecret: paymentResponse.paymentIntentClientSecret,
+          publishableKey: paymentResponse.publishableKey,
+          paymentPurpose: "SERVICE_AD",
+          serviceAdSubscriptionId: subscription.id,
+        })
+      );
 
       toast.success(response.message || "Advert subscription created successfully.");
 
       await loadSubscriptions();
       await refreshDashboard();
 
-      if (!paymentUrl) {
-        toast.error("Stripe checkout URL was not returned.");
-        return;
-      }
-
-      window.location.href = paymentUrl;
+      navigate("/checkout/payment");
     } catch (err) {
       console.error("Create subscription error:", err);
-      toast.error(err?.response?.data?.message || "Unable to create advert subscription.");
+      toast.error(err?.response?.data?.message || err?.message || "Unable to create advert subscription.");
     } finally {
       setCreating(false);
     }

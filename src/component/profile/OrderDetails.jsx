@@ -35,13 +35,15 @@ const OrderDetails = () => {
       try {
         const response = await OrderService.getOrderItemById(itemId);
 
-        if (!response || !response.orderItemList || response.orderItemList.length === 0) {
+        if (!response || !response.orderItem) {
           throw new Error("No data received from the API");
         }
 
-        setOrderItem(response.orderItemList[0]); // Access the first item in the array
+        setOrderItem(response.orderItem);
+        setMessage("");
       } catch (error) {
-        setMessage(error.response?.data?.message || "Failed to load order details");
+        setMessage(error.response?.data?.message || error.message || "Failed to load order details");
+        setOrderItem(null);
       } finally {
         setIsLoading(false);
       }

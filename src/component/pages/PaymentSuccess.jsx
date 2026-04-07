@@ -1,71 +1,12 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import PaymentService from "../../service/PaymentService";
-import OrderService from "../../service/OrderService";
-import { useCart } from "../../component/context/CartContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const { dispatch } = useCart();
+  const location = useLocation();
 
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("Processing your order...");
-  const [orderId, setOrderId] = useState(null);
-  const [hasProcessed, setHasProcessed] = useState(false);
-
-  useEffect(() => {
-    if (hasProcessed) return;
-
-    const processStripeSuccess = async () => {
-      try {
-        const pendingPayment = JSON.parse(localStorage.getItem("pendingPayment"));
-
-        if (!pendingPayment) {
-          throw new Error("Pending payment details not found.");
-        }
-
-        const { reference, paymentId, cart, totalPrice } = pendingPayment;
-
-        if (!reference || !paymentId || !cart?.length) {
-          throw new Error("Incomplete pending payment details.");
-        }
-
-        setMessage("Verifying your payment...");
-
-        const verificationResponse = await PaymentService.verifyPayment(reference);
-
-        if (verificationResponse.status !== 200) {
-          throw new Error(verificationResponse.message || "Payment verification failed.");
-        }
-
-        setMessage("Payment verified. Creating your order...");
-
-        const orderResponse = await OrderService.createOrderAfterPayment(
-          paymentId,
-          cart,
-          totalPrice
-        );
-
-        if (orderResponse.status !== 200) {
-          throw new Error(orderResponse.message || "Order creation failed.");
-        }
-
-        setOrderId(orderResponse.orderId);
-        setMessage("Your order has been created successfully.");
-        setHasProcessed(true);
-
-        dispatch({ type: "CLEAR_CART" });
-        localStorage.removeItem("pendingPayment");
-      } catch (error) {
-        console.error("Stripe payment success processing error:", error);
-        setMessage(error.message || "Unable to complete your order.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    processStripeSuccess();
-  }, [dispatch, hasProcessed]);
+  const orderId = location.state?.orderId || null;
+  const message =
+    location.state?.message || "Your payment was successful and your order has been placed.";
 
   const handleContinueShopping = () => {
     navigate("/");
@@ -78,30 +19,6 @@ const PaymentSuccess = () => {
   const handleGoHome = () => {
     navigate("/");
   };
-
-  if (loading) {
-    return (
-      <div className="container mt-5">
-        <div className="row justify-content-center">
-          <div className="col-md-6">
-            <div className="card shadow-lg border-0">
-              <div className="card-body text-center py-5">
-                <div
-                  className="spinner-border text-primary mb-4"
-                  style={{ width: "3rem", height: "3rem" }}
-                  role="status"
-                >
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <h3 className="card-title mb-3">Payment Processing</h3>
-                <p className="card-text text-muted">{message}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const isSuccess = !!orderId;
 
@@ -126,7 +43,7 @@ const PaymentSuccess = () => {
               </div>
 
               <h1 className={`${isSuccess ? "text-success" : "text-danger"} mb-3`}>
-                {isSuccess ? "Payment Successful!" : "Order Processing Failed"}
+                {isSuccess ? "Payment Successful!" : "Order Status Unknown"}
               </h1>
 
               <p className="lead text-muted mb-4">{message}</p>

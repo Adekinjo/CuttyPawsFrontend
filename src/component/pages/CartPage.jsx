@@ -122,7 +122,7 @@ const CartPage = () => {
         throw new Error("User not found. Please log in.");
       }
 
-      const paymentResponse = await PaymentService.initializePayment(
+      const paymentResponse = await PaymentService.initializeOrderPayment(
         totalPrice,
         "USD",
         user.email,
@@ -136,17 +136,13 @@ const CartPage = () => {
           reference: paymentResponse.reference,
           cart,
           totalPrice,
+          paymentIntentClientSecret: paymentResponse.paymentIntentClientSecret,
+          publishableKey: paymentResponse.publishableKey,
         })
       );
 
-      setMessage({
-        type: "success",
-        text: "✅ Payment initialized successfully! Redirecting to Stripe...",
-      });
+      navigate("/checkout/payment");
 
-      setTimeout(() => {
-        window.location.href = paymentResponse.authorizationUrl;
-      }, 1500);
     } catch (error) {
       console.error("Checkout Error:", error);
       setMessage({
