@@ -25,6 +25,7 @@
   padding-top: 0;
   padding-bottom: 0;
   line-height: 1;
+  margin-left: -2rem;
 }
 
 .cutty-brand-logo {
@@ -33,7 +34,7 @@
   object-fit: cover;
   image-rendering: -webkit-optimize-contrast;
   display: block;
-  width: 9.4em;
+  width: 10.4em;
   height: 2.4rem;
   object-fit: cover;
 }
@@ -257,6 +258,10 @@
 @media (max-width: 991.98px) {
   .cutty-mobile-header {
     margin-bottom: 0;
+  }
+
+  .cutty-brand {
+    margin-left: -1.6rem;
   }
 
   .cutty-mobile-header-actions {

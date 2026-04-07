@@ -978,9 +978,6 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           <div>
             <strong className="post-owner-name">{post.ownerName}</strong>
             <div className="post-time text-muted small">{ownerDisplayLabel}</div>
-            <div className="post-time text-muted small">
-              {formatDate(post.createdAt)}
-            </div>
           </div>
         </Link>
 
@@ -1138,17 +1135,19 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         {/* Caption (Username + Caption with Profile Link) */}
         {post.caption && (
           <div className="post-caption mb-3">
-            <Link
-              to={ownerProfileLink}
-              className="post-caption-username text-decoration-none"
-            >
-              {post.ownerName || "Unknown"}
-            </Link>
+            <span className={`post-caption-copy ${showMoreCaption ? "is-expanded" : "is-collapsed"}`}>
+              <Link
+                to={ownerProfileLink}
+                className="post-caption-username text-decoration-none"
+              >
+                {post.ownerName || "Unknown"}
+              </Link>
 
-            <span className="post-caption-text">
-              {post.caption.length > 150 && !showMoreCaption
-                ? post.caption.substring(0, 150) + "..."
-                : post.caption}
+              <span className="post-caption-text">
+                {post.caption.length > 150 && !showMoreCaption
+                  ? post.caption.substring(0, 150) + "..."
+                  : post.caption}
+              </span>
             </span>
 
             {post.caption.length > 150 && (
@@ -1163,34 +1162,6 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
           </div>
         )}
 
-
-        {/* Add Comment Form */}
-        {currentUser ? (
-          <Form onSubmit={submitComment} className="d-flex gap-2 mb-3 comment-form">
-            <Form.Control
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="comment-input"
-              disabled={commentLoading}
-            />
-            <Button
-              className="comment-submit-btn"
-              disabled={!newComment.trim() || commentLoading}
-              type="submit"
-            >
-              {commentLoading ? <Spinner size="sm" /> : <FaPaperPlane />}
-            </Button>
-          </Form>
-        ) : (
-          <Button
-            className="login-to-comment-btn w-100"
-            onClick={() => navigate("/login")}
-          >
-            <FaSignInAlt className="me-1" /> Login to comment
-          </Button>
-        )}
-
         {/* Error */}
         {error && (
           <Alert variant="danger" className="mt-2">
@@ -1201,6 +1172,32 @@ const PostCard = ({ post, onDelete, onEdit, isOwner = false, currentUser }) => {
         {/* Comments */}
         <Collapse in={showComments}>
           <div className="mt-3">
+            {currentUser ? (
+              <Form onSubmit={submitComment} className="d-flex gap-2 mb-3 comment-form">
+                <Form.Control
+                  placeholder="Add a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="comment-input"
+                  disabled={commentLoading}
+                />
+                <Button
+                  className="comment-submit-btn"
+                  disabled={!newComment.trim() || commentLoading}
+                  type="submit"
+                >
+                  {commentLoading ? <Spinner size="sm" /> : <FaPaperPlane />}
+                </Button>
+              </Form>
+            ) : (
+              <Button
+                className="login-to-comment-btn w-100 mb-3"
+                onClick={() => navigate("/login")}
+              >
+                <FaSignInAlt className="me-1" /> Login to comment
+              </Button>
+            )}
+
             {commentsLoading && (
               <div className="text-center py-3">
                 <Spinner animation="border" size="sm" />
