@@ -4,6 +4,9 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Image } from "
 import { FaCamera, FaTimes, FaArrowLeft, FaPaperPlane } from "react-icons/fa";
 import PostService from "../../service/PostService";
 
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024;
+
 const CreatePostPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -33,10 +36,17 @@ const CreatePostPage = () => {
                 setError("Please upload only image or video files");
                 return false;
             }
-            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+
+            if (file.type.startsWith("image/") && file.size > MAX_IMAGE_SIZE_BYTES) {
                 setError("File size should be less than 10MB");
                 return false;
             }
+
+            if (file.type.startsWith("video/") && file.size > MAX_VIDEO_SIZE_BYTES) {
+                setError("Video size should be less than 100MB");
+                return false;
+            }
+
             return true;
         });
 

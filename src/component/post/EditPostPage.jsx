@@ -4,6 +4,9 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Image } from "
 import { FaCamera, FaTimes, FaArrowLeft, FaPaperPlane, FaEdit, FaUndo } from "react-icons/fa";
 import PostService from "../../service/PostService";
 
+const MAX_EDIT_POST_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_EDIT_POST_VIDEO_SIZE_BYTES = 100 * 1024 * 1024;
+
 const EditPostPage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
@@ -118,31 +121,39 @@ const EditPostPage = () => {
         
         // Validate file types and size
         const validFiles = files.filter(file => {
-            if (!file.type.startsWith('image/')) {
-                setError("Please upload only image files (JPEG, PNG, GIF)");
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                setError("Please upload only image or video files");
                 return false;
             }
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+
+            if (file.type.startsWith("image/") && file.size > MAX_EDIT_POST_IMAGE_SIZE_BYTES) {
                 setError("Image size should be less than 5MB");
                 return false;
             }
+
+            if (file.type.startsWith("video/") && file.size > MAX_EDIT_POST_VIDEO_SIZE_BYTES) {
+                setError("Video size should be less than 100MB");
+                return false;
+            }
+
             return true;
         });
 
         if (validFiles.length === 0) return;
 
-        // Check total images limit (existing + new)
+        // Check total media limit (existing + new)
         const totalImages = existingImages.length - imagesToDelete.length + imagePreviews.length + validFiles.length;
         if (totalImages > 10) {
-            setError("You can have maximum 10 images per post");
+            setError("You can have maximum 10 media files per post");
             return;
         }
 
-        // Create preview URLs for new images
+        // Create preview URLs for new media
         const newPreviews = validFiles.map(file => ({
             file,
             preview: URL.createObjectURL(file),
             isNew: true,
+            type: file.type,
             id: `new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }));
 
@@ -200,7 +211,7 @@ const EditPostPage = () => {
 
         const totalImages = existingImages.length - imagesToDelete.length + formData.images.length;
         if (totalImages === 0) {
-            setError("At least one image is required");
+            setError("At least one media file is required");
             setLoading(false);
             return;
         }
@@ -348,7 +359,7 @@ const EditPostPage = () => {
                                 <Form.Group className="mb-4">
                                     <Form.Label className="fw-bold d-block mb-3">
                                         <FaCamera className="me-2" />
-                                        Photos ({currentImageCount}/10)
+                                        Media ({currentImageCount}/10)
                                     </Form.Label>
                                     
                                     <div className="border rounded p-4">
@@ -356,7 +367,7 @@ const EditPostPage = () => {
                                         {existingImages.length > 0 && (
                                             <div className="mb-4">
                                                 <h6 className="text-muted mb-3">
-                                                    Current Images 
+                                                    Current Media 
                                                     <small className="ms-2 text-primary">
                                                         ({existingImages.length - imagesToDelete.length} remaining)
                                                     </small>
@@ -429,25 +440,39 @@ const EditPostPage = () => {
                                         {imagePreviews.length > 0 && (
                                             <div className="mb-4">
                                                 <h6 className="text-muted mb-3">
-                                                    New Images 
+                                                    New Media 
                                                     <small className="ms-2 text-success">({imagePreviews.length} added)</small>
                                                 </h6>
                                                 <Row className="g-3">
                                                     {imagePreviews.map((preview, index) => (
                                                         <Col xs={6} md={4} lg={3} key={preview.id}>
                                                             <div className="position-relative">
-                                                                <Image
-                                                                    src={preview.preview}
-                                                                    alt={`New image ${index + 1}`}
-                                                                    fluid
-                                                                    rounded
-                                                                    style={{ 
-                                                                        height: "120px", 
-                                                                        width: "100%", 
-                                                                        objectFit: "cover",
-                                                                        border: "2px solid #28a745"
-                                                                    }}
-                                                                />
+                                                                {preview.type?.startsWith("video/") ? (
+                                                                    <video
+                                                                        src={preview.preview}
+                                                                        muted
+                                                                        style={{
+                                                                            height: "120px",
+                                                                            width: "100%",
+                                                                            objectFit: "cover",
+                                                                            border: "2px solid #28a745",
+                                                                            borderRadius: "0.375rem"
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    <Image
+                                                                        src={preview.preview}
+                                                                        alt={`New media ${index + 1}`}
+                                                                        fluid
+                                                                        rounded
+                                                                        style={{ 
+                                                                            height: "120px", 
+                                                                            width: "100%", 
+                                                                            objectFit: "cover",
+                                                                            border: "2px solid #28a745"
+                                                                        }}
+                                                                    />
+                                                                )}
                                                                 <Button
                                                                     variant="danger"
                                                                     size="sm"
@@ -455,7 +480,7 @@ const EditPostPage = () => {
                                                                     style={{ width: "28px", height: "28px", display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                                     onClick={() => removeNewImage(preview.id)}
                                                                     disabled={loading}
-                                                                    title="Remove new image"
+                                                                    title="Remove new media"
                                                                 >
                                                                     <FaTimes size={10} />
                                                                 </Button>
@@ -486,7 +511,7 @@ const EditPostPage = () => {
                                                 >
                                                     <FaCamera className="text-muted mb-2" size={20} />
                                                     <small className="text-muted text-center">
-                                                        Add More Photos<br />
+                                                        Add More Media<br />
                                                         <span className="text-primary">({10 - currentImageCount} slots remaining)</span>
                                                     </small>
                                                 </Form.Label>
@@ -494,7 +519,7 @@ const EditPostPage = () => {
                                                     type="file"
                                                     id="post-images"
                                                     multiple
-                                                    accept="image/*"
+                                                    accept="image/*,video/*"
                                                     onChange={handleImageUpload}
                                                     style={{ display: "none" }}
                                                     disabled={loading}
@@ -515,17 +540,17 @@ const EditPostPage = () => {
                                                     htmlFor="post-images"
                                                 >
                                                     <FaCamera className="text-muted mb-3" size={32} />
-                                                    <h5 className="text-muted">Upload Photos</h5>
+                                                    <h5 className="text-muted">Upload Media</h5>
                                                     <p className="text-muted mb-0 text-center">
                                                         Click to browse or drag and drop<br />
-                                                        <small>Maximum 10 photos, 5MB each</small>
+                                                        <small>Maximum 10 files, images 5MB each, videos 100MB each</small>
                                                     </p>
                                                 </Form.Label>
                                                 <Form.Control
                                                     type="file"
                                                     id="post-images"
                                                     multiple
-                                                    accept="image/*"
+                                                    accept="image/*,video/*"
                                                     onChange={handleImageUpload}
                                                     style={{ display: "none" }}
                                                     disabled={loading}
