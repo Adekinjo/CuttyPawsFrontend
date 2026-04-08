@@ -136,6 +136,7 @@ const CartPage = () => {
           reference: paymentResponse.reference,
           cart,
           totalPrice,
+          paymentPurpose: "ORDER",
           paymentIntentClientSecret: paymentResponse.paymentIntentClientSecret,
           publishableKey: paymentResponse.publishableKey,
         })
