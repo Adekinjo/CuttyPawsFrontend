@@ -5,7 +5,7 @@ import { FaCamera, FaTimes, FaArrowLeft, FaPaperPlane } from "react-icons/fa";
 import PostService from "../../service/PostService";
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
-const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024;
+const MAX_VIDEO_SIZE_BYTES = 50 * 1024 * 1024;
 
 const CreatePostPage = () => {
     const navigate = useNavigate();
@@ -43,7 +43,7 @@ const CreatePostPage = () => {
             }
 
             if (file.type.startsWith("video/") && file.size > MAX_VIDEO_SIZE_BYTES) {
-                setError("Video size should be less than 100MB");
+                setError("Video size should be less than 50MB");
                 return false;
             }
 

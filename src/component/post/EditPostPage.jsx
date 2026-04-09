@@ -5,7 +5,7 @@ import { FaCamera, FaTimes, FaArrowLeft, FaPaperPlane, FaEdit, FaUndo } from "re
 import PostService from "../../service/PostService";
 
 const MAX_EDIT_POST_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
-const MAX_EDIT_POST_VIDEO_SIZE_BYTES = 100 * 1024 * 1024;
+const MAX_EDIT_POST_VIDEO_SIZE_BYTES = 50 * 1024 * 1024;
 
 const EditPostPage = () => {
     const navigate = useNavigate();
@@ -132,7 +132,7 @@ const EditPostPage = () => {
             }
 
             if (file.type.startsWith("video/") && file.size > MAX_EDIT_POST_VIDEO_SIZE_BYTES) {
-                setError("Video size should be less than 100MB");
+                setError("Video size should be less than 50MB");
                 return false;
             }
 
@@ -543,7 +543,7 @@ const EditPostPage = () => {
                                                     <h5 className="text-muted">Upload Media</h5>
                                                     <p className="text-muted mb-0 text-center">
                                                         Click to browse or drag and drop<br />
-                                                        <small>Maximum 10 files, images 5MB each, videos 100MB each</small>
+                                                        <small>Maximum 10 files, images 5MB each, videos 50MB each</small>
                                                     </p>
                                                 </Form.Label>
                                                 <Form.Control
