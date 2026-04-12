@@ -80,12 +80,6 @@ export default class ServiceProviderService extends ApiService {
     const serviceMedia = this.normalizeServiceMediaCollection(profile);
     const coverMedia = serviceMedia.find((item) => item.isCover) || serviceMedia[0] || null;
 
-    console.debug("[ServiceProviderService] normalizeServiceProfile", {
-      profile,
-      serviceMediaCount: serviceMedia.length,
-      coverMedia,
-    });
-
     return {
       ...profile,
       serviceMedia,

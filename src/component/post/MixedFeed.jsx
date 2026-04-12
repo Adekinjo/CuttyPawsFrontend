@@ -23,59 +23,75 @@ const MixedFeed = ({ currentUser }) => {
     }
   };
 
-  const getItemKey = (item) => {
-    if (item?.type === "POST" && item?.post?.id) {
+  const getItemKey = (item, index = 0) => {
+    if (item?.type === "POST" && item?.post?.id != null) {
       return `POST-${item.post.id}`;
     }
-    if (item?.type === "SERVICE_AD" && item?.serviceAd?.id) {
-      return `SERVICE_AD-${item.serviceAd.id}`;
+
+    if (item?.type === "SERVICE_AD") {
+      if (item?.serviceAd?.id != null) {
+        return `SERVICE_AD-${item.serviceAd.id}-${index}`;
+      }
+      if (item?.serviceAd?.userId != null) {
+        return `SERVICE_AD-USER-${item.serviceAd.userId}-${index}`;
+      }
     }
-    if (item?.type === "PRODUCT_RECOMMENDATION" && item?.product?.id) {
-      return `PRODUCT-${item.product.id}`;
+
+    if (item?.type === "PRODUCT_RECOMMENDATION" && item?.product?.id != null) {
+      return `PRODUCT-${item.product.id}-${index}`;
     }
-    return null;
+
+    return `UNKNOWN-${index}`;
   };
 
   const summarizeItems = (items) => {
     if (!Array.isArray(items)) return [];
+
     return items.map((item, index) => ({
       index,
       type: item?.type || null,
-      key: getItemKey(item),
+      key: getItemKey(item, index),
       postId: item?.post?.id || null,
       serviceAdId: item?.serviceAd?.id || null,
+      serviceAdUserId: item?.serviceAd?.userId || null,
       productId: item?.product?.id || null,
     }));
   };
 
-  const mergeUniqueItems = useCallback((oldItems, newItems) => {
-    const seen = new Set();
+  const mergeFeedItems = useCallback((oldItems, newItems) => {
+    const seenPostIds = new Set();
     const duplicates = [];
 
-    const combined = [...oldItems, ...newItems].filter((item) => {
-      const key = getItemKey(item);
+    const combined = [...oldItems, ...newItems].filter((item, index) => {
+      if (item?.type !== "POST") {
+        return true;
+      }
 
-      if (!key) {
+      const postId = item?.post?.id;
+      if (postId == null) {
         duplicates.push({
-          reason: "missing-key",
+          reason: "missing-post-id",
+          index,
           type: item?.type || null,
         });
         return false;
       }
 
-      if (seen.has(key)) {
+      const key = `POST-${postId}`;
+      if (seenPostIds.has(key)) {
         duplicates.push({
-          reason: "duplicate-key",
+          reason: "duplicate-post",
           key,
+          index,
         });
         return false;
       }
 
-      seen.add(key);
+      seenPostIds.add(key);
       return true;
     });
 
-    debugLog("mergeUniqueItems result", {
+    debugLog("mergeFeedItems result", {
       oldCount: oldItems.length,
       newCount: newItems.length,
       finalCount: combined.length,
@@ -118,7 +134,7 @@ const MixedFeed = ({ currentUser }) => {
         });
 
         setFeedItems((prev) => {
-          const nextItems = append ? mergeUniqueItems(prev, items) : items;
+          const nextItems = append ? mergeFeedItems(prev, items) : items;
 
           debugLog(`setFeedItems from request #${requestNumber}`, {
             append,
@@ -138,7 +154,7 @@ const MixedFeed = ({ currentUser }) => {
         setError(err?.message || "Failed to load mixed feed");
       }
     },
-    [mergeUniqueItems]
+    [mergeFeedItems]
   );
 
   useEffect(() => {
@@ -203,7 +219,7 @@ const MixedFeed = ({ currentUser }) => {
   };
 
   const renderFeedItem = (item, index) => {
-    const itemKey = getItemKey(item) || `fallback-${index}`;
+    const itemKey = getItemKey(item, index);
 
     debugLog("renderFeedItem", {
       index,
@@ -211,6 +227,7 @@ const MixedFeed = ({ currentUser }) => {
       type: item?.type,
       postId: item?.post?.id || null,
       serviceAdId: item?.serviceAd?.id || null,
+      serviceAdUserId: item?.serviceAd?.userId || null,
       productId: item?.product?.id || null,
     });
 
@@ -228,8 +245,8 @@ const MixedFeed = ({ currentUser }) => {
         );
 
       case "SERVICE_AD":
-        if (!item?.serviceAd?.id) {
-          debugLog("SERVICE_AD skipped because serviceAd.id is missing", {
+        if (!item?.serviceAd?.id && !item?.serviceAd?.userId) {
+          debugLog("SERVICE_AD skipped because serviceAd id/userId is missing", {
             item,
             index,
           });
@@ -237,7 +254,10 @@ const MixedFeed = ({ currentUser }) => {
         }
 
         return (
-          <div data-feed-debug={`SERVICE_AD-${item.serviceAd.id}`} key={itemKey}>
+          <div
+            data-feed-debug={`SERVICE_AD-${item?.serviceAd?.id || item?.serviceAd?.userId}`}
+            key={itemKey}
+          >
             <ServiceAdCard serviceAd={item.serviceAd} />
           </div>
         );

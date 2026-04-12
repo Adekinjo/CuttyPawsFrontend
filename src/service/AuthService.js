@@ -10,17 +10,6 @@ export default class AuthService extends ApiService {
     const token = localStorage.getItem("token");
     const refreshToken = localStorage.getItem("refreshToken");
     const storedUser = localStorage.getItem("user");
-
-    console.log(`[AuthService] ${context}`, {
-      hasToken: Boolean(token),
-      tokenLength: token?.length || 0,
-      token,
-      hasRefreshToken: Boolean(refreshToken),
-      refreshTokenLength: refreshToken?.length || 0,
-      refreshToken,
-      hasStoredUser: Boolean(storedUser),
-      ...extra,
-    });
   }
 
   static getRoleFromToken() {
@@ -31,7 +20,6 @@ export default class AuthService extends ApiService {
       const payload = JSON.parse(atob(token.split(".")[1]));
       return payload.role || null;
     } catch (error) {
-      console.error("[AuthService] getRoleFromToken:error", error);
       return null;
     }
   }
@@ -50,11 +38,6 @@ export default class AuthService extends ApiService {
   static hasRole(...roles) {
     const effectiveRole = this.getEffectiveRole();
     const matched = roles.includes(effectiveRole);
-    console.log("[AuthService] hasRole", {
-      effectiveRole,
-      expectedRoles: roles,
-      matched,
-    });
     return matched;
   }
 
@@ -63,7 +46,6 @@ export default class AuthService extends ApiService {
       const raw = localStorage.getItem("user");
       return raw ? JSON.parse(raw) : null;
     } catch (error) {
-      console.error("Error parsing stored user:", error);
       return null;
     }
   }
@@ -94,7 +76,6 @@ export default class AuthService extends ApiService {
       } else if (Array.isArray(responseData)) {
         return responseData;
       } else {
-        console.warn("Unexpected response structure:", responseData);
         return [];
       }
     } catch (error) {
@@ -111,7 +92,6 @@ export default class AuthService extends ApiService {
           if (Array.isArray(fallbackData)) return fallbackData;
           return [];
         } catch (fallbackError) {
-          console.error("Error fetching users (fallback route):", fallbackError);
           throw fallbackError;
         }
       }
@@ -146,15 +126,6 @@ export default class AuthService extends ApiService {
       `${this.BASE_URL}/auth/login`,
       loginDetails
     );
-    console.log("[AuthService] loginUser:response", {
-      status: response?.data?.status,
-      hasToken: Boolean(response?.data?.token),
-      token: response?.data?.token,
-      hasRefreshToken: Boolean(response?.data?.refreshToken),
-      refreshToken: response?.data?.refreshToken,
-      requiresVerification: Boolean(response?.data?.requiresVerification),
-      role: response?.data?.role,
-    });
     return response.data;
   }
 
@@ -196,21 +167,8 @@ export default class AuthService extends ApiService {
           }
         }
       );
-      
-      console.log("[AuthService] refreshToken:response", {
-        status: response?.data?.status,
-        hasToken: Boolean(response?.data?.token),
-        token: response?.data?.token,
-        hasRefreshToken: Boolean(response?.data?.refreshToken),
-        refreshToken: response?.data?.refreshToken,
-      });
       return response.data;
     } catch (error) {
-      console.error("[AuthService] refreshToken:error", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
       throw error;
     }
   }
@@ -244,21 +202,8 @@ export default class AuthService extends ApiService {
           headers: this.getHeader(),
         }
       );
-      console.log("[AuthService] getLoggedInInfo:response", {
-        status: response?.data?.status,
-        userId: response?.data?.user?.id,
-        role:
-          response?.data?.user?.role ||
-          response?.data?.user?.userRole ||
-          response?.data?.role,
-      });
       return response.data;
     } catch (error) {
-      console.error("[AuthService] getLoggedInInfo:error", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
       throw error;
     }
   }
@@ -317,15 +262,9 @@ export default class AuthService extends ApiService {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const expiryMs = payload.exp * 1000;
       const expired = Date.now() >= (expiryMs - bufferSeconds * 1000);
-      console.log("[AuthService] isTokenExpired:result", {
-        expired,
-        exp: payload.exp,
-        now: Date.now(),
-        bufferSeconds,
-      });
+      
       return expired;
     } catch (e) {
-      console.error("[AuthService] isTokenExpired:error", e);
       return true;
     }
   }
@@ -355,7 +294,6 @@ export default class AuthService extends ApiService {
         this.logAuthState("refreshTokenIfNeeded:refresh-success");
         return true;
       } catch (error) {
-        console.error("[AuthService] refreshTokenIfNeeded:refresh-failed", error);
         return false;
       }
     }
@@ -392,11 +330,6 @@ export default class AuthService extends ApiService {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log("[AuthService] axios:request", {
-          url: config?.url,
-          method: config?.method,
-          hasAuthorizationHeader: Boolean(config?.headers?.Authorization),
-        });
         return config;
       },
       (error) => Promise.reject(error)
@@ -470,11 +403,6 @@ export default class AuthService extends ApiService {
             return axios(originalRequest);
             
           } catch (refreshError) {
-            console.error("[AuthService] axios:refresh-failed", {
-              url: originalRequest?.url,
-              message: refreshError.message,
-              response: refreshError.response?.data,
-            });
             // Refresh failed, logout user
             processQueue(refreshError, null);
             isRefreshing = false;
@@ -505,7 +433,6 @@ export default class AuthService extends ApiService {
       // Only set inactivity logout if user didn't choose "remember me"
       if (!rememberMe) {
         inactivityTimer = setTimeout(() => {
-          console.log('Inactivity logout triggered');
           this.logout();
           window.location.href = '/login?reason=inactivity';
         }, TIMEOUT);
@@ -542,7 +469,6 @@ export default class AuthService extends ApiService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload.userId || payload.sub;
     } catch (error) {
-      console.error("Error getting user ID from token:", error);
       return null;
     }
   }
@@ -561,10 +487,7 @@ export default class AuthService extends ApiService {
   static isAuthenticated() {
     const refreshToken = localStorage.getItem("refreshToken");
     const authenticated = !!refreshToken;
-    console.log("[AuthService] isAuthenticated", {
-      authenticated,
-      hasRefreshToken: Boolean(refreshToken),
-    });
+    
     return authenticated;
   }
 
@@ -584,11 +507,7 @@ export default class AuthService extends ApiService {
     const storedUser = this.getStoredUser();
     const matchedRole = this.hasRole("ROLE_SERVICE", "ROLE_SERVICE_PROVIDER");
     const matchedFlag = Boolean(storedUser?.isServiceProvider);
-    console.log("[AuthService] isServiceProvider", {
-      matchedRole,
-      matchedFlag,
-      effectiveRole: this.getEffectiveRole(),
-    });
+   
     return matchedRole || matchedFlag;
   }
 
@@ -609,7 +528,6 @@ export default class AuthService extends ApiService {
       try {
         await ServiceProviderService.refreshDashboard();
       } catch (error) {
-        console.error("Failed to refresh service dashboard on startup:", error);
       }
     }
   }
@@ -623,7 +541,6 @@ export default class AuthService extends ApiService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching user profile:", error);
       throw error;
     }
   }
@@ -636,7 +553,6 @@ export default class AuthService extends ApiService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching user posts:", error);
       throw error;
     }
   }
@@ -649,7 +565,6 @@ export default class AuthService extends ApiService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching user stats:", error);
       throw error;
     }
   }

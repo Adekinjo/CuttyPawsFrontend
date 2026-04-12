@@ -11,12 +11,7 @@ export default class ApiService {
     // Only add Authorization header if token exists
     if (token && token.trim().length > 10) {
       headers.Authorization = `Bearer ${token}`;
-      console.log("Auth header set:", { tokenLength: token.length });
     } else {
-      console.warn("No valid token found for auth header:", {
-        tokenPresent: Boolean(token),
-        tokenLength: token ? token.length : 0
-      });
     }
     
     return headers;

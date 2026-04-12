@@ -41,7 +41,6 @@ export default class NotificationService extends ApiService {
       this.stompClient.connect(
         { Authorization: `Bearer ${token}` },
         () => {
-          console.log("🔗 WebSocket connected!");
           this.reconnectAttempts = 0;
           this.notifyConnectionChange(true);
 
@@ -59,13 +58,10 @@ export default class NotificationService extends ApiService {
                 }
               }
             );
-          //console.log("✅ Subscribed to /user/queue/notifications");
           } catch (subscribeError) {
-            //console.error("❌ Error subscribing to notifications:", subscribeError);
           }
         },
         (err) => {
-          //console.error("❌ WebSocket error:", err);
           this.notifyConnectionChange(false);
           this.handleReconnection(onNotificationReceived);
         }
@@ -76,7 +72,6 @@ export default class NotificationService extends ApiService {
       this.stompClient.heartbeat.incoming = 10000; // Expect every 10 seconds
 
     } catch (error) {
-      //console.error("❌ WebSocket connection failed:", error);
       this.notifyConnectionChange(false);
       this.handleReconnection(onNotificationReceived);
     }
@@ -87,14 +82,11 @@ export default class NotificationService extends ApiService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-      
-      //console.log(`🔄 Reconnecting in ${delay}ms... (Attempt ${this.reconnectAttempts})`);
-      
+            
       setTimeout(() => {
         this.connect(onNotificationReceived);
       }, delay);
     } else {
-      //console.error("❌ Max reconnection attempts reached");
     }
   }
 
@@ -103,11 +95,9 @@ export default class NotificationService extends ApiService {
     if (this.stompClient) {
       try {
         this.stompClient.disconnect(() => {
-          //console.log("🔌 WebSocket disconnected safely");
           this.notifyConnectionChange(false);
         });
       } catch (error) {
-        //console.warn("⚠️ Error during WebSocket disconnect:", error);
       } finally {
         this.stompClient = null;
         this.notifyConnectionChange(false);
@@ -135,10 +125,8 @@ export default class NotificationService extends ApiService {
           headers: this.getHeader(),
         }
       );
-      //console.log("📋 REST API - Notifications response:", response.data);
       return response.data;
     } catch (error) {
-      //console.error("❌ REST API - Error fetching notifications:", error);
       throw this.fallbackErrorHandler(error);
     }
   }
@@ -149,10 +137,8 @@ export default class NotificationService extends ApiService {
         `${this.BASE_URL}/notifications/unread-count`,
         { headers: this.getHeader() }
       );
-      //console.log("📊 REST API - Unread count:", response.data);
       return response.data;
     } catch (error) {
-      //console.error("❌ REST API - Error fetching unread count:", error);
       throw this.fallbackErrorHandler(error);
     }
   }

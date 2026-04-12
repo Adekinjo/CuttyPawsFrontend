@@ -54,20 +54,22 @@ const Home = () => {
   }, []);
 
   const mergeUniqueItems = useCallback((oldItems, newItems) => {
-    const seen = new Set();
+    const seenPosts = new Set();
 
     return [...oldItems, ...newItems].filter((item) => {
-      const key =
-        item?.type === "POST"
-          ? `POST-${item?.post?.id}`
-          : item?.type === "SERVICE_AD"
-          ? `SERVICE_AD-${item?.serviceAd?.id}`
-          : item?.type === "PRODUCT_RECOMMENDATION"
-          ? `PRODUCT-${item?.product?.id}`
-          : null;
+      // Only dedupe posts
+      if (item?.type !== "POST") {
+        return true;
+      }
 
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
+      const postId = item?.post?.id;
+      if (!postId) return false;
+
+      if (seenPosts.has(postId)) {
+        return false;
+      }
+
+      seenPosts.add(postId);
       return true;
     });
   }, []);
@@ -234,6 +236,22 @@ const Home = () => {
     navigate(`/edit-post/${postId}`);
   };
 
+  const getFeedRenderKey = (item, index) => {
+    if (item?.type === "POST") {
+      return `post-${item?.post?.id ?? index}`;
+    }
+
+    if (item?.type === "SERVICE_AD") {
+      return `service-${item?.serviceAd?.id ?? item?.serviceAd?.userId ?? "x"}-${index}`;
+    }
+
+    if (item?.type === "PRODUCT_RECOMMENDATION") {
+      return `product-${item?.product?.id ?? "x"}-${index}`;
+    }
+
+    return `feed-item-${index}`;
+  };
+
   const renderFeedItem = (item, index) => {
     if (!item?.type) {
       console.warn("[Home] Feed item missing type:", item);
@@ -249,7 +267,7 @@ const Home = () => {
 
         return (
           <div
-            key={`post-${item.post.id ?? index}`}
+            key={getFeedRenderKey(item, index)}
             className={styles.homePostItem}
           >
             <PostCard
@@ -270,7 +288,7 @@ const Home = () => {
 
         return (
           <div
-            key={`service-${item.serviceAd.id ?? item.serviceAd.userId ?? index}`}
+            key={getFeedRenderKey(item, index)}
             className={styles.homePostItem}
           >
             <ServiceAdCard serviceAd={item.serviceAd} />
@@ -288,7 +306,7 @@ const Home = () => {
 
         return (
           <div
-            key={`product-${item.product.id ?? index}`}
+            key={getFeedRenderKey(item, index)}
             className={styles.homePostItem}
           >
             <ProductRecommendationCard product={item.product} />
