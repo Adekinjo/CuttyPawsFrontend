@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Alert, Spinner } from "react-bootstrap";
-import { FaImages, FaPlus, FaRobot } from "react-icons/fa";
+import { FaImages, FaRobot } from "react-icons/fa";
 
 import FeedService from "../../service/FeedService";
 import PostService from "../../service/PostService";
@@ -17,10 +17,19 @@ const Home = () => {
 
   const [feedItems, setFeedItems] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const [error, setError] = useState("");
+
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursorCreatedAt, setNextCursorCreatedAt] = useState(null);
+  const [nextCursorId, setNextCursorId] = useState(null);
+
   const activeRequestRef = useRef(0);
+  const loadMoreRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -44,6 +53,25 @@ const Home = () => {
     }
   }, []);
 
+  const mergeUniqueItems = useCallback((oldItems, newItems) => {
+    const seen = new Set();
+
+    return [...oldItems, ...newItems].filter((item) => {
+      const key =
+        item?.type === "POST"
+          ? `POST-${item?.post?.id}`
+          : item?.type === "SERVICE_AD"
+          ? `SERVICE_AD-${item?.serviceAd?.id}`
+          : item?.type === "PRODUCT_RECOMMENDATION"
+          ? `PRODUCT-${item?.product?.id}`
+          : null;
+
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, []);
+
   const loadPostsOnlyItems = useCallback(async (reason) => {
     console.warn("[Home] Falling back to posts-only feed", { reason });
 
@@ -55,72 +83,127 @@ const Home = () => {
       _debugIndex: index,
     }));
 
-    console.debug("[Home] posts-only fallback result", {
-      reason,
-      count: fallbackItems.length,
-      postsResponse,
-    });
-
     return fallbackItems;
   }, []);
-  const fetchFeed = useCallback(async (showInitialLoader = false) => {
-    const requestId = Date.now();
-    activeRequestRef.current = requestId;
 
-    try {
-      if (showInitialLoader) setLoading(true);
-      else setRefreshing(true);
-
-      setError("");
-
-      const response = await FeedService.getMixedFeed({
-        limit: 12,
-        timeoutMs: 5000,
-      });
-
-      const normalizedItems = Array.isArray(response?.items)
-        ? response.items
-        : [];
-
-      // if mixed feed returned nothing, treat as failure
-      if (!normalizedItems.length) {
-        throw new Error("mixed-feed-empty");
-      }
-
-      if (activeRequestRef.current !== requestId) return;
-
-      setFeedItems(normalizedItems);
-    } catch (err) {
-      console.error("[Home] Failed to load mixed feed", err);
+  const loadFeed = useCallback(
+    async ({
+      showInitialLoader = false,
+      append = false,
+      cursorCreatedAt = null,
+      cursorId = null,
+    } = {}) => {
+      const requestId = Date.now();
+      activeRequestRef.current = requestId;
 
       try {
-        const fallbackItems = await loadPostsOnlyItems(
-          `mixed-feed-error:${err?.message || "unknown"}`
-        );
+        if (showInitialLoader) {
+          setLoading(true);
+        } else if (append) {
+          setLoadingMore(true);
+        } else {
+          setRefreshing(true);
+        }
 
-        if (activeRequestRef.current !== requestId) return;
-
-        // clear error because fallback worked
         setError("");
 
-        setFeedItems(fallbackItems);
-      } catch (fallbackError) {
+        const response = await FeedService.getMixedFeed({
+          cursorCreatedAt,
+          cursorId,
+          limit: 12,
+          timeoutMs: 5000,
+        });
+
+        const normalizedItems = Array.isArray(response?.items) ? response.items : [];
+
+        if (!normalizedItems.length && !append) {
+          throw new Error("mixed-feed-empty");
+        }
+
         if (activeRequestRef.current !== requestId) return;
 
-        setError("Unable to load your feed right now.");
-        setFeedItems([]);
+        setFeedItems((prev) =>
+          append ? mergeUniqueItems(prev, normalizedItems) : normalizedItems
+        );
+
+        setHasMore(Boolean(response?.hasMore));
+        setNextCursorCreatedAt(response?.nextCursorCreatedAt || null);
+        setNextCursorId(response?.nextCursorId || null);
+      } catch (err) {
+        console.error("[Home] Failed to load mixed feed", err);
+
+        if (append) {
+          return;
+        }
+
+        try {
+          const fallbackItems = await loadPostsOnlyItems(
+            `mixed-feed-error:${err?.message || "unknown"}`
+          );
+
+          if (activeRequestRef.current !== requestId) return;
+
+          setError("");
+          setFeedItems(fallbackItems);
+          setHasMore(false);
+          setNextCursorCreatedAt(null);
+          setNextCursorId(null);
+        } catch (fallbackError) {
+          if (activeRequestRef.current !== requestId) return;
+
+          setError("Unable to load your feed right now.");
+          setFeedItems([]);
+          setHasMore(false);
+          setNextCursorCreatedAt(null);
+          setNextCursorId(null);
+        }
+      } finally {
+        if (activeRequestRef.current === requestId) {
+          setLoading(false);
+          setRefreshing(false);
+          setLoadingMore(false);
+        }
       }
-    } finally {
-      if (activeRequestRef.current === requestId) {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    }
-  }, [loadPostsOnlyItems]);
+    },
+    [loadPostsOnlyItems, mergeUniqueItems]
+  );
 
   useEffect(() => {
-    fetchFeed(true);
-  }, [fetchFeed]);
+    loadFeed({ showInitialLoader: true });
+  }, [loadFeed]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || !nextCursorCreatedAt || !nextCursorId) return;
+
+    await loadFeed({
+      append: true,
+      cursorCreatedAt: nextCursorCreatedAt,
+      cursorId: nextCursorId,
+    });
+  }, [hasMore, loadingMore, nextCursorCreatedAt, nextCursorId, loadFeed]);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        const firstEntry = entries[0];
+        if (firstEntry.isIntersecting && hasMore && !loadingMore && !loading) {
+          await handleLoadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [handleLoadMore, hasMore, loadingMore, loading]);
 
   const handleCreatePost = () => {
     if (!currentUser) {
@@ -196,7 +279,10 @@ const Home = () => {
 
       case "PRODUCT_RECOMMENDATION":
         if (!item.product) {
-          console.warn("[Home] PRODUCT_RECOMMENDATION item missing payload", { index, item });
+          console.warn("[Home] PRODUCT_RECOMMENDATION item missing payload", {
+            index,
+            item,
+          });
           return null;
         }
 
@@ -232,7 +318,7 @@ const Home = () => {
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  onClick={() => fetchFeed(false)}
+                  onClick={() => loadFeed({ showInitialLoader: false })}
                   disabled={refreshing}
                 >
                   {refreshing ? "Retrying..." : "Try Again"}
@@ -270,6 +356,32 @@ const Home = () => {
                 )}
 
                 {feedItems.map((item, index) => renderFeedItem(item, index))}
+
+                <div ref={loadMoreRef} style={{ height: "20px" }} />
+
+                {loadingMore && (
+                  <div className="text-center my-3">
+                    <Spinner animation="border" size="sm" />
+                    <span className="ms-2 text-muted">Loading more feed items...</span>
+                  </div>
+                )}
+
+                {!loadingMore && hasMore && (
+                  <div className="text-center mt-3">
+                    <Button
+                      variant="outline-primary"
+                      onClick={handleLoadMore}
+                    >
+                      Load More
+                    </Button>
+                  </div>
+                )}
+
+                {!hasMore && (
+                  <div className="text-center text-muted mt-3">
+                    No more feed items
+                  </div>
+                )}
               </>
             )}
           </Col>
@@ -285,14 +397,6 @@ const Home = () => {
           >
             <FaRobot />
           </Button>
-
-          {/* <Button
-            onClick={handleCreatePost}
-            className={styles.homeFloatingBtn}
-            aria-label="Create post"
-          >
-            <FaPlus />
-          </Button> */}
         </div>
       )}
     </div>
